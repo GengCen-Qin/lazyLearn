@@ -108,4 +108,6 @@ The application is configured for Docker deployment:
 - 交互时使用中文
 - 前端使用rails默认前端方案：HOTWIRE， Js 通用使用 stimulus 编写
 - 后端按照rails规范编写，清晰，易懂，可维护的代码
+- css使用tailwind，样式优先写入到标签中
 - 不要编写测试文件
+- 如果不知道某个库的代码怎么写，使用context7 mcp
