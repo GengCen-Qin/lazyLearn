@@ -1,0 +1,72 @@
+<% content_for :title, "视频字幕播放器" %>
+
+<link rel="stylesheet" href="https://cdn.plyr.io/3.8.3/plyr.css" />
+
+<div class="video-subtitle-app-container" data-controller="video-subtitle-merged">
+
+  <div class="app-container">
+    <!-- 文件上传区域 -->
+    <div class="file-section">
+      <h1>视频字幕播放器</h1>
+      <div class="file-upload">
+        <div class="upload-group">
+          <label for="videoInput">选择视频文件:</label>
+          <input type="file"
+                 id="videoInput"
+                 data-video-subtitle-merged-target="videoInput"
+                 data-action="change->video-subtitle-merged#loadVideo"
+                 accept="video/*,.mov,.mp4,.webm,.ogg,.avi,.mkv,.m4v"
+                 title="支持格式: MP4, MOV, WebM, OGG, AVI, MKV, M4V" />
+          <div class="format-info">支持格式: MP4, MOV, WebM, OGG, AVI, MKV, M4V</div>
+        </div>
+        <div class="upload-group">
+          <label for="jsonInput">选择字幕文件 (JSON):</label>
+          <input type="file"
+                 id="jsonInput"
+                 data-video-subtitle-merged-target="jsonInput"
+                 data-action="change->video-subtitle-merged#loadSubtitles"
+                 accept=".json" />
+          <div class="format-info">字幕格式: JSON (.json)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 主播放器布局 -->
+    <div class="player-layout">
+      <!-- 视频播放器 -->
+      <div class="video-section" id="video-player-container">
+        <video id="videoPlayer"
+               data-video-subtitle-merged-target="video"
+               controls>
+          您的浏览器不支持 HTML5 视频。
+        </video>
+      </div>
+
+      <!-- 字幕列表 -->
+      <div class="subtitle-section" id="subtitle-container">
+        <div class="subtitle-header">
+          <h3>字幕列表</h3>
+          <span id="subtitleCount" data-video-subtitle-merged-target="subtitleCount">0 条字幕</span>
+        </div>
+        <div class="subtitle-list" data-video-subtitle-merged-target="subtitleList" id="subtitleList">
+          <div class="no-subtitles">
+            请上传字幕文件
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 状态信息 -->
+    <div class="status-bar">
+      <div class="status-item">
+        <span>当前时间:</span>
+        <span id="currentTime" data-video-subtitle-merged-target="currentTime">00:00</span>
+      </div>
+      <div class="status-item">
+        <span>当前字幕:</span>
+        <span id="currentSubtitleIndex" data-video-subtitle-merged-target="currentSubtitleIndex">- / -</span>
+      </div>
+    </div>
+  </div>
+</div>
+
