@@ -190,6 +190,8 @@ body.video-player-page > main {
   justify-content: center;
   background-color: #000;
   min-height: 300px;
+  flex: 1;
+  min-width: 0; /* 允许容器收缩 */
 }
 
 /* 使用padding-bottom技巧确保16:9的宽高比，兼容性更好 */
@@ -198,6 +200,30 @@ body.video-player-page > main {
   width: 100%;
   height: 0;
   padding-bottom: 56.25%; /* 16:9 aspect ratio (9 / 16 = 0.5625) */
+  flex: 1;
+  min-height: 0;
+}
+
+/* 针对视频播放器容器的优化 */
+#video-player-container {
+  min-height: 300px; /* 确保最小高度，使视频区域足够大 */
+}
+
+/* 在中等及小屏幕上调整宽高比以更好地利用空间 */
+@media (max-width: 1023px) {
+  .video-container-aspect {
+    padding-bottom: 62.5%; /* 调整为16:10，更适合移动设备 */
+  }
+
+  /* 在小屏幕上，让视频区域占满整个宽度 */
+  .grid.grid-cols-1 .video-container-aspect {
+    padding-bottom: 56.25%; /* 保持16:9比例 */
+  }
+}
+
+/* 为视频控件区域预留空间 */
+.plyr--video .plyr__controls {
+  padding-bottom: 20px; /* 确保控件不会遮挡视频内容 */
 }
 
 .video-container-aspect #videoPlayer {
@@ -206,6 +232,7 @@ body.video-player-page > main {
   left: 0;
   width: 100%;
   height: 100%;
+  object-fit: contain; /* 保持视频比例并适应容器 */
 }
 
 #videoPlayer {
@@ -217,6 +244,7 @@ body.video-player-page > main {
   max-width: 100%;
   max-height: 100%;
   background-color: #000; /* 确保没有视频时显示黑色背景 */
+  object-fit: contain; /* 保持视频比例并适应容器 */
 }
 
 /* 确保Plyr播放器在没有视频源时也保持正确尺寸 */
@@ -231,6 +259,9 @@ body.video-player-page > main {
   display: flex;
   align-items: center;
   justify-content: center;
+  min-height: 0;
+  flex: 1;
+  height: auto !important; /* 覆盖plyr的固定高度 */
 }
 
 /* 当没有视频源时，保持容器的样式 */
@@ -240,4 +271,11 @@ video#videoPlayer:not([src]):not([srcset]) {
   align-items: center;
   justify-content: center;
   min-height: 300px;
+}
+
+/* 优化视频在容器中的显示效果 */
+.plyr--video .plyr__video-wrapper video {
+  object-fit: contain !important; /* 强制视频适应容器同时保持宽高比 */
+  width: 100% !important;
+  height: 100% !important;
 }
