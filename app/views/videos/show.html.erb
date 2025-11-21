@@ -1,0 +1,103 @@
+<% content_for :title, @video.title || "视频播放器" %>
+
+<%= stylesheet_link_tag "plyr", "data-turbo-track": "reload" %>
+<%= stylesheet_link_tag "video_player_tailwind_fix", "data-turbo-track": "reload" %>
+
+<div class="video-subtitle-app-container h-screen flex flex-col"
+     data-controller="video-subtitle-merged"
+     data-video-subtitle-merged-video-path-value="<%= @video.video_file.attached? ? url_for(@video.video_file) : '' %>"
+     data-video-subtitle-merged-subtitles-value="<%= j((@video.formatted_transcription || []).to_json) %>">
+
+  <!-- 视频标题和状态区域 -->
+  <div class="bg-white p-3 sm:p-4 border-b border-gray-200">
+    <div class="max-w-7xl mx-auto">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+        <div class="flex items-center">
+          <h1 class="text-gray-800 text-lg sm:text-xl md:text-2xl font-semibold truncate">
+            <%= @video.title %>
+          </h1>
+          
+          <span class="ml-3 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+            <% case @video.transcription_status
+               when 'completed' %>bg-green-100 text-green-800
+               <% when 'processing' %>bg-yellow-100 text-yellow-800
+               <% when 'failed' %>bg-red-100 text-red-800
+               <% else %>bg-gray-100 text-gray-800
+               <% end %>">
+            <%= @video.transcription_status_text %>
+          </span>
+        </div>
+
+        <div class="flex items-center gap-4">
+          <%= link_to "返回列表", videos_path, 
+              class: "inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 主播放器布局 -->
+  <div class="flex-1 overflow-hidden flex flex-col">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-4 md:gap-5 flex-1 overflow-hidden p-3 sm:p-4">
+      <!-- 视频播放器 - 占用更多空间 -->
+      <div class="lg:col-span-8 bg-black rounded-lg sm:rounded-xl overflow-hidden flex flex-col" id="video-player-container">
+        <div class="video-container-aspect">
+          <video id="videoPlayer"
+                 data-video-subtitle-merged-target="video"
+                 controls
+                 class="w-full h-full object-contain"
+                 <% if @video.video_file.attached? %>
+                 src="<%= url_for(@video.video_file) %>"
+                 <% end %>>
+            您的浏览器不支持 HTML5 视频。
+          </video>
+        </div>
+      </div>
+
+      <!-- 字幕列表 - 占用较少空间 -->
+      <div class="lg:col-span-4 bg-white rounded-lg sm:rounded-xl overflow-hidden flex flex-col border border-gray-200" id="subtitle-container">
+        <div class="p-2 sm:p-3 bg-gray-50 border-b border-gray-200 flex justify-between items-center">
+          <h3 class="text-gray-800 text-sm sm:text-base font-medium">字幕列表</h3>
+          <span id="subtitleCount" data-video-subtitle-merged-target="subtitleCount" class="text-gray-600 text-xs sm:text-sm bg-gray-200 px-2 py-1 rounded-full">
+            <%= @video.has_transcription? ? @video.transcription_segments.size : 0 %> 条字幕
+          </span>
+        </div>
+        <div class="flex-1 overflow-y-auto p-2 sm:p-3 bg-white" data-video-subtitle-merged-target="subtitleList" id="subtitleList">
+          <% if @video.has_transcription? %>
+            <% @video.formatted_transcription.each_with_index do |segment, index| %>
+              <div class="subtitle-item p-2 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors duration-150"
+                   data-start="<%= segment[:start] %>"
+                   data-index="<%= index %>"
+                   data-action="click->video-subtitle-merged#jumpToSubtitle">
+                <div class="text-xs text-gray-500 mb-1">
+                  <%= segment[:time_str] %>
+                </div>
+                <div class="text-sm text-gray-800">
+                  <%= segment[:text] %>
+                </div>
+              </div>
+            <% end %>
+          <% else %>
+            <div class="no-subtitles text-center text-gray-500 p-6 text-sm">
+              此视频暂无字幕
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <!-- 状态信息 -->
+    <div class="border-t border-gray-200 bg-white p-2 sm:p-3">
+      <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-center sm:justify-start gap-3 sm:gap-6 text-xs sm:text-sm">
+        <div class="flex items-center gap-2">
+          <span class="text-gray-600 font-medium">当前时间:</span>
+          <span id="currentTime" data-video-subtitle-merged-target="currentTime" class="text-gray-800 font-mono">00:00</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-gray-600 font-medium">当前字幕:</span>
+          <span id="currentSubtitleIndex" data-video-subtitle-merged-target="currentSubtitleIndex" class="text-gray-800 font-mono">- / -</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

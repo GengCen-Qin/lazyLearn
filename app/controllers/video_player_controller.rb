@@ -1,14 +1,13 @@
 class VideoPlayerController < ApplicationController
   def index
-    # 获取所有已转录完成的视频
-    @videos = Video.where(transcription_status: 'completed')
-                  .where.not(transcription_segments: nil)
-                  .order(created_at: :desc)
+    # 获取所有视频（不仅仅是已完成转录的）
+    @videos = Video.all.order(created_at: :desc)
 
     # 如果指定了视频ID，则设置为当前视频
     if params[:video_id].present?
       @current_video = Video.find(params[:video_id])
     else
+      # 默认显示第一个视频（如果有）
       @current_video = @videos.first
     end
   end

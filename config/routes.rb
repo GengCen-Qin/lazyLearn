@@ -3,5 +3,6 @@ Rails.application.routes.draw do
 
   root "welcome#index"
 
+  resources :videos, only: [:index, :show, :destroy]
   get "video_player", to: "video_player#index"
 end
