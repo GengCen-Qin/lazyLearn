@@ -1,4 +1,6 @@
 Rails.application.routes.draw do
+  get "welcome/index"
+  post "download_xiaohongshu", to: "welcome#download_xiaohongshu"
   resources :uploads
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
@@ -11,6 +13,6 @@ Rails.application.routes.draw do
   # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
 
   # Defines the root path route ("/")
-  # root "posts#index"
+  root "welcome#index"
   get "video_player", to: "video_player#index"
 end
