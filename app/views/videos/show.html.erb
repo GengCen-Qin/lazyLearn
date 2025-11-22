@@ -6,7 +6,7 @@
 <div class="video-subtitle-app-container h-screen flex flex-col"
      data-controller="video-subtitle-merged"
      data-video-subtitle-merged-video-path-value="<%= @video.video_file.attached? ? url_for(@video.video_file) : '' %>"
-     data-video-subtitle-merged-subtitles-value="<%= j((@video.formatted_transcription || []).to_json) %>">
+     data-video-subtitle-merged-subtitles-value="<%= (@video.formatted_transcription || []).to_json %>">
 
   <!-- 视频标题和状态区域 -->
   <div class="bg-white p-3 sm:p-4 border-b border-gray-200">
@@ -16,7 +16,7 @@
           <h1 class="text-gray-800 text-lg sm:text-xl md:text-2xl font-semibold truncate">
             <%= @video.title %>
           </h1>
-          
+
           <span class="ml-3 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
             <% case @video.transcription_status
                when 'completed' %>bg-green-100 text-green-800
@@ -29,7 +29,7 @@
         </div>
 
         <div class="flex items-center gap-4">
-          <%= link_to "返回列表", videos_path, 
+          <%= link_to "返回列表", videos_path,
               class: "inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
         </div>
       </div>
