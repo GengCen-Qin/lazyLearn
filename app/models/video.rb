@@ -44,7 +44,7 @@ class Video < ApplicationRecord
     self
   rescue StandardError => e
     Rails.logger.error "转录失败: #{e.message}"
-    update!(transcription_status: :failed)
+    failed!
     self
   end
 

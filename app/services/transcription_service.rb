@@ -23,7 +23,7 @@ class TranscriptionService
         transcription_status: :completed
       )
     else
-      @video.update!(transcription_status: :failed)
+      @video.failed!
     end
   end
 end
