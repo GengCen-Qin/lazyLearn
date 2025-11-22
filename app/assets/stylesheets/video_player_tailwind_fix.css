@@ -1,27 +1,23 @@
-/* Custom styles for elements that need specific behavior beyond Tailwind */
+/* Custom styles for subtitle items - override to work with Tailwind classes */
 .subtitle-item {
-  padding: 0.75rem;
-  background-color: #ffffff;
-  border-radius: 0.5rem;
-  cursor: pointer;
+  /* Override specific styles while preserving Tailwind layout classes */
   transition: all 0.2s ease;
-  font-size: 0.875rem;
-  line-height: 1.25;
+  border-radius: 0.5rem !important;
   border: 2px solid transparent;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  margin-bottom: 0.5rem;
+  position: relative;
 }
 
 .subtitle-item:hover {
   border-color: #3b82f6;
-  background-color: #eff6ff;
+  background-color: #eff6ff !important;
   transform: translateY(-0.125rem);
   box-shadow: 0 2px 4px rgba(59, 130, 246, 0.1);
 }
 
 .subtitle-item.active {
-  background-color: #3b82f6;
-  color: #ffffff;
+  background-color: #3b82f6 !important;
+  color: #ffffff !important;
   border-color: #2563eb;
   transform: scale(1.02);
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -31,6 +27,16 @@
   box-shadow: 0 6px 12px rgba(59, 130, 246, 0.2);
 }
 
+/* Update text colors for active state */
+.subtitle-item.active .text-xs.text-gray-500 {
+  color: #fde047 !important;
+}
+
+.subtitle-item.active .text-sm.text-gray-800 {
+  color: #ffffff !important;
+}
+
+/* Legacy support for old structure */
 .subtitle-item.active .subtitle-time {
   color: #fde047;
 }

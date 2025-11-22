@@ -333,7 +333,7 @@ export default class extends Controller {
     const container = this.subtitleListTarget;
 
     if (this.subtitlesValue.length === 0) {
-      container.innerHTML = '<div class="no-subtitles">请上传字幕文件</div>';
+      container.innerHTML = '<div class="no-subtitles text-center text-gray-500 p-6 text-sm">请上传字幕文件</div>';
       return;
     }
 
@@ -341,13 +341,16 @@ export default class extends Controller {
 
     this.subtitlesValue.forEach((subtitle, index) => {
       const item = document.createElement("div");
-      item.className = "subtitle-item";
+      // 使用与视频详情页一致的样式类
+      item.className = "subtitle-item p-2 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors duration-150";
       item.dataset.index = index;
+      item.dataset.start = subtitle.start;
 
       const time = this.formatTime(subtitle.start);
+      // 使用与视频详情页一致的HTML结构
       item.innerHTML = `
-        <span class="subtitle-time">[${time}]</span>
-        <span class="subtitle-text">${this.escapeHtml(subtitle.text)}</span>
+        <div class="text-xs text-gray-500 mb-1">${time}</div>
+        <div class="text-sm text-gray-800">${this.escapeHtml(subtitle.text)}</div>
       `;
 
       item.addEventListener("click", () => {
