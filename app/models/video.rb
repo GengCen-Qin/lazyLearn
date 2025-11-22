@@ -26,13 +26,13 @@ class Video < ApplicationRecord
   end
 
   # 触发转录（异步）
-  def trigger_transcription_async(language: "zh")
+  def trigger_transcription_async(language: "en")
     update!(transcription_language: language, transcription_status: :pending)
     TranscriptionJob.perform_later(id, language)
   end
 
   # 触发转录（同步，主要用于调试）
-  def trigger_transcription(language: "zh")
+  def trigger_transcription(language: "en")
     update!(transcription_language: language, transcription_status: :processing)
 
     service = TranscriptionService.new(self, language)

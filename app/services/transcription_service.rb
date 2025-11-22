@@ -1,5 +1,5 @@
 class TranscriptionService
-  def initialize(video, language = "zh")
+  def initialize(video, language = "en")
     @video = video
     @language = language
   end

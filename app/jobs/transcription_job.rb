@@ -19,7 +19,7 @@ class TranscriptionJob < ApplicationJob
     Rails.logger.warn "TranscriptionJob被丢弃: Video ID: #{job.arguments[0]} 不存在"
   end
 
-  def perform(video_id, language = "zh")
+  def perform(video_id, language = "en")
     Rails.logger.info "开始执行转录任务: Video ID: #{video_id}, Language: #{language}"
 
     video = Video.find(video_id)
