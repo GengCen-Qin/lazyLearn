@@ -1,3 +1,12 @@
+# == Schema Information
+#
+# Table name: uploads
+#
+#  id         :integer          not null, primary key
+#  info       :text
+#  created_at :datetime         not null
+#  updated_at :datetime         not null
+#
 require "test_helper"
 
 class UploadTest < ActiveSupport::TestCase
