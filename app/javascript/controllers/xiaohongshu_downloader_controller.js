@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["input", "form", "result_area", "result_content"]
+  static targets = ["input", "form", "result_area", "result_content", "button"]
 
   connect() {
     console.log("Xiaohongshu downloader controller connected")
@@ -28,7 +28,8 @@ export default class extends Controller {
       return
     }
 
-    this.showLoading()
+    // 显示按钮loading状态
+    this.setButtonLoading(true)
 
     // 发送请求
     try {
@@ -45,11 +46,21 @@ export default class extends Controller {
       const data = await response.json()
 
       if (data.success) {
-        this.showSuccess(data)
+        if (data.redirect_to) {
+          // 显示跳转提示，然后进行重定向
+          this.showRedirectMessage(data.message || '下载成功，正在跳转...')
+          setTimeout(() => {
+            window.location.href = data.redirect_to
+          }, 1500)
+        } else {
+          this.showSuccess(data)
+        }
       } else {
+        this.setButtonLoading(false)
         this.showError(data.error || '下载失败')
       }
     } catch (error) {
+      this.setButtonLoading(false)
       this.showError(`网络错误: ${error.message}`)
     }
   }
@@ -70,6 +81,53 @@ export default class extends Controller {
       <div class="flex items-center justify-center py-4">
         <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
         <span class="ml-3 text-gray-600">正在解析小红书链接...</span>
+      </div>
+    `
+    this.result_areaTarget.classList.remove('hidden')
+  }
+
+  setButtonLoading(loading) {
+    if (!this.hasButtonTarget) return
+
+    if (loading) {
+      this.buttonTarget.disabled = true
+      this.buttonTarget.classList.add('opacity-75', 'cursor-not-allowed', 'bg-blue-400')
+      this.buttonTarget.classList.remove('bg-blue-500', 'hover:bg-blue-600')
+      this.buttonTarget.innerHTML = `
+        <svg class="animate-spin h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+        </svg>
+      `
+    } else {
+      this.buttonTarget.disabled = false
+      this.buttonTarget.classList.remove('opacity-75', 'cursor-not-allowed', 'bg-blue-400')
+      this.buttonTarget.classList.add('bg-blue-500', 'hover:bg-blue-600')
+      this.buttonTarget.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+      `
+    }
+  }
+
+  
+  showRedirectMessage(message) {
+    if (!this.hasResult_contentTarget || !this.hasResult_areaTarget) {
+      return
+    }
+
+    this.result_contentTarget.innerHTML = `
+      <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+        <div class="flex items-center">
+          <svg class="h-6 w-6 text-green-600 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <div class="flex-1">
+            <h3 class="text-green-800 font-semibold">下载成功！</h3>
+            <p class="text-green-700 text-sm mt-1">${message}</p>
+          </div>
+          <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-green-600"></div>
+        </div>
       </div>
     `
     this.result_areaTarget.classList.remove('hidden')

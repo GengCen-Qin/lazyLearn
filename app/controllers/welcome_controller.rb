@@ -24,9 +24,8 @@ class WelcomeController < ApplicationController
       if result[:success]
         render json: {
           success: true,
-          file_path: result[:file_path],
-          file_name: result[:file_name],
-          title: api_result[:title]
+          redirect_to: '/videos',
+          message: '视频下载成功，正在跳转到视频列表...'
         }
       else
         render json: { success: false, error: result[:error] }, status: result[:status] || :internal_server_error
