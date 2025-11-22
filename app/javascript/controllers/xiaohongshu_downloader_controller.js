@@ -64,6 +64,10 @@ export default class extends Controller {
   }
 
   showSuccess(data) {
+    if (!this.hasResult_contentTarget || !this.hasResult_areaTarget) {
+      return
+    }
+
     this.result_contentTarget.innerHTML = `
       <p class="text-green-600">视频下载成功！</p>
       <p class="mt-2">本地存储路径: ${data.file_path}</p>
@@ -73,6 +77,10 @@ export default class extends Controller {
   }
 
   showError(message) {
+    if (!this.hasResult_contentTarget || !this.hasResult_areaTarget) {
+      return
+    }
+
     this.result_contentTarget.innerHTML = `
       <p class="text-red-600">${message}</p>
     `
