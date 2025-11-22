@@ -152,10 +152,12 @@ export default class extends Controller {
       let detectedType = file.type || this.detectVideoType(file.name);
 
       // Prepare sources
-      const sources = [{
-        src: this.currentVideoUrlValue,
-        type: detectedType,
-      }];
+      const sources = [
+        {
+          src: this.currentVideoUrlValue,
+          type: detectedType,
+        },
+      ];
 
       // Add fallback for MOV files
       if (file.name.toLowerCase().endsWith(".mov")) {
@@ -190,16 +192,16 @@ export default class extends Controller {
   detectVideoType(filename) {
     const extension = filename.toLowerCase().split(".").pop();
     const mimeTypes = {
-      "mp4": "video/mp4",
-      "webm": "video/webm",
-      "ogg": "video/ogg",
-      "ogv": "video/ogg",
-      "avi": "video/x-msvideo",
-      "mov": "video/quicktime",
-      "mkv": "video/x-matroska",
-      "m4v": "video/mp4",
+      mp4: "video/mp4",
+      webm: "video/webm",
+      ogg: "video/ogg",
+      ogv: "video/ogg",
+      avi: "video/x-msvideo",
+      mov: "video/quicktime",
+      mkv: "video/x-matroska",
+      m4v: "video/mp4",
       "3gp": "video/3gpp",
-      "flv": "video/x-flv",
+      flv: "video/x-flv",
     };
     return mimeTypes[extension] || "video/mp4";
   }
@@ -431,11 +433,17 @@ export default class extends Controller {
       this.setCurrentSubtitle(index);
 
       console.log(
-        `Jumped to subtitle ${index + 1}: [${
-          this.formatTime(subtitle.start)
-        }] ${subtitle.text}`,
+        `Jumped to subtitle ${index + 1}: [${this.formatTime(
+          subtitle.start,
+        )}] ${subtitle.text}`,
       );
     }
+  }
+
+  // Alias method for compatibility with HTML template
+  jumpToSubtitle(event) {
+    const index = parseInt(event.currentTarget.dataset.index);
+    this.seekToSubtitle(index);
   }
 
   jumpToPrevious() {
@@ -475,8 +483,7 @@ export default class extends Controller {
 
   updateSubtitleCount() {
     if (this.hasSubtitleCountTarget) {
-      this.subtitleCountTarget.textContent =
-        `${this.subtitlesValue.length} 条字幕`;
+      this.subtitleCountTarget.textContent = `${this.subtitlesValue.length} 条字幕`;
     }
   }
 
@@ -537,10 +544,10 @@ export default class extends Controller {
       font-size: 14px;
       font-weight: 500;
       ${
-      type === "success"
-        ? "background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb;"
-        : "background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;"
-    }
+        type === "success"
+          ? "background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb;"
+          : "background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;"
+      }
     `;
 
     // Add to the top of the container
@@ -567,18 +574,18 @@ export default class extends Controller {
     if (!seconds || isNaN(seconds)) return "00:00";
     const minutes = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
-    return `${minutes.toString().padStart(2, "0")}:${
-      secs.toString().padStart(2, "0")
-    }`;
+    return `${minutes.toString().padStart(2, "0")}:${secs
+      .toString()
+      .padStart(2, "0")}`;
   }
 
   formatDuration(seconds) {
     if (!seconds || isNaN(seconds)) return "00:00";
     const minutes = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
-    return `${minutes.toString().padStart(2, "0")}:${
-      secs.toString().padStart(2, "0")
-    }`;
+    return `${minutes.toString().padStart(2, "0")}:${secs
+      .toString()
+      .padStart(2, "0")}`;
   }
 
   formatFileSize(bytes) {
@@ -595,4 +602,3 @@ export default class extends Controller {
     return div.innerHTML;
   }
 }
-
