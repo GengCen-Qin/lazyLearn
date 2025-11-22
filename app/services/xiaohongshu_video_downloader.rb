@@ -46,9 +46,12 @@ class XiaohongshuVideoDownloader
         description: @description || "从小红书下载的视频: #{@url}"
       )
 
+      # 附加文件
       video.video_file.attach(@video_file_info)
 
+      # 手动触发转录，因为文件是在创建后附加的
       if video.persisted? && video.video_file.attached?
+        video.trigger_transcription_async
         {
           success: true,
           file_path: video.local_path,

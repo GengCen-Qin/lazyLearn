@@ -7,9 +7,6 @@ class Video < ApplicationRecord
   validates :title, presence: true
   validates :transcription_language, inclusion: { in: %w[zh en ja ko es fr de], message: "%{value} 不是支持的语言" }
 
-  # 回调
-  after_commit :auto_trigger_transcription, on: :create, if: :has_video_file?
-
   def local_path
     return nil unless video_file.attached?
     video_file.blob.service.send(:path_for, video_file.blob.key)
@@ -76,13 +73,5 @@ class Video < ApplicationRecord
     else
       "未知状态"
     end
-  end
-
-  private
-
-  # 创建后自动触发转录（回调方法）
-  def auto_trigger_transcription
-    return unless has_video_file?
-    trigger_transcription_async
   end
 end
