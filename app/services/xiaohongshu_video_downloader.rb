@@ -3,9 +3,11 @@ class XiaohongshuVideoDownloader
   # Public method to download and save a video from a Xiaohongshu URL
   #
   # @param url [String] the Xiaohongshu video URL to download
+  # @param title [String] the video title (optional)
+  # @param description [String] the video description (optional)
   # @return [Hash] result hash containing success status and relevant data
-  def self.download_and_save(url)
-    new(url).download_and_save
+  def self.download_and_save(url, title = nil, description = nil)
+    new(url, title, description).download_and_save
   end
 
   # Public method to download a file from a URL
@@ -16,8 +18,10 @@ class XiaohongshuVideoDownloader
     new(url).download
   end
 
-  def initialize(url)
+  def initialize(url, title = nil, description = nil)
     @url = url
+    @title = title
+    @description = description
     @video_file_info = nil
   end
 
@@ -38,8 +42,8 @@ class XiaohongshuVideoDownloader
       @video_file_info = download
 
       video = Video.create!(
-        title: "小红书视频 - #{Time.current.strftime('%Y-%m-%d %H:%M:%S')}",
-        description: "从小红书下载的视频: #{@url}"
+        title: @title || "小红书视频 - #{Time.current.strftime('%Y-%m-%d %H:%M:%S')}",
+        description: @description || "从小红书下载的视频: #{@url}"
       )
 
       video.video_file.attach(@video_file_info)
@@ -87,7 +91,7 @@ class XiaohongshuVideoDownloader
 
   private
 
-  attr_reader :url, :video_file_info
+  attr_reader :url, :title, :description, :video_file_info
 
   # Validate if the provided URL is a valid Xiaohongshu URL
   #

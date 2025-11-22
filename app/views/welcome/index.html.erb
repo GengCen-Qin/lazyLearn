@@ -11,7 +11,7 @@
                             action: "submit->xiaohongshu-downloader#download" } do |form| %>
         <div class="flex items-center border border-gray-300 rounded-full px-4 py-3 shadow-sm hover:shadow-md focus-within:shadow-md transition-shadow">
           <%= form.text_field :url,
-                              placeholder: "请输入小红书视频链接...",
+                              placeholder: "请输入小红书分享内容...",
                               class: "flex-grow outline-none text-lg",
                               data: { xiaohongshu_downloader_target: "input" } %>
           <%= form.button type: "submit",
@@ -25,7 +25,7 @@
     </div>
 
     <p class="mt-8 text-gray-600 text-sm">
-      输入小红书视频链接，点击搜索按钮进行下载
+      输入小红书分享内容，系统将自动解析并下载视频
     </p>
 
     <!-- Result area -->
