@@ -38,12 +38,25 @@ class XiaohongshuVideoDownloader
       }
     end
 
+    # 检查是否已经存在相同下载链接的视频
+    existing_video = Video.find_by(download_link: @url)
+    if existing_video
+      return {
+        success: true,
+        video_exists: true,
+        video_id: existing_video.id,
+        video_record: existing_video,
+        message: "视频已存在，跳过下载"
+      }
+    end
+
     begin
       @video_file_info = download
 
       video = Video.create!(
         title: @title || "小红书视频 - #{Time.current.strftime('%Y-%m-%d %H:%M:%S')}",
-        description: @description || "从小红书下载的视频: #{@url}"
+        description: @description || "从小红书下载的视频: #{@url}",
+        download_link: @url
       )
 
       # 附加文件
@@ -54,6 +67,7 @@ class XiaohongshuVideoDownloader
         video.trigger_transcription_async
         {
           success: true,
+          video_id: video.id,
           file_path: video.local_path,
           file_name: video.video_file.blob.filename.to_s
         }
