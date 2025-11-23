@@ -9,6 +9,10 @@ default: &default
   pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
   timeout: 5000
 
+legacy:
+  adapter: sqlite3
+  database: storage/stardict.db
+
 development:
   <<: *default
   database: storage/development.sqlite3

@@ -37,3 +37,7 @@
 !/app/assets/builds/.keep
 
 .serena
+
+/db/dict/ecdict.sql
+/db/development.sqlite3
+/db/test.sqlite3

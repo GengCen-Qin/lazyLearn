@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_11_22_130536) do
+ActiveRecord::Schema[8.0].define(version: 2025_11_23_111120) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -37,6 +37,27 @@ ActiveRecord::Schema[8.0].define(version: 2025_11_22_130536) do
     t.bigint "blob_id", null: false
     t.string "variation_digest", null: false
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
+
+  create_table "ecdict_words", force: :cascade do |t|
+    t.string "word", limit: 64, null: false
+    t.string "sw", limit: 64, null: false
+    t.string "phonetic", limit: 64
+    t.text "definition"
+    t.text "translation"
+    t.string "pos", limit: 16
+    t.integer "collins", default: 0
+    t.integer "oxford", default: 0
+    t.string "tag", limit: 64
+    t.integer "bnc"
+    t.integer "frq"
+    t.text "exchange"
+    t.text "detail"
+    t.text "audio"
+    t.index "lower(word)", name: "index_ecdict_words_on_lower_word"
+    t.index ["collins"], name: "index_ecdict_words_on_collins"
+    t.index ["oxford"], name: "index_ecdict_words_on_oxford"
+    t.index ["word"], name: "index_ecdict_words_on_word", unique: true
   end
 
   create_table "solid_queue_blocked_executions", force: :cascade do |t|
