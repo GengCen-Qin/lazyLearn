@@ -7,6 +7,7 @@ Rails.application.routes.draw do
 
   resources :videos, only: [:index, :show, :destroy]
   get "video_player", to: "video_player#index"
+  post "word_lookup", to: "word_lookup#create"
 
   mount MissionControl::Jobs::Engine, at: "/jobs"
 end

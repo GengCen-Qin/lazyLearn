@@ -63,25 +63,13 @@
           </span>
         </div>
         <div class="flex-1 overflow-y-auto p-2 sm:p-3 bg-white" data-video-subtitle-merged-target="subtitleList" id="subtitleList">
-          <% if @video.has_transcription? %>
-            <% @video.formatted_transcription.each_with_index do |segment, index| %>
-              <div class="subtitle-item p-2 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors duration-150"
-                   data-start="<%= segment[:start] %>"
-                   data-index="<%= index %>"
-                   data-action="click->video-subtitle-merged#jumpToSubtitle">
-                <div class="text-xs text-gray-500 mb-1">
-                  <%= segment[:time_str] %>
-                </div>
-                <div class="text-sm text-gray-800">
-                  <%= segment[:text] %>
-                </div>
-              </div>
-            <% end %>
-          <% else %>
-            <div class="no-subtitles text-center text-gray-500 p-6 text-sm">
+          <div class="no-subtitles text-center text-gray-500 p-6 text-sm">
+            <% if @video.has_transcription? %>
+              正在加载字幕...
+            <% else %>
               此视频暂无字幕
-            </div>
-          <% end %>
+            <% end %>
+          </div>
         </div>
       </div>
     </div>
@@ -97,6 +85,30 @@
           <span class="text-gray-600 font-medium">当前字幕:</span>
           <span id="currentSubtitleIndex" data-video-subtitle-merged-target="currentSubtitleIndex" class="text-gray-800 font-mono">- / -</span>
         </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 单词查询弹窗 -->
+<div id="wordLookupPopup" class="hidden fixed z-50 flex items-center justify-center" style="top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.5); backdrop-filter: blur(2px);">
+  <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 max-h-[80vh] overflow-hidden">
+    <!-- 弹窗头部 -->
+    <div class="flex justify-between items-center p-4 border-b border-gray-200">
+      <h3 class="text-lg font-semibold text-gray-900">单词释义</h3>
+      <button id="closeWordPopup" class="text-gray-400 hover:text-gray-600 transition-colors">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+
+    <!-- 弹窗内容 -->
+    <div id="wordPopupContent" class="p-4 max-h-[60vh] overflow-y-auto">
+      <!-- 单词内容将在这里动态插入 -->
+      <div class="text-center text-gray-500 py-8">
+        <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <p class="mt-2 text-sm">查询中...</p>
       </div>
     </div>
   </div>

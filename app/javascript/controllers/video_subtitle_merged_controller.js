@@ -26,8 +26,14 @@ export default class extends Controller {
     this.initializePlayer();
     this.setupEventListeners();
     this.setupKeyboardShortcuts();
+    this.setupWordLookup();
     this.isAutoScrolling = false;
     this.lastScrollTime = 0;
+    this.currentPopupWord = null;
+
+    // 处理从HTML传递的字幕数据（视频详情页）
+    this.loadInitialSubtitles();
+
     console.log("Video subtitle merged controller connected");
   }
 
@@ -341,28 +347,41 @@ export default class extends Controller {
 
     this.subtitlesValue.forEach((subtitle, index) => {
       const item = document.createElement("div");
-      // 使用与视频详情页一致的样式类
       item.className = "subtitle-item p-2 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors duration-150";
       item.dataset.index = index;
       item.dataset.start = subtitle.start;
 
       const time = this.formatTime(subtitle.start);
-      // 使用与视频详情页一致的HTML结构
+
+      // 将字幕文本按空格分割为单词，使每个单词可点击
+      const processedText = this.processSubtitleText(subtitle.text);
+
+      console.log(`Subtitle text: "${subtitle.text}"`);
+      console.log(`Processed text: "${processedText}"`);
+
       item.innerHTML = `
         <div class="text-xs text-gray-500 mb-1">${time}</div>
-        <div class="text-sm text-gray-800">${this.escapeHtml(subtitle.text)}</div>
+        <div class="text-sm text-gray-800">${processedText}</div>
       `;
 
-      item.addEventListener("click", () => {
+      // 设置字幕行点击事件（用于时间跳转）
+      item.addEventListener("click", (e) => {
+        // 如果点击的是单词，不触发时间跳转
+        if (e.target.classList.contains("word-lookup")) {
+          e.stopPropagation();
+          return;
+        }
         this.seekToSubtitle(index);
       });
 
       container.appendChild(item);
     });
 
-    console.log(
-      `Subtitle list rendered, ${this.subtitlesValue.length} entries`,
-    );
+    console.log('这里被执行。。。。。。。。。。')
+    // 添加单词点击事件监听
+    this.addWordClickListeners();
+
+    console.log(`Subtitle list rendered, ${this.subtitlesValue.length} entries`);
   }
 
   syncSubtitles(currentTime) {
@@ -603,5 +622,294 @@ export default class extends Controller {
     const div = document.createElement("div");
     div.textContent = text;
     return div.innerHTML;
+  }
+
+  // ========================================
+  // Word Lookup Methods
+  // ========================================
+
+  setupWordLookup() {
+    // 初始化弹窗相关元素
+    this.wordPopup = document.getElementById("wordLookupPopup");
+    this.wordPopupContent = document.getElementById("wordPopupContent");
+    this.closeWordPopupBtn = document.getElementById("closeWordPopup");
+
+    // 设置关闭按钮事件
+    if (this.closeWordPopupBtn) {
+      this.closeWordPopupBtn.addEventListener("click", () => {
+        this.hideWordPopup();
+      });
+    }
+
+    // 点击弹窗外部区域关闭弹窗
+    if (this.wordPopup) {
+      this.wordPopup.addEventListener("click", (e) => {
+        if (e.target === this.wordPopup) {
+          this.hideWordPopup();
+        }
+      });
+    }
+
+    // ESC键关闭弹窗
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && !this.wordPopup.classList.contains("hidden")) {
+        this.hideWordPopup();
+      }
+    });
+  }
+
+
+  processSubtitleText(text) {
+    // 按空格分割文本，每个部分都视为单词
+    return text.split(' ').map(word => {
+      const trimmedWord = word.trim();
+      // 如果是纯英文单词且长度大于1，添加点击事件
+      if (trimmedWord.length >= 2 && /^[a-zA-Z]+$/.test(trimmedWord)) {
+        return `<span class="word-lookup inline-block px-0.5 rounded hover:bg-blue-100 hover:text-blue-700 cursor-pointer transition-colors duration-150" data-word="${trimmedWord}">${this.escapeHtml(trimmedWord)}</span>`;
+      }
+      // 其他情况（数字、标点、中文字符等）直接显示
+      return this.escapeHtml(word);
+    }).join(' ');
+  }
+
+  addWordClickListeners() {
+    // 移除旧的事件监听器
+    document.querySelectorAll('.word-lookup').forEach(element => {
+      element.replaceWith(element.cloneNode(true));
+    });
+
+    // 重新获取所有单词元素并添加事件监听器
+    const wordElements = document.querySelectorAll('.word-lookup');
+    console.log(`Found ${wordElements.length} word elements to add click listeners`);
+
+    wordElements.forEach((element, index) => {
+      const word = element.dataset.word;
+      console.log(`Adding click listener to word: ${word}`);
+
+      element.addEventListener("click", (e) => {
+        e.stopPropagation();
+        console.log(`Word clicked: ${word}`);
+        this.lookupWord(word, e.target);
+      });
+    });
+  }
+
+  async lookupWord(word, clickedElement) {
+    if (!word) {
+      console.log("No word provided for lookup");
+      return;
+    }
+
+    console.log(`Looking up word: ${word}`);
+
+    // 如果当前弹窗显示的是同一个单词，直接返回
+    if (this.currentPopupWord === word && this.wordPopup && !this.wordPopup.classList.contains("hidden")) {
+      console.log(`Word ${word} already displayed in popup`);
+      return;
+    }
+
+    // 显示弹窗并显示加载状态
+    this.showWordPopup();
+    this.showWordLoading();
+
+    try {
+      console.log(`Making request to /word_lookup for word: ${word}`);
+      const response = await fetch("/word_lookup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRF-Token": this.getCSRFToken()
+        },
+        body: JSON.stringify({ word: word })
+      });
+
+      console.log(`Response status: ${response.status}`);
+      const data = await response.json();
+      console.log(`Response data:`, data);
+
+      if (data.success && data.word) {
+        console.log(`Successfully found word: ${data.word.word}`);
+        this.showWordDefinition(data.word);
+        this.currentPopupWord = word;
+      } else {
+        console.log(`Word not found: ${data.message}`);
+        this.showWordError(`未找到单词 "${word}" 的释义`);
+      }
+    } catch (error) {
+      console.error("Word lookup error:", error);
+      this.showWordError(`查询失败，请稍后重试`);
+    }
+  }
+
+  getCSRFToken() {
+    const meta = document.querySelector('meta[name="csrf-token"]');
+    return meta ? meta.getAttribute("content") : "";
+  }
+
+  showWordPopup() {
+    if (this.wordPopup) {
+      this.wordPopup.classList.remove("hidden");
+    }
+  }
+
+  hideWordPopup() {
+    if (this.wordPopup) {
+      this.wordPopup.classList.add("hidden");
+      this.currentPopupWord = null;
+    }
+  }
+
+  showWordLoading() {
+    if (this.wordPopupContent) {
+      this.wordPopupContent.innerHTML = `
+        <div class="text-center text-gray-500 py-8">
+          <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <p class="mt-2 text-sm">查询中...</p>
+        </div>
+      `;
+    }
+  }
+
+  showWordDefinition(wordData) {
+    if (!this.wordPopupContent) return;
+
+    const html = `
+      <div class="space-y-4">
+        <!-- 单词标题 -->
+        <div class="text-center border-b border-gray-200 pb-3">
+          <h2 class="text-2xl font-bold text-gray-900 mb-2">${wordData.word}</h2>
+          ${wordData.phonetic ? `<p class="text-gray-600">[${wordData.phonetic}]</p>` : ''}
+        </div>
+
+        <!-- 词性 -->
+        ${wordData.pos ? `
+          <div class="flex justify-center">
+            <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+              ${wordData.pos}
+            </span>
+          </div>
+        ` : ''}
+
+        <!-- 核心词汇标记 -->
+        ${wordData.core ? `
+          <div class="flex justify-center">
+            <span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-medium">
+              ⭐ 核心词汇
+            </span>
+          </div>
+        ` : ''}
+
+        <!-- 英文释义 -->
+        ${wordData.definition ? `
+          <div>
+            <h3 class="font-semibold text-gray-900 mb-2 flex items-center">
+              <svg class="w-4 h-4 mr-2 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M3 5a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2h-2.22l.123.489.804.804A1 1 0 0113 18H7a1 1 0 01-.707-1.707l.804-.804L7.22 15H5a2 2 0 01-2-2V5zm5.771 7H5V5h10v7H8.771z" clip-rule="evenodd"/>
+              </svg>
+              英文释义
+            </h3>
+            <div class="text-gray-700 text-sm leading-relaxed bg-gray-50 p-3 rounded">
+              ${wordData.definition.split(';').map(def => `<div class="mb-1">• ${def.trim()}</div>`).join('')}
+            </div>
+          </div>
+        ` : ''}
+
+        <!-- 中文释义 -->
+        ${wordData.translation ? `
+          <div>
+            <h3 class="font-semibold text-gray-900 mb-2 flex items-center">
+              <svg class="w-4 h-4 mr-2 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"/>
+              </svg>
+              中文释义
+            </h3>
+            <div class="text-gray-700 text-sm leading-relaxed bg-green-50 p-3 rounded">
+              ${wordData.translation.split(';').map(tran => `<div class="mb-1">• ${tran.trim()}</div>`).join('')}
+            </div>
+          </div>
+        ` : ''}
+
+        <!-- 详细信息 -->
+        ${wordData.detail ? `
+          <div>
+            <h3 class="font-semibold text-gray-900 mb-2 flex items-center">
+              <svg class="w-4 h-4 mr-2 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z"/>
+              </svg>
+              详细说明
+            </h3>
+            <div class="text-gray-700 text-sm leading-relaxed bg-purple-50 p-3 rounded">
+              ${wordData.detail}
+            </div>
+          </div>
+        ` : ''}
+
+        <!-- 标签信息 -->
+        ${wordData.tag ? `
+          <div class="flex flex-wrap gap-2 pt-2">
+            ${wordData.tag.split(',').map(tag => `
+              <span class="bg-gray-100 text-gray-800 px-2 py-1 rounded text-xs">
+                ${tag.trim()}
+              </span>
+            `).join('')}
+          </div>
+        ` : ''}
+      </div>
+    `;
+
+    this.wordPopupContent.innerHTML = html;
+  }
+
+  showWordError(message) {
+    if (this.wordPopupContent) {
+      this.wordPopupContent.innerHTML = `
+        <div class="text-center text-gray-500 py-8">
+          <svg class="w-12 h-12 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <p class="text-sm">${message}</p>
+        </div>
+      `;
+    }
+  }
+
+  // ========================================
+  // Video Detail Page Methods
+  // ========================================
+
+  loadInitialSubtitles() {
+    // 检查是否有初始字幕数据（从HTML data属性传递）
+    const initialSubtitles = this.subtitlesValue;
+    const videoPath = this.element.dataset.videoSubtitleMergedVideoPathValue;
+
+    console.log("Loading initial data:");
+    console.log("Video path:", videoPath);
+    console.log("Initial subtitles count:", initialSubtitles.length);
+
+    // 如果有视频路径，设置视频源
+    if (videoPath && this.hasVideoTarget) {
+      this.loadVideoFromPath(videoPath);
+    }
+
+    // 如果有字幕数据，渲染字幕列表
+    if (initialSubtitles && initialSubtitles.length > 0) {
+      this.subtitlesValue = initialSubtitles;
+      this.currentIndexValue = -1;
+      this.renderSubtitleList();
+      this.updateSubtitleCount();
+      console.log(`Loaded ${initialSubtitles.length} subtitle segments`);
+    }
+  }
+
+  loadVideoFromPath(videoPath) {
+    console.log("Loading video from path:", videoPath);
+
+    // 设置视频源
+    if (this.hasVideoTarget) {
+      this.videoTarget.src = videoPath;
+      this.videoTarget.load(); // 确保重新加载视频
+
+      console.log("Video source set successfully");
+    }
   }
 }

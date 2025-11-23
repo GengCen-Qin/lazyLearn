@@ -32,18 +32,72 @@ class EcdictWord < ActiveRecord::Base
   self.table_name = "stardict"
   self.primary_key = "id"
 
+  # Scopes
   scope :core,    -> { where(oxford: 1) }
   scope :cet4,    -> { where("tag LIKE '%cet4%'") }
   scope :cet6,    -> { where("tag LIKE '%cet6%'") }
   scope :search,  ->(q) { where("lower(word) LIKE ?", "#{q.to_s.downcase.strip}%") }
 
-  # 方便前端显示音标
+  # Class Methods
+  class << self
+    def lookup(word)
+      clean_word = word.to_s.strip.gsub(/[^a-zA-Z]/, '').downcase
+      return nil if clean_word.blank?
+
+      # 尝试精确匹配
+      word_record = find_by("lower(word) = ?", clean_word)
+      return word_record if word_record
+
+      # 尝试模糊匹配
+      search(clean_word).first
+    end
+  end
+
+  # Instance Methods
   def uk_phonetic = phonetic
   def us_phonetic = phonetic # 目前 ECDICT 只有一套音标
-
-  # sw 字段可能是简单的单词变体或拼写权重
   def simple_word = sw
 
-  # 检查是否为核心词汇
-  def core? = oxford == 1 || collins > 0
+  def core?
+    oxford.to_i == 1 || collins.to_i > 0
+  end
+
+  # 序列化方法 - 返回格式化的单词数据
+  def serialized
+    {
+      id: id,
+      word: word,
+      phonetic: phonetic,
+      definition: definition,
+      translation: translation,
+      detail: detail,
+      pos: pos,
+      audio: audio,
+      oxford: oxford,
+      collins: collins,
+      core: core?,
+      tag: tag,
+      exchange: exchange,
+      bnc: bnc,
+      frq: frq
+    }
+  end
+
+  # 格式化定义 - 分割并清理
+  def formatted_definition
+    return [] if definition.blank?
+    definition.split(';').map(&:strip).reject(&:blank?)
+  end
+
+  # 格式化翻译 - 分割并清理
+  def formatted_translation
+    return [] if translation.blank?
+    translation.split(';').map(&:strip).reject(&:blank?)
+  end
+
+  # 格式化标签 - 分割并清理
+  def formatted_tags
+    return [] if tag.blank?
+    tag.split(',').map(&:strip).reject(&:blank?)
+  end
 end
