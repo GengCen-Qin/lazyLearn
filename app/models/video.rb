@@ -4,6 +4,7 @@
 #
 #  id                     :integer          not null, primary key
 #  description            :text
+#  download_link          :string
 #  title                  :string
 #  transcription_language :string           default("zh")
 #  transcription_segments :json
@@ -14,6 +15,7 @@
 #
 # Indexes
 #
+#  index_videos_on_download_link           (download_link) UNIQUE
 #  index_videos_on_transcription_language  (transcription_language)
 #  index_videos_on_transcription_status    (transcription_status)
 #
