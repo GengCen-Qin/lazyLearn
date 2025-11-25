@@ -1,6 +1,5 @@
 import { Controller } from "@hotwired/stimulus";
 import Plyr from "plyr";
-
 export default class extends Controller {
   static targets = [
     // Video targets
@@ -15,13 +14,11 @@ export default class extends Controller {
     // Message targets
     "message",
   ];
-
   static values = {
     currentVideoUrl: String,
     subtitles: Array,
     currentIndex: { type: Number, default: -1 },
   };
-
   connect() {
     this.initializePlayer();
     this.setupEventListeners();
@@ -30,13 +27,8 @@ export default class extends Controller {
     this.isAutoScrolling = false;
     this.lastScrollTime = 0;
     this.currentPopupWord = null;
-
-    // 处理从HTML传递的字幕数据（视频详情页）
     this.loadInitialSubtitles();
-
-    console.log("Video subtitle merged controller connected");
   }
-
   disconnect() {
     if (this.currentVideoUrlValue) {
       URL.revokeObjectURL(this.currentVideoUrlValue);
@@ -45,13 +37,10 @@ export default class extends Controller {
       this.player.destroy();
     }
   }
-
   // ========================================
   // Video Player Methods
   // ========================================
-
   initializePlayer() {
-    // Check if Plyr is available
     if (typeof Plyr !== "undefined") {
       this.player = new Plyr(this.videoTarget, {
         controls: [
@@ -82,37 +71,27 @@ export default class extends Controller {
           exitFullscreen: "退出全屏",
         },
       });
-      console.log("Plyr player initialized");
     } else {
-      console.warn("Plyr library not found, using native video element");
       this.player = this.videoTarget;
     }
   }
-
   setupEventListeners() {
     if (this.player) {
       const videoElement = this.player.media || this.player;
-
       videoElement.addEventListener("timeupdate", () => {
         this.handleTimeUpdate();
       });
-
       videoElement.addEventListener("loadedmetadata", () => {
-        console.log("Video metadata loaded");
         this.updateStatusBar();
       });
-
       videoElement.addEventListener("error", (e) => {
         this.handleVideoError(e);
       });
     }
   }
-
   setupKeyboardShortcuts() {
     document.addEventListener("keydown", (e) => {
-      // Ignore if in input field
       if (e.target.tagName === "INPUT") return;
-
       switch (e.code) {
         case "Space":
           e.preventDefault();
@@ -132,31 +111,17 @@ export default class extends Controller {
       }
     });
   }
-
   async loadVideo(event) {
     const file = event.target.files[0];
     if (!file) return;
-
     try {
       // Clean up previous video URL
       if (this.currentVideoUrlValue) {
         URL.revokeObjectURL(this.currentVideoUrlValue);
       }
-
-      console.log(
-        "Loading video file:",
-        file.name,
-        "Type:",
-        file.type,
-        "Size:",
-        this.formatFileSize(file.size),
-      );
-
       this.currentVideoUrlValue = URL.createObjectURL(file);
-
       // Detect file type
       let detectedType = file.type || this.detectVideoType(file.name);
-
       // Prepare sources
       const sources = [
         {
@@ -164,16 +129,13 @@ export default class extends Controller {
           type: detectedType,
         },
       ];
-
       // Add fallback for MOV files
       if (file.name.toLowerCase().endsWith(".mov")) {
-        console.log("MOV file detected, adding fallback source");
         sources.push({
           src: this.currentVideoUrlValue,
           type: "video/mp4",
         });
       }
-
       // Set video source
       if (this.player.source) {
         this.player.source = {
@@ -184,17 +146,14 @@ export default class extends Controller {
         // Native video element
         this.videoTarget.src = this.currentVideoUrlValue;
       }
-
       const duration = this.player.duration || 0;
       this.showSuccess(
         `视频加载成功: ${file.name} (${this.formatDuration(duration)})`,
       );
     } catch (error) {
-      console.error("Video loading failed:", error);
       this.showError(`视频文件加载失败: ${error.message}`);
     }
   }
-
   detectVideoType(filename) {
     const extension = filename.toLowerCase().split(".").pop();
     const mimeTypes = {
@@ -211,12 +170,9 @@ export default class extends Controller {
     };
     return mimeTypes[extension] || "video/mp4";
   }
-
   handleVideoError(event) {
-    console.error("Video error:", event);
     this.showError("视频文件播放失败，请检查文件格式是否支持");
   }
-
   togglePlay() {
     if (this.player) {
       if (typeof this.player.togglePlay === "function") {
@@ -231,7 +187,6 @@ export default class extends Controller {
       }
     }
   }
-
   handleLeftKey() {
     if (this.subtitlesValue.length > 0) {
       this.jumpToPrevious();
@@ -241,7 +196,6 @@ export default class extends Controller {
       this.seekTo(Math.max(0, currentTime - 5));
     }
   }
-
   handleRightKey() {
     if (this.subtitlesValue.length > 0) {
       this.jumpToNext();
@@ -252,12 +206,10 @@ export default class extends Controller {
       this.seekTo(Math.min(duration, currentTime + 5));
     }
   }
-
   handleTimeUpdate() {
     this.updateStatusBar();
     this.syncSubtitles(this.getCurrentTime());
   }
-
   seekTo(time) {
     if (this.player) {
       if (this.player.currentTime !== undefined) {
@@ -267,33 +219,27 @@ export default class extends Controller {
       }
     }
   }
-
   getCurrentTime() {
     if (this.player) {
       return this.player.currentTime || this.player.media?.currentTime || 0;
     }
     return 0;
   }
-
   getDuration() {
     if (this.player) {
       return this.player.duration || this.player.media?.duration || 0;
     }
     return 0;
   }
-
   // ========================================
   // Subtitle Methods
   // ========================================
-
   async loadSubtitles(event) {
     const file = event.target.files[0];
     if (!file) return;
-
     try {
       const text = await file.text();
       const data = JSON.parse(text);
-
       // Validate and parse subtitle data
       let subtitles = [];
       if (Array.isArray(data)) {
@@ -303,67 +249,46 @@ export default class extends Controller {
       } else {
         throw new Error("字幕文件格式不正确");
       }
-
       // Validate subtitle structure
       for (let i = 0; i < subtitles.length; i++) {
         if (typeof subtitles[i].start !== "number" || !subtitles[i].text) {
           throw new Error(`字幕数据格式错误，第 ${i + 1} 条字幕缺少必要字段`);
         }
       }
-
       // Sort subtitles by start time
       this.subtitlesValue = subtitles.sort((a, b) => a.start - b.start);
       this.currentIndexValue = -1;
-
       this.renderSubtitleList();
       this.updateSubtitleCount();
-
       this.showSuccess(
         `字幕加载成功: ${file.name} (${subtitles.length} 条字幕)`,
       );
-      console.log(
-        "Subtitles loaded successfully:",
-        file.name,
-        subtitles.length,
-        "entries",
-      );
     } catch (error) {
-      console.error("Subtitle loading failed:", error);
       this.showError(`字幕文件格式错误: ${error.message}`);
     }
   }
-
   renderSubtitleList() {
     if (!this.hasSubtitleListTarget) return;
-
     const container = this.subtitleListTarget;
-
     if (this.subtitlesValue.length === 0) {
-      container.innerHTML = '<div class="no-subtitles text-center text-gray-500 p-6 text-sm">请上传字幕文件</div>';
+      container.innerHTML =
+        '<div class="no-subtitles text-center text-gray-500 p-6 text-sm">请上传字幕文件</div>';
       return;
     }
-
     container.innerHTML = "";
-
     this.subtitlesValue.forEach((subtitle, index) => {
       const item = document.createElement("div");
-      item.className = "subtitle-item p-2 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors duration-150";
+      item.className =
+        "subtitle-item p-2 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors duration-150";
       item.dataset.index = index;
       item.dataset.start = subtitle.start;
-
       const time = this.formatTime(subtitle.start);
-
       // 将字幕文本按空格分割为单词，使每个单词可点击
       const processedText = this.processSubtitleText(subtitle.text);
-
-      console.log(`Subtitle text: "${subtitle.text}"`);
-      console.log(`Processed text: "${processedText}"`);
-
       item.innerHTML = `
         <div class="text-xs text-gray-500 mb-1">${time}</div>
         <div class="text-sm text-gray-800">${processedText}</div>
       `;
-
       // 设置字幕行点击事件（用于时间跳转）
       item.addEventListener("click", (e) => {
         // 如果点击的是单词，不触发时间跳转
@@ -373,20 +298,13 @@ export default class extends Controller {
         }
         this.seekToSubtitle(index);
       });
-
       container.appendChild(item);
     });
-
-    console.log('这里被执行。。。。。。。。。。')
     // 添加单词点击事件监听
     this.addWordClickListeners();
-
-    console.log(`Subtitle list rendered, ${this.subtitlesValue.length} entries`);
   }
-
   syncSubtitles(currentTime) {
     const newSubtitleIndex = this.findCurrentSubtitleIndex(currentTime);
-
     if (newSubtitleIndex !== this.currentIndexValue) {
       this.currentIndexValue = newSubtitleIndex;
       this.updateActiveSubtitle();
@@ -394,14 +312,12 @@ export default class extends Controller {
       this.updateStatusBar();
     }
   }
-
   setCurrentSubtitle(index) {
     this.currentIndexValue = index;
     this.updateActiveSubtitle();
     this.scrollToCurrentSubtitle();
     this.updateStatusBar();
   }
-
   findCurrentSubtitleIndex(currentTime) {
     for (let i = this.subtitlesValue.length - 1; i >= 0; i--) {
       if (currentTime >= this.subtitlesValue[i].start) {
@@ -410,13 +326,11 @@ export default class extends Controller {
     }
     return -1;
   }
-
   updateActiveSubtitle() {
     // Remove active class from all subtitle items
     document.querySelectorAll(".subtitle-item").forEach((item) => {
       item.classList.remove("active");
     });
-
     // Add active class to current subtitle
     if (this.currentIndexValue >= 0) {
       const currentElement = document.querySelector(
@@ -427,66 +341,46 @@ export default class extends Controller {
       }
     }
   }
-
   scrollToCurrentSubtitle() {
     const activeElement = document.querySelector(".subtitle-item.active");
     if (activeElement && !this.isAutoScrolling) {
       const now = Date.now();
       if (now - this.lastScrollTime < 100) return; // Prevent frequent scrolling
-
       this.isAutoScrolling = true;
       this.lastScrollTime = now;
-
       activeElement.scrollIntoView({
         behavior: "smooth",
         block: "center",
       });
-
       setTimeout(() => {
         this.isAutoScrolling = false;
       }, 500);
     }
   }
-
   seekToSubtitle(index) {
     if (index >= 0 && index < this.subtitlesValue.length) {
       const subtitle = this.subtitlesValue[index];
       this.seekTo(subtitle.start);
       this.setCurrentSubtitle(index);
-
-      console.log(
-        `Jumped to subtitle ${index + 1}: [${this.formatTime(
-          subtitle.start,
-        )}] ${subtitle.text}`,
-      );
     }
   }
-
   // Alias method for compatibility with HTML template
   jumpToSubtitle(event) {
     const index = parseInt(event.currentTarget.dataset.index);
     this.seekToSubtitle(index);
   }
-
   jumpToPrevious() {
     if (this.subtitlesValue.length === 0) return;
-
     let targetIndex;
     if (this.currentIndexValue <= 0) {
       targetIndex = 0;
     } else {
       targetIndex = this.currentIndexValue - 1;
     }
-
     this.seekToSubtitle(targetIndex);
-    console.log(
-      `Previous subtitle: ${targetIndex + 1}/${this.subtitlesValue.length}`,
-    );
   }
-
   jumpToNext() {
     if (this.subtitlesValue.length === 0) return;
-
     let targetIndex;
     if (
       this.currentIndexValue < 0 ||
@@ -496,23 +390,16 @@ export default class extends Controller {
     } else {
       targetIndex = this.currentIndexValue + 1;
     }
-
     this.seekToSubtitle(targetIndex);
-    console.log(
-      `Next subtitle: ${targetIndex + 1}/${this.subtitlesValue.length}`,
-    );
   }
-
   updateSubtitleCount() {
     if (this.hasSubtitleCountTarget) {
       this.subtitleCountTarget.textContent = `${this.subtitlesValue.length} 条字幕`;
     }
   }
-
   // ========================================
   // Status Bar Methods
   // ========================================
-
   updateStatusBar() {
     // Update current time display
     if (this.hasCurrentTimeTarget) {
@@ -520,12 +407,10 @@ export default class extends Controller {
         this.getCurrentTime(),
       );
     }
-
     // Update current subtitle index
     if (this.hasCurrentSubtitleIndexTarget) {
       const current = this.currentIndexValue;
       const total = this.subtitlesValue.length;
-
       if (current >= 0 && total > 0) {
         this.currentSubtitleIndexTarget.textContent = `${
           current + 1
@@ -535,29 +420,23 @@ export default class extends Controller {
       }
     }
   }
-
   // ========================================
   // Message Methods
   // ========================================
-
   showSuccess(message) {
     this.showMessage(message, "success");
   }
-
   showError(message) {
     this.showMessage(message, "error");
   }
-
   showMessage(message, type = "success") {
     // Remove existing messages
     const existingMessages = this.element.querySelectorAll(".success, .error");
     existingMessages.forEach((msg) => msg.remove());
-
     // Create new message element
     const messageDiv = document.createElement("div");
     messageDiv.className = type;
     messageDiv.textContent = message;
-
     // Style the message
     messageDiv.style.cssText = `
       padding: 10px 15px;
@@ -571,7 +450,6 @@ export default class extends Controller {
           : "background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;"
       }
     `;
-
     // Add to the top of the container
     const fileSection = this.element.querySelector(".file-section");
     if (fileSection) {
@@ -579,7 +457,6 @@ export default class extends Controller {
     } else {
       this.element.insertBefore(messageDiv, this.element.firstChild);
     }
-
     // Auto-remove after 3 seconds
     setTimeout(() => {
       if (messageDiv.parentNode) {
@@ -587,11 +464,9 @@ export default class extends Controller {
       }
     }, 3000);
   }
-
   // ========================================
   // Utility Methods
   // ========================================
-
   formatTime(seconds) {
     if (!seconds || isNaN(seconds)) return "00:00";
     const minutes = Math.floor(seconds / 60);
@@ -600,7 +475,6 @@ export default class extends Controller {
       .toString()
       .padStart(2, "0")}`;
   }
-
   formatDuration(seconds) {
     if (!seconds || isNaN(seconds)) return "00:00";
     const minutes = Math.floor(seconds / 60);
@@ -609,7 +483,6 @@ export default class extends Controller {
       .toString()
       .padStart(2, "0")}`;
   }
-
   formatFileSize(bytes) {
     if (bytes === 0) return "0 Bytes";
     const k = 1024;
@@ -617,30 +490,25 @@ export default class extends Controller {
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   }
-
   escapeHtml(text) {
     const div = document.createElement("div");
     div.textContent = text;
     return div.innerHTML;
   }
-
   // ========================================
   // Word Lookup Methods
   // ========================================
-
   setupWordLookup() {
     // 初始化弹窗相关元素
     this.wordPopup = document.getElementById("wordLookupPopup");
     this.wordPopupContent = document.getElementById("wordPopupContent");
     this.closeWordPopupBtn = document.getElementById("closeWordPopup");
-
     // 设置关闭按钮事件
     if (this.closeWordPopupBtn) {
       this.closeWordPopupBtn.addEventListener("click", () => {
         this.hideWordPopup();
       });
     }
-
     // 点击弹窗外部区域关闭弹窗
     if (this.wordPopup) {
       this.wordPopup.addEventListener("click", (e) => {
@@ -649,7 +517,6 @@ export default class extends Controller {
         }
       });
     }
-
     // ESC键关闭弹窗
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape" && !this.wordPopup.classList.contains("hidden")) {
@@ -657,108 +524,86 @@ export default class extends Controller {
       }
     });
   }
-
-
   processSubtitleText(text) {
     // 按空格分割文本，每个部分都视为单词
-    return text.split(' ').map(word => {
-      const trimmedWord = word.trim();
-      // 如果是纯英文单词且长度大于1，添加点击事件
-      if (trimmedWord.length >= 2 && /^[a-zA-Z]+$/.test(trimmedWord)) {
-        return `<span class="word-lookup inline-block px-0.5 rounded hover:bg-blue-100 hover:text-blue-700 cursor-pointer transition-colors duration-150" data-word="${trimmedWord}">${this.escapeHtml(trimmedWord)}</span>`;
-      }
-      // 其他情况（数字、标点、中文字符等）直接显示
-      return this.escapeHtml(word);
-    }).join(' ');
+    return text
+      .split(" ")
+      .map((word) => {
+        const trimmedWord = word.trim();
+        // 如果是纯英文单词且长度大于1，添加点击事件
+        if (trimmedWord.length >= 2 && /^[a-zA-Z]+$/.test(trimmedWord)) {
+          return `<span class="word-lookup inline-block px-0.5 rounded hover:bg-blue-100 hover:text-blue-700 cursor-pointer transition-colors duration-150" data-word="${trimmedWord}">${this.escapeHtml(trimmedWord)}</span>`;
+        }
+        // 其他情况（数字、标点、中文字符等）直接显示
+        return this.escapeHtml(word);
+      })
+      .join(" ");
   }
-
   addWordClickListeners() {
     // 移除旧的事件监听器
-    document.querySelectorAll('.word-lookup').forEach(element => {
+    document.querySelectorAll(".word-lookup").forEach((element) => {
       element.replaceWith(element.cloneNode(true));
     });
-
     // 重新获取所有单词元素并添加事件监听器
-    const wordElements = document.querySelectorAll('.word-lookup');
-    console.log(`Found ${wordElements.length} word elements to add click listeners`);
-
+    const wordElements = document.querySelectorAll(".word-lookup");
     wordElements.forEach((element, index) => {
       const word = element.dataset.word;
-      console.log(`Adding click listener to word: ${word}`);
-
       element.addEventListener("click", (e) => {
         e.stopPropagation();
-        console.log(`Word clicked: ${word}`);
         this.lookupWord(word, e.target);
       });
     });
   }
-
   async lookupWord(word, clickedElement) {
     if (!word) {
-      console.log("No word provided for lookup");
       return;
     }
-
-    console.log(`Looking up word: ${word}`);
-
     // 如果当前弹窗显示的是同一个单词，直接返回
-    if (this.currentPopupWord === word && this.wordPopup && !this.wordPopup.classList.contains("hidden")) {
-      console.log(`Word ${word} already displayed in popup`);
+    if (
+      this.currentPopupWord === word &&
+      this.wordPopup &&
+      !this.wordPopup.classList.contains("hidden")
+    ) {
       return;
     }
-
     // 显示弹窗并显示加载状态
     this.showWordPopup();
     this.showWordLoading();
-
     try {
-      console.log(`Making request to /word_lookup for word: ${word}`);
       const response = await fetch("/word_lookup", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "X-CSRF-Token": this.getCSRFToken()
+          "X-CSRF-Token": this.getCSRFToken(),
         },
-        body: JSON.stringify({ word: word })
+        body: JSON.stringify({ word: word }),
       });
-
-      console.log(`Response status: ${response.status}`);
       const data = await response.json();
-      console.log(`Response data:`, data);
-
       if (data.success && data.word) {
-        console.log(`Successfully found word: ${data.word.word}`);
         this.showWordDefinition(data.word);
         this.currentPopupWord = word;
       } else {
-        console.log(`Word not found: ${data.message}`);
         this.showWordError(`未找到单词 "${word}" 的释义`);
       }
     } catch (error) {
-      console.error("Word lookup error:", error);
       this.showWordError(`查询失败，请稍后重试`);
     }
   }
-
   getCSRFToken() {
     const meta = document.querySelector('meta[name="csrf-token"]');
     return meta ? meta.getAttribute("content") : "";
   }
-
   showWordPopup() {
     if (this.wordPopup) {
       this.wordPopup.classList.remove("hidden");
     }
   }
-
   hideWordPopup() {
     if (this.wordPopup) {
       this.wordPopup.classList.add("hidden");
       this.currentPopupWord = null;
     }
   }
-
   showWordLoading() {
     if (this.wordPopupContent) {
       this.wordPopupContent.innerHTML = `
@@ -769,38 +614,43 @@ export default class extends Controller {
       `;
     }
   }
-
   showWordDefinition(wordData) {
     if (!this.wordPopupContent) return;
-
     const html = `
       <div class="space-y-4">
         <!-- 单词标题 -->
         <div class="text-center border-b border-gray-200 pb-3">
           <h2 class="text-2xl font-bold text-gray-900 mb-2">${wordData.word}</h2>
-          ${wordData.phonetic ? `<p class="text-gray-600">[${wordData.phonetic}]</p>` : ''}
+          ${wordData.phonetic ? `<p class="text-gray-600">[${wordData.phonetic}]</p>` : ""}
         </div>
-
         <!-- 词性 -->
-        ${wordData.pos ? `
+        ${
+          wordData.pos
+            ? `
           <div class="flex justify-center">
             <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
               ${wordData.pos}
             </span>
           </div>
-        ` : ''}
-
+        `
+            : ""
+        }
         <!-- 核心词汇标记 -->
-        ${wordData.core ? `
+        ${
+          wordData.core
+            ? `
           <div class="flex justify-center">
             <span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-medium">
               ⭐ 核心词汇
             </span>
           </div>
-        ` : ''}
-
+        `
+            : ""
+        }
         <!-- 英文释义 -->
-        ${wordData.definition ? `
+        ${
+          wordData.definition
+            ? `
           <div>
             <h3 class="font-semibold text-gray-900 mb-2 flex items-center">
               <svg class="w-4 h-4 mr-2 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
@@ -809,13 +659,19 @@ export default class extends Controller {
               英文释义
             </h3>
             <div class="text-gray-700 text-sm leading-relaxed bg-gray-50 p-3 rounded">
-              ${wordData.definition.split(';').map(def => `<div class="mb-1">• ${def.trim()}</div>`).join('')}
+              ${wordData.definition
+                .split(";")
+                .map((def) => `<div class="mb-1">• ${def.trim()}</div>`)
+                .join("")}
             </div>
           </div>
-        ` : ''}
-
+        `
+            : ""
+        }
         <!-- 中文释义 -->
-        ${wordData.translation ? `
+        ${
+          wordData.translation
+            ? `
           <div>
             <h3 class="font-semibold text-gray-900 mb-2 flex items-center">
               <svg class="w-4 h-4 mr-2 text-green-600" fill="currentColor" viewBox="0 0 20 20">
@@ -824,13 +680,19 @@ export default class extends Controller {
               中文释义
             </h3>
             <div class="text-gray-700 text-sm leading-relaxed bg-green-50 p-3 rounded">
-              ${wordData.translation.split(';').map(tran => `<div class="mb-1">• ${tran.trim()}</div>`).join('')}
+              ${wordData.translation
+                .split(";")
+                .map((tran) => `<div class="mb-1">• ${tran.trim()}</div>`)
+                .join("")}
             </div>
           </div>
-        ` : ''}
-
+        `
+            : ""
+        }
         <!-- 详细信息 -->
-        ${wordData.detail ? `
+        ${
+          wordData.detail
+            ? `
           <div>
             <h3 class="font-semibold text-gray-900 mb-2 flex items-center">
               <svg class="w-4 h-4 mr-2 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
@@ -842,24 +704,32 @@ export default class extends Controller {
               ${wordData.detail}
             </div>
           </div>
-        ` : ''}
-
+        `
+            : ""
+        }
         <!-- 标签信息 -->
-        ${wordData.tag ? `
+        ${
+          wordData.tag
+            ? `
           <div class="flex flex-wrap gap-2 pt-2">
-            ${wordData.tag.split(',').map(tag => `
+            ${wordData.tag
+              .split(",")
+              .map(
+                (tag) => `
               <span class="bg-gray-100 text-gray-800 px-2 py-1 rounded text-xs">
                 ${tag.trim()}
               </span>
-            `).join('')}
+            `,
+              )
+              .join("")}
           </div>
-        ` : ''}
+        `
+            : ""
+        }
       </div>
     `;
-
     this.wordPopupContent.innerHTML = html;
   }
-
   showWordError(message) {
     if (this.wordPopupContent) {
       this.wordPopupContent.innerHTML = `
@@ -872,44 +742,30 @@ export default class extends Controller {
       `;
     }
   }
-
   // ========================================
   // Video Detail Page Methods
   // ========================================
-
   loadInitialSubtitles() {
     // 检查是否有初始字幕数据（从HTML data属性传递）
     const initialSubtitles = this.subtitlesValue;
     const videoPath = this.element.dataset.videoSubtitleMergedVideoPathValue;
-
-    console.log("Loading initial data:");
-    console.log("Video path:", videoPath);
-    console.log("Initial subtitles count:", initialSubtitles.length);
-
     // 如果有视频路径，设置视频源
     if (videoPath && this.hasVideoTarget) {
       this.loadVideoFromPath(videoPath);
     }
-
     // 如果有字幕数据，渲染字幕列表
     if (initialSubtitles && initialSubtitles.length > 0) {
       this.subtitlesValue = initialSubtitles;
       this.currentIndexValue = -1;
       this.renderSubtitleList();
       this.updateSubtitleCount();
-      console.log(`Loaded ${initialSubtitles.length} subtitle segments`);
     }
   }
-
   loadVideoFromPath(videoPath) {
-    console.log("Loading video from path:", videoPath);
-
     // 设置视频源
     if (this.hasVideoTarget) {
       this.videoTarget.src = videoPath;
       this.videoTarget.load(); // 确保重新加载视频
-
-      console.log("Video source set successfully");
     }
   }
 }
