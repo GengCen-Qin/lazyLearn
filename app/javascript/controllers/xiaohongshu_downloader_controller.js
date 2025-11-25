@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["input", "form", "result_area", "result_content", "button"]
+  static targets = ["input", "form", "resultArea", "button"]
 
   connect() {
     console.log("Xiaohongshu downloader controller connected")
@@ -40,7 +40,7 @@ export default class extends Controller {
           this.showRedirectMessage(data.message || '下载成功，正在跳转...')
           setTimeout(() => {
             window.location.href = data.redirect_to
-          }, 1500)
+          }, 500)
         } else {
           this.showSuccess(data)
         }
@@ -60,21 +60,24 @@ export default class extends Controller {
   }
 
   setButtonLoading(loading) {
+    console.log('change loading: ', loading)
     if (!this.hasButtonTarget) return
 
     const isLoading = loading
     this.buttonTarget.disabled = isLoading
 
+    // 保存完整的初始样式类
+    const initialClasses = ['ml-3', 'bg-blue-500', 'text-white', 'rounded-full', 'p-2', 'hover:bg-blue-600', 'focus:outline-none', 'cursor-pointer', 'transition-all', 'duration-200']
     const loadingClasses = ['opacity-75', 'cursor-not-allowed', 'bg-blue-400']
-    const normalClasses = ['bg-blue-500', 'hover:bg-blue-600']
 
     if (isLoading) {
+      this.buttonTarget.classList.remove('hover:bg-blue-600')
       this.buttonTarget.classList.add(...loadingClasses)
-      this.buttonTarget.classList.remove(...normalClasses)
       this.buttonTarget.innerHTML = this.getLoadingIcon()
     } else {
       this.buttonTarget.classList.remove(...loadingClasses)
-      this.buttonTarget.classList.add(...normalClasses)
+      // 确保恢复所有初始类
+      this.buttonTarget.className = initialClasses.join(' ')
       this.buttonTarget.innerHTML = this.getSearchIcon()
     }
   }
@@ -92,18 +95,36 @@ export default class extends Controller {
   }
 
 
-  showResult(content, isError = false) {
-    if (!this.hasResult_contentTarget || !this.hasResult_areaTarget) {
+  showResult(content) {
+    if (!this.hasResultAreaTarget) {
       return
     }
 
-    this.result_contentTarget.innerHTML = content
-    this.result_areaTarget.classList.remove('hidden')
+    this.resultAreaTarget.innerHTML = content
+
+    // Enable pointer events for user interaction
+    this.resultAreaTarget.classList.remove('pointer-events-none')
+
+    // Auto-hide result after 3 seconds with fade-out animation
+    setTimeout(() => {
+      if (this.resultAreaTarget && this.resultAreaTarget.innerHTML) {
+        this.resultAreaTarget.style.transition = 'opacity 0.5s ease-out'
+        this.resultAreaTarget.style.opacity = '0'
+
+        setTimeout(() => {
+          if (this.resultAreaTarget) {
+            this.resultAreaTarget.innerHTML = ''
+            this.resultAreaTarget.style.opacity = '1'
+            this.resultAreaTarget.classList.add('pointer-events-none')
+          }
+        }, 500)
+      }
+    }, 1000)
   }
 
   showRedirectMessage(message) {
     const content = `
-      <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+      <div class="bg-green-50 border border-green-200 rounded-lg p-4 pointer-events-auto shadow-lg">
         <div class="flex items-center">
           ${this.getSuccessIcon()}
           <div class="flex-1">
@@ -120,7 +141,7 @@ export default class extends Controller {
   showSuccess(data) {
     const title = data.title || '小红书视频'
     const content = `
-      <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+      <div class="bg-green-50 border border-green-200 rounded-lg p-4 pointer-events-auto shadow-lg">
         <div class="flex items-center mb-3">
           ${this.getSuccessIcon()}
           <h3 class="text-green-800 font-semibold">下载成功！</h3>
@@ -134,8 +155,17 @@ export default class extends Controller {
   }
 
   showError(message) {
-    const content = `<p class="text-red-600">${message}</p>`
-    this.showResult(content, true)
+    const content = `
+      <div class="bg-red-50 border border-red-200 rounded-lg p-4 pointer-events-auto shadow-lg">
+        <div class="flex items-center">
+          <svg class="h-6 w-6 text-red-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <p class="text-red-700 font-medium">${message}</p>
+        </div>
+      </div>
+    `
+    this.showResult(content)
   }
 
   getSuccessIcon() {
