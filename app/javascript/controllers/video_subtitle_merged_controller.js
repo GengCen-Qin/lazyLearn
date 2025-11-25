@@ -525,19 +525,40 @@ export default class extends Controller {
     });
   }
   processSubtitleText(text) {
-    // 按空格分割文本，每个部分都视为单词
-    return text
-      .split(" ")
-      .map((word) => {
-        const trimmedWord = word.trim();
-        // 如果是纯英文单词且长度大于1，添加点击事件
-        if (trimmedWord.length >= 2 && /^[a-zA-Z]+$/.test(trimmedWord)) {
-          return `<span class="word-lookup inline-block px-0.5 rounded hover:bg-blue-100 hover:text-blue-700 cursor-pointer transition-colors duration-150" data-word="${trimmedWord}">${this.escapeHtml(trimmedWord)}</span>`;
+    // 使用改进的词法分析来正确处理标点符号
+    return this.tokenizeText(text)
+      .map((token) => {
+        if (token.type === 'word' && token.value.length >= 2) {
+          return `<span class="word-lookup inline-block px-0.5 rounded hover:bg-blue-100 hover:text-blue-700 cursor-pointer transition-colors duration-150" data-word="${token.value}">${this.escapeHtml(token.value)}</span>`;
         }
-        // 其他情况（数字、标点、中文字符等）直接显示
-        return this.escapeHtml(word);
+        // 其他情况（标点、中文字符、数字等）直接显示
+        return this.escapeHtml(token.value);
       })
-      .join(" ");
+      .join('');
+  }
+
+  tokenizeText(text) {
+    const tokens = [];
+    const regex = /([a-zA-Z]+)|([\u4e00-\u9fff]+)|(\d+)|([^\w\s\u4e00-\u9fff])|(\s+)/g;
+    let match;
+
+    while ((match = regex.exec(text)) !== null) {
+      const [fullMatch, englishWord, chineseChars, numbers, punctuation, whitespace] = match;
+      
+      if (englishWord) {
+        tokens.push({ type: 'word', value: englishWord });
+      } else if (chineseChars) {
+        tokens.push({ type: 'chinese', value: chineseChars });
+      } else if (numbers) {
+        tokens.push({ type: 'number', value: numbers });
+      } else if (punctuation) {
+        tokens.push({ type: 'punctuation', value: punctuation });
+      } else if (whitespace) {
+        tokens.push({ type: 'whitespace', value: whitespace });
+      }
+    }
+    
+    return tokens;
   }
   addWordClickListeners() {
     // 移除旧的事件监听器
@@ -755,7 +776,6 @@ export default class extends Controller {
     }
     // 如果有字幕数据，渲染字幕列表
     if (initialSubtitles && initialSubtitles.length > 0) {
-      this.subtitlesValue = initialSubtitles;
       this.currentIndexValue = -1;
       this.renderSubtitleList();
       this.updateSubtitleCount();
