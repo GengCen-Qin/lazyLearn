@@ -18,6 +18,33 @@ class Downloader::Xhs
   #   result = parser.parse("https://www.xiaohongshu.com/explore/abc123")
   # @note 内部使用 Downloader::XhsUrlParser 进行实际解析工作
   def parse(url)
-    Downloader::XhsUrlParser.new.parse_url(url)
+    result = Downloader::XhsUrlParser.new.parse_url(link(url))
+    return { success: false } if result.nil?
+
+    file = Down.download(result["视频链接"])
+    {
+      success: true,
+      io: file,
+      filename: result["作品标题"],
+      ori_url: link(url),
+      description: result["作品描述"],
+      content_type: Util.determine_content_type(file)
+    }
+  end
+
+  private
+
+  # 从分享文本中提取xhslink.com链接
+  #
+  # @return [String, nil] 提取到的小红书链接，如果找不到则返回nil
+  def link(text)
+    urls = URI.extract(text, [ "http", "https" ])
+
+    xiaohongshu_urls = urls.select { |url| url.include?("xhslink.com") }
+
+    xiaohongshu_urls.first
+  rescue => e
+    Rails.logger.error "解析分享文本失败: #{e.message} #{text}"
+    nil
   end
 end

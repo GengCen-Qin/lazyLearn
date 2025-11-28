@@ -21,42 +21,27 @@ class WelcomeController < ApplicationController
       return
     end
 
-    # 首先尝试从API获取内容信息
-    api_result = XiaohongshuApiService.extract_content(share_text)
+    result = Downloader::Xhs.new.parse(share_text)
 
-    if api_result[:success]
-      # 使用API返回的下载地址和标题
-      result = XiaohongshuVideoDownloader.download_and_save(
-        api_result[:download_url],
-        api_result[:title],
-        api_result[:description]
+    if result[:success]
+      video = Video.create!(
+        title: result[:filename],
+        description: result[:description],
+        download_link: result[:ori_url]
       )
 
-      if result[:success]
-        if result[:video_exists] && result[:video_record]
-          VideoLinkCache.cache_video(share_text, result[:video_record])
+      video.video_file.attach(result.slice(:io, :filename, :content_type))
+      video.trigger_transcription_async
+      VideoLinkCache.cache_video(share_text, video)
 
-          render json: {
-            success: true,
-            redirect_to: "/videos/#{result[:video_id]}",
-            message: "视频已存在，正在跳转到视频详情页...",
-            video_exists: true
-          }
-        else
-          VideoLinkCache.cache_video(share_text, Video.find_by(id: result[:video_id])) if result[:video_id]
-
-          render json: {
-            success: true,
-            redirect_to: "/videos",
-            message: "视频下载成功，正在跳转到视频列表...",
-            video_exists: false
-          }
-        end
-      else
-        render json: { success: false, error: result[:error] }, status: result[:status] || :internal_server_error
-      end
+      render json: {
+        success: true,
+        redirect_to: "/videos",
+        message: "视频已存在，正在跳转到视频详情页...",
+        video_exists: true
+      }
     else
-      render json: { success: false, error: api_result[:error] }, status: :bad_request
+      render json: { success: false, error: "处理异常" }, status: :bad_request
     end
   end
 end

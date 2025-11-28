@@ -36,7 +36,7 @@ class Downloader::XhsUrlParser
     display_result(final_url, data)
     data
   rescue => e
-    # 调试模式下的错误输出已移除，生产环境静默处理
+    Rails.logger.error("XhsUrlParser Error: #{e.message}")
     nil
   end
 
