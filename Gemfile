@@ -72,3 +72,9 @@ group :test do
 end
 
 gem "down", "~> 5.4"
+
+gem "nokogiri", "~> 1.18"
+
+gem "typhoeus", "~> 1.5"
+
+gem "psych", "~> 5.2"

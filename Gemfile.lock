@@ -114,6 +114,14 @@ GEM
     erubi (1.13.1)
     et-orbi (1.4.0)
       tzinfo
+    ethon (0.15.0)
+      ffi (>= 1.15.0)
+    ffi (1.17.2-aarch64-linux-gnu)
+    ffi (1.17.2-aarch64-linux-musl)
+    ffi (1.17.2-arm-linux-gnu)
+    ffi (1.17.2-arm-linux-musl)
+    ffi (1.17.2-x86_64-linux-gnu)
+    ffi (1.17.2-x86_64-linux-musl)
     fugit (1.12.1)
       et-orbi (~> 1.4)
       raabro (~> 1.4)
@@ -360,6 +368,8 @@ GEM
     turbo-rails (2.0.20)
       actionpack (>= 7.1.0)
       railties (>= 7.1.0)
+    typhoeus (1.5.0)
+      ethon (>= 0.9.0, < 0.16.0)
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
     unicode-display_width (3.2.0)
@@ -403,7 +413,9 @@ DEPENDENCIES
   jbuilder
   kamal
   mission_control-jobs
+  nokogiri (~> 1.18)
   propshaft
+  psych (~> 5.2)
   puma (>= 5.0)
   rails (~> 8.0.4)
   rubocop-rails-omakase
@@ -416,6 +428,7 @@ DEPENDENCIES
   tailwindcss-rails
   thruster
   turbo-rails
+  typhoeus (~> 1.5)
   tzinfo-data
   web-console
 

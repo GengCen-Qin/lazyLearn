@@ -40,4 +40,5 @@
 
 /db/dict/ecdict.sql
 /db/development.sqlite3
-/db/test.sqlite3
+/db/test.sqlite3# Ignore bundled gems (Bundler deployment)
+/vendor/bundle/
