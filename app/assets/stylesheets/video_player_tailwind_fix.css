@@ -196,13 +196,38 @@ body.video-player-page > main {
   justify-content: center;
   background-color: #000;
   min-height: 300px;
+  max-height: 70vh; /* 限制最大高度，防止竖屏视频过度拉伸 */
   flex: 1;
   min-width: 0; /* 允许容器收缩 */
+  aspect-ratio: auto; /* 允许自然宽高比 */
 }
 
-/* 针对视频播放器容器的优化 */
-#video-player-container {
-  min-height: 300px; /* 确保最小高度，使视频区域足够大 */
+/* 移动端竖屏视频优化 */
+@media (max-width: 768px) and (orientation: portrait) {
+  #video-player-container {
+    max-height: 50vh; /* 移动端进一步限制高度 */
+    min-height: 200px;
+  }
+
+  #videoPlayer {
+    max-height: 50vh;
+  }
+
+  .plyr__video-wrapper {
+    max-height: 50vh;
+  }
+}
+
+/* 超小屏幕优化 */
+@media (max-width: 480px) {
+  #video-player-container {
+    max-height: 40vh;
+    min-height: 150px;
+  }
+
+  #videoPlayer {
+    max-height: 40vh;
+  }
 }
 
 /* 为视频控件区域预留空间 */
@@ -217,7 +242,7 @@ body.video-player-page > main {
   align-items: center;
   justify-content: center;
   max-width: 100%;
-  max-height: 100%;
+  max-height: 70vh; /* 限制最大高度，防止竖屏视频过度拉伸 */
   background-color: #000; /* 确保没有视频时显示黑色背景 */
   object-fit: contain; /* 保持视频比例并适应容器 */
 }
@@ -253,4 +278,75 @@ video#videoPlayer:not([src]):not([srcset]) {
   object-fit: contain !important; /* 强制视频适应容器同时保持宽高比 */
   width: 100% !important;
   height: 100% !important;
+}
+
+/* 主播放器布局的容器统一高度 */
+.video-subtitle-app-container .grid {
+  /* 确保视频播放器和字幕列表高度一致 */
+  align-items: stretch;
+}
+
+/* 视频播放器和字幕列表容器高度同步 */
+.video-subtitle-app-container .lg\\:col-span-8,
+.video-subtitle-app-container .lg\\:col-span-4 {
+  /* 两个容器都使用相同的高度约束 */
+  min-height: 300px;
+  max-height: 70vh;
+  display: flex;
+  flex-direction: column;
+}
+
+@media (max-width: 768px) and (orientation: portrait) {
+  .video-subtitle-app-container .lg\\:col-span-8,
+  .video-subtitle-app-container .lg\\:col-span-4 {
+    min-height: 200px;
+    max-height: 50vh;
+  }
+}
+
+@media (max-width: 480px) {
+  .video-subtitle-app-container .lg\\:col-span-8,
+  .video-subtitle-app-container .lg\\:col-span-4 {
+    min-height: 150px;
+    max-height: 40vh;
+  }
+}
+
+/* 字幕列表容器内部高度控制 */
+#subtitle-container {
+  /* 确保与视频播放器相同的高度约束 */
+  min-height: 300px;
+  max-height: 70vh;
+}
+
+/* 字幕列表内容区域高度控制 */
+#subtitleList {
+  /* 计算高度：总高度减去头部高度 */
+  height: calc(100% - 60px); /* 减去头部区域高度 */
+  min-height: 240px; /* 300px - 60px */
+  max-height: calc(70vh - 60px);
+}
+
+@media (max-width: 768px) and (orientation: portrait) {
+  #subtitle-container {
+    min-height: 200px;
+    max-height: 50vh;
+  }
+
+  #subtitleList {
+    min-height: 140px; /* 200px - 60px */
+    max-height: calc(50vh - 60px);
+  }
+}
+
+@media (max-width: 480px) {
+  #subtitle-container {
+    min-height: 150px;
+    max-height: 40vh;
+  }
+
+  #subtitleList {
+    min-height: 90px; /* 150px - 60px */
+    max-height: calc(40vh - 60px);
+  }
 }
