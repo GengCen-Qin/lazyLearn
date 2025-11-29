@@ -29,22 +29,13 @@ export default class extends Controller {
     this.currentPopupWord = null;
     this.loadInitialSubtitles();
   }
-    // ========================================
+  // ========================================
   // Video Player Methods
   // ========================================
   initializePlayer() {
     if (typeof Plyr !== "undefined") {
       this.player = new Plyr(this.videoTarget, {
-        controls: [
-          "play-large",
-          "play",
-          "progress",
-          "current-time",
-          "duration",
-          "mute",
-          "volume",
-          "fullscreen",
-        ],
+        controls: ["play", "progress", "duration", "fullscreen"],
         tooltips: {
           controls: true,
           seek: true,
@@ -526,49 +517,57 @@ export default class extends Controller {
 
   showPopupContainer() {
     if (this.popupContainer) {
-      this.popupContainer.classList.remove('hidden');
+      this.popupContainer.classList.remove("hidden");
     }
   }
 
   hidePopupContainer() {
     if (this.popupContainer) {
-      this.popupContainer.classList.add('hidden');
+      this.popupContainer.classList.add("hidden");
     }
   }
   processSubtitleText(text) {
     // 使用改进的词法分析来正确处理标点符号
     return this.tokenizeText(text)
       .map((token) => {
-        if (token.type === 'word' && token.value.length >= 2) {
+        if (token.type === "word" && token.value.length >= 2) {
           return `<span class="word-lookup inline-block px-0.5 rounded hover:bg-blue-100 hover:text-blue-700 cursor-pointer transition-colors duration-150" data-word="${token.value}">${this.escapeHtml(token.value)}</span>`;
         }
         // 其他情况（标点、中文字符、数字等）直接显示
         return this.escapeHtml(token.value);
       })
-      .join('');
+      .join("");
   }
 
   tokenizeText(text) {
     const tokens = [];
-    const regex = /([a-zA-Z]+)|([\u4e00-\u9fff]+)|(\d+)|([^\w\s\u4e00-\u9fff])|(\s+)/g;
+    const regex =
+      /([a-zA-Z]+)|([\u4e00-\u9fff]+)|(\d+)|([^\w\s\u4e00-\u9fff])|(\s+)/g;
     let match;
 
     while ((match = regex.exec(text)) !== null) {
-      const [fullMatch, englishWord, chineseChars, numbers, punctuation, whitespace] = match;
-      
+      const [
+        fullMatch,
+        englishWord,
+        chineseChars,
+        numbers,
+        punctuation,
+        whitespace,
+      ] = match;
+
       if (englishWord) {
-        tokens.push({ type: 'word', value: englishWord });
+        tokens.push({ type: "word", value: englishWord });
       } else if (chineseChars) {
-        tokens.push({ type: 'chinese', value: chineseChars });
+        tokens.push({ type: "chinese", value: chineseChars });
       } else if (numbers) {
-        tokens.push({ type: 'number', value: numbers });
+        tokens.push({ type: "number", value: numbers });
       } else if (punctuation) {
-        tokens.push({ type: 'punctuation', value: punctuation });
+        tokens.push({ type: "punctuation", value: punctuation });
       } else if (whitespace) {
-        tokens.push({ type: 'whitespace', value: whitespace });
+        tokens.push({ type: "whitespace", value: whitespace });
       }
     }
-    
+
     return tokens;
   }
   addWordClickListeners() {
@@ -641,7 +640,7 @@ export default class extends Controller {
 
     // 克隆模板
     const template = this.popupTemplate.content.cloneNode(true);
-    const popupLayer = template.querySelector('.word-popup-layer');
+    const popupLayer = template.querySelector(".word-popup-layer");
 
     // 设置唯一ID和层级属性
     const popupId = `word-popup-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -656,8 +655,8 @@ export default class extends Controller {
     popupLayer.style.zIndex = this.baseZIndex + this.activePopups.length;
 
     // 显示容器
-    if (this.popupContainer.classList.contains('hidden')) {
-      this.popupContainer.classList.remove('hidden');
+    if (this.popupContainer.classList.contains("hidden")) {
+      this.popupContainer.classList.remove("hidden");
     }
 
     // 添加到容器
@@ -671,15 +670,15 @@ export default class extends Controller {
       id: popupId,
       word: word,
       element: popupLayer,
-      sourceLayer: sourceLayer
+      sourceLayer: sourceLayer,
     };
     this.activePopups.push(popupData);
 
     // 初始隐藏，等待显示指令
     if (!showImmediately) {
-      popupLayer.style.opacity = '0';
-      popupLayer.style.pointerEvents = 'none';
-      popupLayer.style.transition = 'opacity 0.2s ease';
+      popupLayer.style.opacity = "0";
+      popupLayer.style.pointerEvents = "none";
+      popupLayer.style.transition = "opacity 0.2s ease";
     }
 
     return popupId;
@@ -690,22 +689,21 @@ export default class extends Controller {
     if (!popupLayer) return;
 
     // 关闭按钮事件
-    const closeBtn = popupLayer.querySelector('.word-popup-close');
+    const closeBtn = popupLayer.querySelector(".word-popup-close");
     if (closeBtn) {
-      closeBtn.addEventListener('click', () => {
+      closeBtn.addEventListener("click", () => {
         this.closePopup(popupId);
       });
     }
 
-  
     // 阻止事件冒泡
-    popupLayer.addEventListener('click', (e) => {
+    popupLayer.addEventListener("click", (e) => {
       e.stopPropagation();
     });
   }
 
   closePopup(popupId) {
-    const popupIndex = this.activePopups.findIndex(p => p.id === popupId);
+    const popupIndex = this.activePopups.findIndex((p) => p.id === popupId);
     if (popupIndex === -1) return;
 
     const popupData = this.activePopups[popupIndex];
@@ -722,7 +720,6 @@ export default class extends Controller {
     if (this.activePopups.length === 0) {
       this.hidePopupContainer();
     }
-
   }
 
   closeTopPopup() {
@@ -734,17 +731,19 @@ export default class extends Controller {
 
   updateBackButtonStates() {
     this.activePopups.forEach((popupData, index) => {
-      const backBtn = popupData.element.querySelector('.word-popup-back');
+      const backBtn = popupData.element.querySelector(".word-popup-back");
       if (backBtn) {
-        backBtn.style.display = index > 0 ? 'block' : 'none';
+        backBtn.style.display = index > 0 ? "block" : "none";
         // 更新返回按钮的标题
-        backBtn.title = index > 0 ? '返回上一层' : '关闭';
+        backBtn.title = index > 0 ? "返回上一层" : "关闭";
       }
     });
   }
 
   showPopupLoading(popupId) {
-    const contentElement = document.querySelector(`#${popupId} .word-popup-content`);
+    const contentElement = document.querySelector(
+      `#${popupId} .word-popup-content`,
+    );
     if (contentElement) {
       contentElement.innerHTML = `
         <div class="text-center text-gray-500 py-8">
@@ -756,7 +755,9 @@ export default class extends Controller {
   }
 
   showPopupError(popupId, message) {
-    const contentElement = document.querySelector(`#${popupId} .word-popup-content`);
+    const contentElement = document.querySelector(
+      `#${popupId} .word-popup-content`,
+    );
     if (contentElement) {
       contentElement.innerHTML = `
         <div class="text-center text-gray-500 py-8">
@@ -775,27 +776,29 @@ export default class extends Controller {
 
     // 短暂延迟确保DOM已更新
     requestAnimationFrame(() => {
-      popupLayer.style.opacity = '1';
-      popupLayer.style.pointerEvents = 'auto';
+      popupLayer.style.opacity = "1";
+      popupLayer.style.pointerEvents = "auto";
     });
   }
 
   showPopupDefinition(popupId, wordData, sourceWord) {
-    const contentElement = document.querySelector(`#${popupId} .word-popup-content`);
+    const contentElement = document.querySelector(
+      `#${popupId} .word-popup-content`,
+    );
     if (!contentElement) return;
 
     // 处理英文释义中的单词，使其可点击
     const processedDefinition = wordData.definition
       ? this.processDefinitionText(wordData.definition)
-      : '';
+      : "";
 
     const processedTranslation = wordData.translation
       ? this.processDefinitionText(wordData.translation, true) // 中文释义不处理英文单词
-      : '';
+      : "";
 
     const processedDetail = wordData.detail
       ? this.processDefinitionText(wordData.detail, true) // 详细信息不处理英文单词
-      : '';
+      : "";
 
     const html = `
       <div class="space-y-4">
@@ -910,44 +913,46 @@ export default class extends Controller {
   }
 
   processDefinitionText(text, skipEnglish = false) {
-    if (!text) return '';
+    if (!text) return "";
 
     // 如果跳过英文单词处理，只做基本的HTML转义
     if (skipEnglish) {
       return this.escapeHtml(text)
-        .split(';')
-        .map(def => `<div class="mb-1">• ${def.trim()}</div>`)
-        .join('');
+        .split(";")
+        .map((def) => `<div class="mb-1">• ${def.trim()}</div>`)
+        .join("");
     }
 
     // 处理文本中的单词，使其可点击
     return this.tokenizeText(text)
       .map((token) => {
-        if (token.type === 'word' && token.value.length >= 2) {
+        if (token.type === "word" && token.value.length >= 2) {
           return `<span class="word-lookup-popup inline-block px-0.5 rounded hover:bg-blue-100 hover:text-blue-700 cursor-pointer transition-colors duration-150" data-word="${token.value}">${this.escapeHtml(token.value)}</span>`;
         }
         // 其他情况（标点、中文字符、数字等）直接显示
         return this.escapeHtml(token.value);
       })
-      .join('')
-      .split(';')
-      .map(def => `<div class="mb-1">• ${def.trim()}</div>`)
-      .join('');
+      .join("")
+      .split(";")
+      .map((def) => `<div class="mb-1">• ${def.trim()}</div>`)
+      .join("");
   }
 
   addPopupWordClickListeners(popupId) {
     const popupElement = document.getElementById(popupId);
     if (!popupElement) return;
 
-    const wordElements = popupElement.querySelectorAll('.word-lookup-popup');
+    const wordElements = popupElement.querySelectorAll(".word-lookup-popup");
     wordElements.forEach((element) => {
       const word = element.dataset.word;
-      element.addEventListener('click', (e) => {
+      element.addEventListener("click", (e) => {
         e.stopPropagation();
 
         // 查找当前弹窗的层级信息
-        const currentPopup = this.activePopups.find(p => p.id === popupId);
-        const sourceLayer = currentPopup ? (parseInt(currentPopup.element.dataset.layer) || 0) : 0;
+        const currentPopup = this.activePopups.find((p) => p.id === popupId);
+        const sourceLayer = currentPopup
+          ? parseInt(currentPopup.element.dataset.layer) || 0
+          : 0;
 
         // 查找新单词，源层级为当前弹窗的层级
         this.lookupWord(word, element, parseInt(sourceLayer));
