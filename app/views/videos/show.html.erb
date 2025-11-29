@@ -186,27 +186,42 @@
 }
 </style>
 
-<div class="video-subtitle-app-container h-screen flex flex-col"
-     data-controller="video-subtitle-merged"
-     data-video-subtitle-merged-video-path-value="<%= @video.video_file.attached? ? url_for(@video.video_file) : '' %>"
-     data-video-subtitle-merged-subtitles-value="<%= (@video.formatted_transcription || []).to_json %>">
-
+<div
+  class="video-subtitle-app-container h-screen flex flex-col"
+  data-controller="video-subtitle-merged"
+  data-video-subtitle-merged-video-path-value="<%= @video.video_file.attached? ? url_for(@video.video_file) : '' %>"
+  data-video-subtitle-merged-subtitles-value="<%= (@video.formatted_transcription || []).to_json %>"
+>
   <!-- 视频标题和状态区域 -->
   <div class="bg-white p-3 sm:p-4 border-b border-gray-200">
     <div class="max-w-7xl mx-auto">
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+      <div
+        class="
+          flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3
+          sm:gap-4
+        "
+      >
         <div class="flex items-center">
-          <h1 class="text-gray-800 text-lg sm:text-xl md:text-2xl font-semibold truncate">
+          <h1
+            class="
+              text-gray-800 text-lg sm:text-xl md:text-2xl font-semibold
+              truncate
+            "
+          >
             <%= @video.title %>
           </h1>
 
-          <span class="ml-3 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-            <% case @video.transcription_status
-               when 'completed' %>bg-green-100 text-green-800
-               <% when 'processing' %>bg-yellow-100 text-yellow-800
-               <% when 'failed' %>bg-red-100 text-red-800
-               <% else %>bg-gray-100 text-gray-800
-               <% end %>">
+          <span
+            class="
+              ml-3 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+              <% case @video.transcription_status
+              when 'completed' %>
+              <% when 'processing' %> bg-yellow-100 text-yellow-800
+              <% when 'failed' %> bg-red-100 text-red-800
+              <% else %> bg-gray-100 text-gray-800
+              <% end %>
+            "
+          >
             <%= @video.transcription_status_text %>
           </span>
         </div>
@@ -221,31 +236,69 @@
 
   <!-- 主播放器布局 -->
   <div class="flex-1 overflow-hidden flex flex-col">
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-4 md:gap-5 flex-1 overflow-hidden p-3 sm:p-4">
+    <div
+      class="
+        grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-4 md:gap-5 flex-1
+        overflow-hidden p-3 sm:p-4
+      "
+    >
       <!-- 视频播放器 - 占用更多空间 -->
-      <div class="lg:col-span-8 bg-black rounded-lg sm:rounded-xl overflow-hidden flex flex-col" id="video-player-container">
+      <div
+        class="
+          lg:col-span-8 bg-black rounded-lg sm:rounded-xl overflow-hidden
+          flex flex-col
+        "
+        id="video-player-container"
+      >
         <div>
-          <video id="videoPlayer"
-                 data-video-subtitle-merged-target="video"
-                 controls
-                 class="w-full h-full object-contain"
-                 <% if @video.video_file.attached? %>
-                 src="<%= url_for(@video.video_file) %>"
-                 <% end %>>
+          <video
+            id="videoPlayer"
+            data-video-subtitle-merged-target="video"
+            controls
+            class="w-full h-full object-contain"
+            <% if @video.video_file.attached? %>
+              src="<%= url_for(@video.video_file) %>"
+            <% end %>
+          >
             您的浏览器不支持 HTML5 视频。
           </video>
         </div>
       </div>
 
       <!-- 字幕列表 - 占用较少空间 -->
-      <div class="lg:col-span-4 bg-white rounded-lg sm:rounded-xl overflow-hidden flex flex-col border border-gray-200" id="subtitle-container">
-        <div class="p-2 sm:p-3 bg-gray-50 border-b border-gray-200 flex justify-between items-center">
+      <div
+        class="
+          lg:col-span-4 bg-white rounded-lg sm:rounded-xl overflow-hidden
+          flex flex-col border border-gray-200
+        "
+        id="subtitle-container"
+      >
+        <div
+          class="
+            p-2 sm:p-3 bg-gray-50 border-b border-gray-200 flex
+            justify-between items-center
+          "
+        >
           <h3 class="text-gray-800 text-sm sm:text-base font-medium">字幕列表</h3>
-          <span id="subtitleCount" data-video-subtitle-merged-target="subtitleCount" class="text-gray-600 text-xs sm:text-sm bg-gray-200 px-2 py-1 rounded-full">
-            <%= @video.has_transcription? ? @video.transcription_segments.size : 0 %> 条字幕
+
+          <span
+            id="subtitleCount"
+            data-video-subtitle-merged-target="subtitleCount"
+            class="
+              text-gray-600 text-xs sm:text-sm bg-gray-200 px-2 py-1
+              rounded-full
+            "
+          >
+            <%= @video.has_transcription? ? @video.transcription_segments.size : 0 %>
+            条字幕
           </span>
         </div>
-        <div class="flex-1 overflow-y-auto p-2 sm:p-3 bg-white" data-video-subtitle-merged-target="subtitleList" id="subtitleList">
+
+        <div
+          class="flex-1 overflow-y-auto p-2 sm:p-3 bg-white"
+          data-video-subtitle-merged-target="subtitleList"
+          id="subtitleList"
+        >
           <div class="no-subtitles text-center text-gray-500 p-6 text-sm">
             <% if @video.has_transcription? %>
               正在加载字幕...
@@ -259,14 +312,34 @@
 
     <!-- 状态信息 -->
     <div class="border-t border-gray-200 bg-white p-2 sm:p-3">
-      <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-center sm:justify-start gap-3 sm:gap-6 text-xs sm:text-sm">
+      <div
+        class="
+          max-w-7xl mx-auto flex flex-col sm:flex-row justify-center
+          sm:justify-start gap-3 sm:gap-6 text-xs sm:text-sm
+        "
+      >
         <div class="flex items-center gap-2">
           <span class="text-gray-600 font-medium">当前时间:</span>
-          <span id="currentTime" data-video-subtitle-merged-target="currentTime" class="text-gray-800 font-mono">00:00</span>
+
+          <span
+            id="currentTime"
+            data-video-subtitle-merged-target="currentTime"
+            class="text-gray-800 font-mono"
+          >
+            00:00
+          </span>
         </div>
+
         <div class="flex items-center gap-2">
           <span class="text-gray-600 font-medium">当前字幕:</span>
-          <span id="currentSubtitleIndex" data-video-subtitle-merged-target="currentSubtitleIndex" class="text-gray-800 font-mono">- / -</span>
+
+          <span
+            id="currentSubtitleIndex"
+            data-video-subtitle-merged-target="currentSubtitleIndex"
+            class="text-gray-800 font-mono"
+          >
+            - / -
+          </span>
         </div>
       </div>
     </div>
@@ -274,20 +347,54 @@
 </div>
 
 <!-- 多层单词查询弹窗容器 -->
-<div id="wordPopupContainer" class="hidden fixed z-40" style="top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.5); backdrop-filter: blur(2px);">
+<div
+  id="wordPopupContainer"
+  class="hidden fixed z-40"
+  style="top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.5); backdrop-filter: blur(2px);"
+>
   <!-- 动态创建的多层弹窗将插入这里 -->
 </div>
 
 <!-- 单词查询弹窗模板 (用于创建多层弹窗) -->
 <template id="wordPopupTemplate">
-  <div class="word-popup-layer absolute flex items-center justify-center" style="z-index: 50;">
-    <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 max-h-[80vh] overflow-hidden border border-gray-200">
+  <div
+    class="word-popup-layer absolute flex items-center justify-center"
+    style="z-index: 50;"
+  >
+    <div
+      class="
+        bg-white rounded-lg shadow-xl max-w-md w-full mx-4 max-h-[80vh]
+        overflow-hidden border border-gray-200
+      "
+    >
       <!-- 弹窗头部 -->
-      <div class="flex justify-between items-center p-4 border-b border-gray-200 bg-gray-50">
+      <div
+        class="
+          flex justify-between items-center p-4 border-b border-gray-200
+          bg-gray-50
+        "
+      >
         <h3 class="text-lg font-semibold text-gray-900">单词释义</h3>
-        <button class="word-popup-close text-gray-400 hover:text-gray-600 transition-colors" title="关闭">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+
+        <button
+          class="
+            word-popup-close text-gray-400 hover:text-gray-600
+            transition-colors
+          "
+          title="关闭"
+        >
+          <svg
+            class="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M6 18L18 6M6 6l12 12"
+            ></path>
           </svg>
         </button>
       </div>
@@ -296,7 +403,13 @@
       <div class="word-popup-content p-4 max-h-[60vh] overflow-y-auto">
         <!-- 单词内容将在这里动态插入 -->
         <div class="text-center text-gray-500 py-8">
-          <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <div
+            class="
+              inline-block animate-spin rounded-full h-8 w-8 border-b-2
+              border-blue-600
+            "
+          ></div>
+
           <p class="mt-2 text-sm">查询中...</p>
         </div>
       </div>
