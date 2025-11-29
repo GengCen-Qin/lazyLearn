@@ -1,29 +1,21 @@
 class TranscriptionService
+  # @param [Video] video - The video to be transcribe.
+  # @param [String] language - The language of the video.
   def initialize(video, language = "en")
     @video = video
     @language = language
   end
 
   def process
-    response = HTTParty.post(
-      "http://localhost:8000/transcribe",
-      body: {
-        file_path: @video.local_path,
-        language: @language
-      }.to_json,
-      headers: { "Content-Type" => "application/json" }
+    response = WhisperTranscriptionService.new.trans_video(@video.local_path)
+    @video.update!(
+      transcription_segments: response["segments"],
+      transcription_language: response["language"],
+      transcription_time: Time.now,
+      transcription_status: :completed
     )
-
-    if response.success?
-      data = response.parsed_response
-      @video.update!(
-        transcription_segments: data["segments"],
-        transcription_language: data["language"],
-        transcription_time: data["transcription_time"],
-        transcription_status: :completed
-      )
-    else
-      @video.failed!
-    end
+  rescue => e
+    Rails.logger.error("Transcription failed: #{e.message}")
+    @video.failed!
   end
 end

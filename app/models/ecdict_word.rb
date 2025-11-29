@@ -41,7 +41,7 @@ class EcdictWord < ActiveRecord::Base
   # Class Methods
   class << self
     def lookup(word)
-      clean_word = word.to_s.strip.gsub(/[^a-zA-Z]/, '').downcase
+      clean_word = word.to_s.strip.gsub(/[^a-zA-Z]/, "").downcase
       return nil if clean_word.blank?
 
       # 尝试精确匹配
@@ -86,18 +86,18 @@ class EcdictWord < ActiveRecord::Base
   # 格式化定义 - 分割并清理
   def formatted_definition
     return [] if definition.blank?
-    definition.split(';').map(&:strip).reject(&:blank?)
+    definition.split(";").map(&:strip).reject(&:blank?)
   end
 
   # 格式化翻译 - 分割并清理
   def formatted_translation
     return [] if translation.blank?
-    translation.split(';').map(&:strip).reject(&:blank?)
+    translation.split(";").map(&:strip).reject(&:blank?)
   end
 
   # 格式化标签 - 分割并清理
   def formatted_tags
     return [] if tag.blank?
-    tag.split(',').map(&:strip).reject(&:blank?)
+    tag.split(",").map(&:strip).reject(&:blank?)
   end
 end

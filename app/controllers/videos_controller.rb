@@ -1,5 +1,5 @@
 class VideosController < ApplicationController
-  before_action :set_video, only: [:show, :destroy]
+  before_action :set_video, only: [ :show, :destroy ]
 
   # GET /videos
   def index
@@ -14,9 +14,9 @@ class VideosController < ApplicationController
   # DELETE /videos/:id
   def destroy
     if @video.destroy
-      redirect_to videos_url, notice: '视频删除成功。'
+      redirect_to videos_url, notice: "视频删除成功。"
     else
-      redirect_to videos_url, alert: '视频删除失败。'
+      redirect_to videos_url, alert: "视频删除失败。"
     end
   end
 

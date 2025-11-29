@@ -5,7 +5,7 @@ Rails.application.routes.draw do
 
   post "download_xiaohongshu" => "welcome#download_xiaohongshu"
 
-  resources :videos, only: [:index, :show, :destroy]
+  resources :videos, only: [ :index, :show, :destroy ]
   get "video_player", to: "video_player#index"
   post "word_lookup", to: "word_lookup#create"
 
