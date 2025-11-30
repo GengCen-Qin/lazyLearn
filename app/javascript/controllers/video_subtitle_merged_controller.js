@@ -1,50 +1,57 @@
 import { Controller } from "@hotwired/stimulus";
 import Plyr from "plyr";
+
+// 视频字幕播放器控制器
 export default class extends Controller {
   static targets = [
-    // Video targets
     "video",
     "videoInput",
     "currentTime",
     "currentSubtitleIndex",
-    // Subtitle targets
     "jsonInput",
     "subtitleList",
     "subtitleCount",
-    // Message targets
     "message",
   ];
+
   static values = {
     currentVideoUrl: String,
     subtitles: Array,
     currentIndex: { type: Number, default: -1 },
   };
+
   connect() {
     this.initializePlayer();
     this.setupEventListeners();
     this.setupKeyboardShortcuts();
     this.setupWordLookup();
+
     this.isAutoScrolling = false;
     this.lastScrollTime = 0;
     this.currentPopupWord = null;
+
     this.loadInitialSubtitles();
   }
-  // ========================================
-  // Video Player Methods
-  // ========================================
+
+  /**
+   * 初始化视频播放器
+   * 使用Plyr库提供更好的用户体验，否则使用原生视频元素
+   */
   initializePlayer() {
     if (typeof Plyr !== "undefined") {
+      // 使用Plyr播放器，提供更好的控制界面和体验
       this.player = new Plyr(this.videoTarget, {
-        controls: ["play", "progress", "duration", "fullscreen"],
+        controls: ["play", "progress", "duration", "fullscreen"], // 播放控制按钮
         tooltips: {
-          controls: true,
-          seek: true,
+          controls: true, // 显示控制按钮提示
+          seek: true, // 显示拖动进度条提示
         },
         captions: {
-          active: false,
-          update: false,
+          active: false, // 默认不启用字幕
+          update: false, // 不自动更新字幕
         },
         i18n: {
+          // 国际化文本 - 中文界面
           play: "播放",
           pause: "暂停",
           seek: "拖动",
@@ -55,26 +62,33 @@ export default class extends Controller {
         },
       });
     } else {
+      // 回退到原生视频元素
       this.player = this.videoTarget;
     }
   }
+  /** 设置视频播放器事件监听器 */
   setupEventListeners() {
     if (this.player) {
       const videoElement = this.player.media || this.player;
+
       videoElement.addEventListener("timeupdate", () => {
         this.handleTimeUpdate();
       });
+
       videoElement.addEventListener("loadedmetadata", () => {
         this.updateStatusBar();
       });
+
       videoElement.addEventListener("error", (e) => {
         this.handleVideoError(e);
       });
     }
   }
+  /** 设置键盘快捷键 */
   setupKeyboardShortcuts() {
     document.addEventListener("keydown", (e) => {
       if (e.target.tagName === "INPUT") return;
+
       switch (e.code) {
         case "Space":
           e.preventDefault();
@@ -94,41 +108,56 @@ export default class extends Controller {
       }
     });
   }
+  /**
+   * 异步加载用户选择的视频文件
+   * 支持多种视频格式，自动检测文件类型
+   * 创建临时URL并设置视频源
+   */
   async loadVideo(event) {
     const file = event.target.files[0];
     if (!file) return;
+
     try {
-      // Clean up previous video URL
+      // 清理之前的视频URL以释放内存
       if (this.currentVideoUrlValue) {
         URL.revokeObjectURL(this.currentVideoUrlValue);
       }
+
+      // 创建新的视频对象URL
       this.currentVideoUrlValue = URL.createObjectURL(file);
-      // Detect file type
+
+      // 检测文件类型
       let detectedType = file.type || this.detectVideoType(file.name);
-      // Prepare sources
+
+      // 准备视频源配置
       const sources = [
         {
           src: this.currentVideoUrlValue,
           type: detectedType,
         },
       ];
-      // Add fallback for MOV files
+
+      // 为MOV文件添加MP4回退支持（常见兼容性问题）
       if (file.name.toLowerCase().endsWith(".mov")) {
         sources.push({
           src: this.currentVideoUrlValue,
           type: "video/mp4",
         });
       }
-      // Set video source
+
+      // 设置视频源（兼容Plyr和原生video）
       if (this.player.source) {
+        // Plyr播放器
         this.player.source = {
           type: "video",
           sources: sources,
         };
       } else {
-        // Native video element
+        // 原生视频元素
         this.videoTarget.src = this.currentVideoUrlValue;
       }
+
+      // 获取视频时长并显示成功消息
       const duration = this.player.duration || 0;
       this.showSuccess(
         `视频加载成功: ${file.name} (${this.formatDuration(duration)})`,
@@ -137,31 +166,45 @@ export default class extends Controller {
       this.showError(`视频文件加载失败: ${error.message}`);
     }
   }
+  /**
+   * 根据文件扩展名检测视频MIME类型
+   * 支持常见视频格式，默认返回mp4格式
+   */
   detectVideoType(filename) {
     const extension = filename.toLowerCase().split(".").pop();
     const mimeTypes = {
-      mp4: "video/mp4",
-      webm: "video/webm",
-      ogg: "video/ogg",
-      ogv: "video/ogg",
-      avi: "video/x-msvideo",
-      mov: "video/quicktime",
-      mkv: "video/x-matroska",
-      m4v: "video/mp4",
-      "3gp": "video/3gpp",
-      flv: "video/x-flv",
+      mp4: "video/mp4", // MP4格式
+      webm: "video/webm", // WebM格式
+      ogg: "video/ogg", // OGG视频格式
+      ogv: "video/ogg", // OGG视频格式
+      avi: "video/x-msvideo", // AVI格式
+      mov: "video/quicktime", // QuickTime MOV格式
+      mkv: "video/x-matroska", // MKV格式
+      m4v: "video/mp4", // M4V格式（iPhone录屏）
+      "3gp": "video/3gpp", // 3GP格式（移动设备）
+      flv: "video/x-flv", // Flash视频格式
     };
-    return mimeTypes[extension] || "video/mp4";
+    return mimeTypes[extension] || "video/mp4"; // 默认返回MP4
   }
+
+  /**
+   * 处理视频播放错误
+   * 显示用户友好的错误信息
+   */
   handleVideoError(event) {
     this.showError("视频文件播放失败，请检查文件格式是否支持");
   }
+  /**
+   * 切换视频播放/暂停状态
+   * 兼容Plyr播放器和原生video元素
+   */
   togglePlay() {
     if (this.player) {
       if (typeof this.player.togglePlay === "function") {
+        // 使用Plyr的切换方法
         this.player.togglePlay();
       } else {
-        // Native video element
+        // 原生视频元素的手动控制
         if (this.player.paused) {
           this.player.play();
         } else {
@@ -170,20 +213,32 @@ export default class extends Controller {
       }
     }
   }
+
+  /**
+   * 处理左箭头键按下事件
+   * 如果有字幕则跳转到上一条，否则后退5秒
+   */
   handleLeftKey() {
     if (this.subtitlesValue.length > 0) {
+      // 有字幕时跳转到上一条
       this.jumpToPrevious();
     } else {
-      // Seek back 5 seconds if no subtitles
+      // 无字幕时后退5秒
       const currentTime = this.getCurrentTime();
       this.seekTo(Math.max(0, currentTime - 5));
     }
   }
+
+  /**
+   * 处理右箭头键按下事件
+   * 如果有字幕则跳转到下一条，否则前进5秒
+   */
   handleRightKey() {
     if (this.subtitlesValue.length > 0) {
+      // 有字幕时跳转到下一条
       this.jumpToNext();
     } else {
-      // Seek forward 5 seconds if no subtitles
+      // 无字幕时前进5秒
       const currentTime = this.getCurrentTime();
       const duration = this.getDuration();
       this.seekTo(Math.min(duration, currentTime + 5));
@@ -215,32 +270,47 @@ export default class extends Controller {
     return 0;
   }
   // ========================================
-  // Subtitle Methods
+  // 字幕相关方法
   // ========================================
+
+  /**
+   * 异步加载JSON字幕文件
+   * 支持两种格式：直接数组和包含segments的对象
+   * 验证字幕数据完整性并按时间排序
+   */
   async loadSubtitles(event) {
     const file = event.target.files[0];
     if (!file) return;
+
     try {
+      // 读取文件内容并解析JSON
       const text = await file.text();
       const data = JSON.parse(text);
-      // Validate and parse subtitle data
+
+      // 验证并解析字幕数据
       let subtitles = [];
       if (Array.isArray(data)) {
+        // 格式1：直接的字幕数组
         subtitles = data;
       } else if (data.segments && Array.isArray(data.segments)) {
+        // 格式2：包含segments字段的对象
         subtitles = data.segments;
       } else {
         throw new Error("字幕文件格式不正确");
       }
-      // Validate subtitle structure
+
+      // 验证每条字幕的结构完整性
       for (let i = 0; i < subtitles.length; i++) {
         if (typeof subtitles[i].start !== "number" || !subtitles[i].text) {
           throw new Error(`字幕数据格式错误，第 ${i + 1} 条字幕缺少必要字段`);
         }
       }
-      // Sort subtitles by start time
+
+      // 按开始时间排序字幕
       this.subtitlesValue = subtitles.sort((a, b) => a.start - b.start);
-      this.currentIndexValue = -1;
+      this.currentIndexValue = -1; // 重置当前索引
+
+      // 更新UI显示
       this.renderSubtitleList();
       this.updateSubtitleCount();
       this.showSuccess(
@@ -250,71 +320,110 @@ export default class extends Controller {
       this.showError(`字幕文件格式错误: ${error.message}`);
     }
   }
+  /**
+   * 渲染字幕列表到UI
+   * 为每条字幕创建可点击的行，支持时间跳转和单词查询
+   * 将字幕文本中的英文单词设为可点击
+   */
   renderSubtitleList() {
     if (!this.hasSubtitleListTarget) return;
     const container = this.subtitleListTarget;
+
+    // 无字幕时显示提示信息
     if (this.subtitlesValue.length === 0) {
       container.innerHTML =
         '<div class="no-subtitles text-center text-gray-500 p-6 text-sm">请上传字幕文件</div>';
       return;
     }
+
+    // 清空容器
     container.innerHTML = "";
+
+    // 为每条字幕创建UI元素
     this.subtitlesValue.forEach((subtitle, index) => {
       const item = document.createElement("div");
       item.className =
         "subtitle-item p-2 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors duration-150";
       item.dataset.index = index;
       item.dataset.start = subtitle.start;
+
       const time = this.formatTime(subtitle.start);
-      // 将字幕文本按空格分割为单词，使每个单词可点击
+
+      // 将字幕文本按空格分割为单词，使每个英文单词可点击
       const processedText = this.processSubtitleText(subtitle.text);
+
       item.innerHTML = `
         <div class="text-xs text-gray-500 mb-1">${time}</div>
         <div class="text-sm text-gray-800">${processedText}</div>
       `;
+
       // 设置字幕行点击事件（用于时间跳转）
       item.addEventListener("click", (e) => {
-        // 如果点击的是单词，不触发时间跳转
+        // 如果点击的是单词，不触发时间跳转（避免冲突）
         if (e.target.classList.contains("word-lookup")) {
           e.stopPropagation();
           return;
         }
         this.seekToSubtitle(index);
       });
+
       container.appendChild(item);
     });
+
     // 添加单词点击事件监听
     this.addWordClickListeners();
   }
+  /**
+   * 同步字幕到当前播放时间
+   * 根据当前时间找到应该显示的字幕并更新UI
+   */
   syncSubtitles(currentTime) {
     const newSubtitleIndex = this.findCurrentSubtitleIndex(currentTime);
+
+    // 如果字幕索引发生变化，更新相关UI
     if (newSubtitleIndex !== this.currentIndexValue) {
       this.currentIndexValue = newSubtitleIndex;
-      this.updateActiveSubtitle();
-      this.scrollToCurrentSubtitle();
-      this.updateStatusBar();
+      this.updateActiveSubtitle(); // 更新当前字幕高亮
+      this.scrollToCurrentSubtitle(); // 滚动到当前字幕
+      this.updateStatusBar(); // 更新状态栏
     }
   }
+
+  /**
+   * 手动设置当前字幕索引
+   * 用于点击字幕列表时的跳转
+   */
   setCurrentSubtitle(index) {
     this.currentIndexValue = index;
-    this.updateActiveSubtitle();
-    this.scrollToCurrentSubtitle();
-    this.updateStatusBar();
+    this.updateActiveSubtitle(); // 更新当前字幕高亮
+    this.scrollToCurrentSubtitle(); // 滚动到当前字幕
+    this.updateStatusBar(); // 更新状态栏
   }
+
+  /**
+   * 根据当前播放时间查找应该显示的字幕索引
+   * 从后往前遍历，找到第一个开始时间小于等于当前时间的字幕
+   */
   findCurrentSubtitleIndex(currentTime) {
     for (let i = this.subtitlesValue.length - 1; i >= 0; i--) {
       if (currentTime >= this.subtitlesValue[i].start) {
         return i;
       }
     }
-    return -1;
+    return -1; // 没有匹配的字幕
   }
+
+  /**
+   * 更新当前字幕的激活状态
+   * 移除所有字幕的active类，为当前字幕添加active类
+   */
   updateActiveSubtitle() {
-    // Remove active class from all subtitle items
+    // 移除所有字幕项的激活状态
     document.querySelectorAll(".subtitle-item").forEach((item) => {
       item.classList.remove("active");
     });
-    // Add active class to current subtitle
+
+    // 为当前字幕添加激活状态
     if (this.currentIndexValue >= 0) {
       const currentElement = document.querySelector(
         `[data-index="${this.currentIndexValue}"]`,
@@ -324,52 +433,82 @@ export default class extends Controller {
       }
     }
   }
+  /**
+   * 滚动到当前激活的字幕位置
+   * 使用平滑滚动并防止频繁滚动
+   */
   scrollToCurrentSubtitle() {
     const activeElement = document.querySelector(".subtitle-item.active");
     if (activeElement && !this.isAutoScrolling) {
       const now = Date.now();
-      if (now - this.lastScrollTime < 100) return; // Prevent frequent scrolling
+      if (now - this.lastScrollTime < 100) return; // 防止频繁滚动
+
       this.isAutoScrolling = true;
       this.lastScrollTime = now;
+
+      // 平滑滚动到当前字幕，使其居中显示
       activeElement.scrollIntoView({
         behavior: "smooth",
         block: "center",
       });
+
+      // 500ms后重置滚动状态
       setTimeout(() => {
         this.isAutoScrolling = false;
       }, 500);
     }
   }
+
+  /**
+   * 跳转到指定索引的字幕
+   * 同时设置视频播放位置和当前字幕索引
+   */
   seekToSubtitle(index) {
     if (index >= 0 && index < this.subtitlesValue.length) {
       const subtitle = this.subtitlesValue[index];
-      this.seekTo(subtitle.start);
-      this.setCurrentSubtitle(index);
+      this.seekTo(subtitle.start); // 跳转到字幕开始时间
+      this.setCurrentSubtitle(index); // 设置当前字幕索引
     }
   }
-  // Alias method for compatibility with HTML template
+
+  /**
+   * 兼容HTML模板的别名方法
+   * 处理字幕列表项点击事件
+   */
   jumpToSubtitle(event) {
     const index = parseInt(event.currentTarget.dataset.index);
     this.seekToSubtitle(index);
   }
+
+  /**
+   * 跳转到上一条字幕
+   * 如果已经是第一条，则停在第一条
+   */
   jumpToPrevious() {
     if (this.subtitlesValue.length === 0) return;
+
     let targetIndex;
     if (this.currentIndexValue <= 0) {
-      targetIndex = 0;
+      targetIndex = 0; // 不超出第一条
     } else {
       targetIndex = this.currentIndexValue - 1;
     }
     this.seekToSubtitle(targetIndex);
   }
+
+  /**
+   * 跳转到下一条字幕
+   * 如果已经是最后一条，则停在最后一条
+   */
   jumpToNext() {
     if (this.subtitlesValue.length === 0) return;
+
     let targetIndex;
     if (
       this.currentIndexValue < 0 ||
       this.currentIndexValue >= this.subtitlesValue.length - 1
     ) {
-      targetIndex = this.subtitlesValue.length - 1;
+      targetIndex = this.subtitlesValue.length - 1; // 不超出最后一条
     } else {
       targetIndex = this.currentIndexValue + 1;
     }
@@ -479,17 +618,22 @@ export default class extends Controller {
     return div.innerHTML;
   }
   // ========================================
-  // Word Lookup Methods
+  // 单词查询相关方法
   // ========================================
+
+  /**
+   * 设置单词查询功能
+   * 初始化多层弹窗管理系统，支持嵌套查词
+   */
   setupWordLookup() {
-    // 多层弹窗管理
-    this.popupContainer = document.getElementById("wordPopupContainer");
-    this.popupTemplate = document.getElementById("wordPopupTemplate");
-    this.activePopups = [];
-    this.popupHistory = [];
-    this.maxPopups = 10; // 防止无限嵌套
-    this.baseZIndex = 50;
-    this.offsetStep = 20; // 每层偏移量
+    // 多层弹窗管理系统初始化
+    this.popupContainer = document.getElementById("wordPopupContainer"); // 弹窗容器
+    this.popupTemplate = document.getElementById("wordPopupTemplate"); // 弹窗HTML模板
+    this.activePopups = []; // 当前活动的弹窗列表
+    this.popupHistory = []; // 弹窗历史记录
+    this.maxPopups = 10; // 最大弹窗层数，防止无限嵌套
+    this.baseZIndex = 50; // 基础z-index值
+    this.offsetStep = 20; // 每层弹窗的视觉偏移量
 
     // 设置全局事件监听
     this.setupGlobalPopupEvents();
@@ -526,10 +670,15 @@ export default class extends Controller {
       this.popupContainer.classList.add("hidden");
     }
   }
+  /**
+   * 处理字幕文本，将英文单词标记为可点击
+   * 使用改进的词法分析来正确处理标点符号和其他字符
+   */
   processSubtitleText(text) {
     // 使用改进的词法分析来正确处理标点符号
     return this.tokenizeText(text)
       .map((token) => {
+        // 只对长度>=2的英文单词添加点击功能
         if (token.type === "word" && token.value.length >= 2) {
           return `<span class="word-lookup inline-block px-0.5 rounded hover:bg-blue-100 hover:text-blue-700 cursor-pointer transition-colors duration-150" data-word="${token.value}">${this.escapeHtml(token.value)}</span>`;
         }
@@ -539,8 +688,14 @@ export default class extends Controller {
       .join("");
   }
 
+  /**
+   * 文本分词器
+   * 将文本分解为英文单词、中文字符、数字、标点符号等token
+   * 支持中英文混合文本的准确分词
+   */
   tokenizeText(text) {
     const tokens = [];
+    // 正则表达式匹配：英文单词 | 中文字符 | 数字 | 标点符号 | 空白字符
     const regex =
       /([a-zA-Z]+)|([\u4e00-\u9fff]+)|(\d+)|([^\w\s\u4e00-\u9fff])|(\s+)/g;
     let match;
@@ -548,11 +703,11 @@ export default class extends Controller {
     while ((match = regex.exec(text)) !== null) {
       const [
         fullMatch,
-        englishWord,
-        chineseChars,
-        numbers,
-        punctuation,
-        whitespace,
+        englishWord, // 英文单词
+        chineseChars, // 中文字符
+        numbers, // 数字
+        punctuation, // 标点符号
+        whitespace, // 空白字符
       ] = match;
 
       if (englishWord) {
@@ -570,27 +725,38 @@ export default class extends Controller {
 
     return tokens;
   }
+  /**
+   * 添加单词点击事件监听器
+   * 为所有可点击的英文单词添加查词功能
+   */
   addWordClickListeners() {
-    // 移除旧的事件监听器
+    // 移除旧的事件监听器，避免重复绑定
     document.querySelectorAll(".word-lookup").forEach((element) => {
       element.replaceWith(element.cloneNode(true));
     });
+
     // 重新获取所有单词元素并添加事件监听器
     const wordElements = document.querySelectorAll(".word-lookup");
     wordElements.forEach((element, index) => {
       const word = element.dataset.word;
       element.addEventListener("click", (e) => {
-        e.stopPropagation();
+        e.stopPropagation(); // 阻止事件冒泡
         this.lookupWord(word, e.target);
       });
     });
   }
+
+  /**
+   * 异步查询单词释义
+   * 发送请求到后端API，创建多层弹窗显示释义
+   */
   async lookupWord(word, clickedElement, sourceLayer = 0) {
+    // 验证输入和弹窗数量限制
     if (!word || this.activePopups.length >= this.maxPopups) {
       return;
     }
 
-    // 检查是否已经在顶层显示这个单词
+    // 检查是否已经在顶层显示这个单词（避免重复查询）
     if (this.activePopups.length > 0) {
       const topPopup = this.activePopups[this.activePopups.length - 1];
       if (topPopup.word === word) {
@@ -598,13 +764,14 @@ export default class extends Controller {
       }
     }
 
-    // 先显示容器
+    // 先显示弹窗容器
     this.showPopupContainer();
 
-    // 创建新的弹窗层（初始隐藏）
+    // 创建新的弹窗层（初始隐藏，等待数据加载完成）
     const popupId = this.createPopupLayer(word, sourceLayer, false);
 
     try {
+      // 发送查询请求到后端API
       const response = await fetch("/word_lookup", {
         method: "POST",
         headers: {
@@ -616,14 +783,16 @@ export default class extends Controller {
       const data = await response.json();
 
       if (data.success && data.word) {
-        // 先设置内容，再显示弹窗
+        // 查询成功，显示单词释义
         this.showPopupDefinition(popupId, data.word, word);
         this.revealPopup(popupId);
       } else {
+        // 未找到单词
         this.showPopupError(popupId, `未找到单词 "${word}" 的释义`);
         this.revealPopup(popupId);
       }
     } catch (error) {
+      // 网络错误或其他异常
       this.showPopupError(popupId, `查询失败，请稍后重试`);
       this.revealPopup(popupId);
     }
@@ -633,12 +802,17 @@ export default class extends Controller {
     return meta ? meta.getAttribute("content") : "";
   }
   // ========================================
-  // Multi-Layer Popup Management
+  // 多层弹窗管理相关方法
   // ========================================
+
+  /**
+   * 创建新的弹窗层
+   * 支持多层嵌套弹窗，每层都有视觉偏移和层级管理
+   */
   createPopupLayer(word, sourceLayer = 0, showImmediately = true) {
     if (!this.popupTemplate || !this.popupContainer) return null;
 
-    // 克隆模板
+    // 克隆HTML模板
     const template = this.popupTemplate.content.cloneNode(true);
     const popupLayer = template.querySelector(".word-popup-layer");
 
@@ -648,13 +822,13 @@ export default class extends Controller {
     popupLayer.dataset.word = word;
     popupLayer.dataset.layer = this.activePopups.length;
 
-    // 计算偏移位置
+    // 计算视觉偏移位置（每层偏移，创建嵌套效果）
     const offset = this.activePopups.length * this.offsetStep;
     popupLayer.style.left = `${offset}px`;
     popupLayer.style.top = `${offset}px`;
     popupLayer.style.zIndex = this.baseZIndex + this.activePopups.length;
 
-    // 显示容器
+    // 确保容器可见
     if (this.popupContainer.classList.contains("hidden")) {
       this.popupContainer.classList.remove("hidden");
     }
@@ -674,7 +848,7 @@ export default class extends Controller {
     };
     this.activePopups.push(popupData);
 
-    // 初始隐藏，等待显示指令
+    // 初始隐藏，等待显示指令（用于加载状态的显示）
     if (!showImmediately) {
       popupLayer.style.opacity = "0";
       popupLayer.style.pointerEvents = "none";
@@ -684,6 +858,10 @@ export default class extends Controller {
     return popupId;
   }
 
+  /**
+   * 设置弹窗的事件监听器
+   * 处理关闭按钮和点击事件冒泡
+   */
   setupPopupEvents(popupId, word) {
     const popupLayer = document.getElementById(popupId);
     if (!popupLayer) return;
@@ -696,12 +874,16 @@ export default class extends Controller {
       });
     }
 
-    // 阻止事件冒泡
+    // 阻止事件冒泡，避免点击弹窗内容时关闭弹窗
     popupLayer.addEventListener("click", (e) => {
       e.stopPropagation();
     });
   }
 
+  /**
+   * 关闭指定的弹窗
+   * 移除DOM元素并从活动列表中删除
+   */
   closePopup(popupId) {
     const popupIndex = this.activePopups.findIndex((p) => p.id === popupId);
     if (popupIndex === -1) return;
@@ -722,6 +904,10 @@ export default class extends Controller {
     }
   }
 
+  /**
+   * 关闭最顶层的弹窗
+   * 用于ESC键和点击外部区域时的处理
+   */
   closeTopPopup() {
     if (this.activePopups.length > 0) {
       const topPopup = this.activePopups[this.activePopups.length - 1];
@@ -729,17 +915,10 @@ export default class extends Controller {
     }
   }
 
-  updateBackButtonStates() {
-    this.activePopups.forEach((popupData, index) => {
-      const backBtn = popupData.element.querySelector(".word-popup-back");
-      if (backBtn) {
-        backBtn.style.display = index > 0 ? "block" : "none";
-        // 更新返回按钮的标题
-        backBtn.title = index > 0 ? "返回上一层" : "关闭";
-      }
-    });
-  }
-
+  /**
+   * 显示弹窗加载状态
+   * 在等待API响应时显示加载动画
+   */
   showPopupLoading(popupId) {
     const contentElement = document.querySelector(
       `#${popupId} .word-popup-content`,
@@ -754,6 +933,10 @@ export default class extends Controller {
     }
   }
 
+  /**
+   * 显示弹窗错误状态
+   * 当查询失败或未找到单词时显示错误信息
+   */
   showPopupError(popupId, message) {
     const contentElement = document.querySelector(
       `#${popupId} .word-popup-content`,
@@ -770,6 +953,10 @@ export default class extends Controller {
     }
   }
 
+  /**
+   * 显示弹窗（从隐藏状态到可见状态）
+   * 使用淡入动画效果
+   */
   revealPopup(popupId) {
     const popupLayer = document.getElementById(popupId);
     if (!popupLayer) return;
@@ -959,7 +1146,7 @@ export default class extends Controller {
       });
     });
   }
-  // Cleanup old popup references on disconnect
+
   disconnect() {
     // 关闭所有活动弹窗
     while (this.activePopups.length > 0) {
@@ -973,9 +1160,8 @@ export default class extends Controller {
       this.player.destroy();
     }
   }
-  // ========================================
-  // Video Detail Page Methods
-  // ========================================
+
+  // 加载字幕
   loadInitialSubtitles() {
     // 检查是否有初始字幕数据（从HTML data属性传递）
     const initialSubtitles = this.subtitlesValue;
