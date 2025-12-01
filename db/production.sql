@@ -1,0 +1,4 @@
+create databases new_web_production;
+create databases new_web_production_cache;
+create databases new_web_production_cable;
+create databases new_web_production_queue;

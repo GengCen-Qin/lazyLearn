@@ -5,7 +5,8 @@
 #   gem "sqlite3"
 #
 default: &default
-  adapter: sqlite3
+  adapter: postgresql
+  # adapter: sqlite3
   pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
   timeout: 5000
 
@@ -28,6 +29,13 @@ test:
 # Store production database in the storage/ directory, which by default
 # is mounted as a persistent Docker volume in config/deploy.yml.
 production:
+  primary: &primary_production
+    <<: *default
+    database: new_web_production
+    username: new_web
+    password: <%= ENV["NEW_WEB_DATABASE_PASSWORD"] %>
+    host: new_web-db
+    port: 5432
   primary:
     <<: *default
     database: storage/production.sqlite3
