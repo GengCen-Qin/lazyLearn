@@ -1,97 +1,85 @@
-# syntax=docker/dockerfile:1
+# syntax=docker.m.daocloud.io/docker/dockerfile:1
 # check=error=true
 
 ARG RUBY_VERSION=3.4.6
-
-# mirr
-FROM docker.1ms.run/ruby:$RUBY_VERSION-slim AS base
-
+FROM docker.1ms.run/ruby:${RUBY_VERSION}-slim AS base
 WORKDIR /rails
 
-# mirr
+# 换清华源
 RUN sed -i 's|deb.debian.org|mirrors.tuna.tsinghua.edu.cn|g' /etc/apt/sources.list.d/debian.sources && \
-  sed -i 's|security.debian.org|mirrors.tuna.tsinghua.edu.cn|g' /etc/apt/sources.list.d/debian.sources && \
-  sed -i 's|http://|https://|g' /etc/apt/sources.list.d/debian.sources
+    sed -i 's|security.debian.org|mirrors.tuna.tsinghua.edu.cn|g' /etc/apt/sources.list.d/debian.sources && \
+    sed -i 's|http://|https://|g' /etc/apt/sources.list.d/debian.sources
 
-# 安装运行时依赖
+# 仅保留运行时依赖（无 python）
 RUN apt-get update -qq && \
-  apt-get install -y --no-install-recommends \
-  curl \
-  libjemalloc2 \
-  libvips \
-  postgresql-client \
-  python3 \
-  python3-pip \
-  python3-venv \
-  python3-dev \
-  ffmpeg \
-  tini && \
-  ln -s /usr/lib/$(uname -m)-linux-gnu/libjemalloc.so.2 /usr/local/lib/libjemalloc.so && \
-  rm -rf /var/lib/apt/lists/*
+    apt-get install -y --no-install-recommends \
+      curl \
+      libjemalloc2 \
+      libvips \
+      postgresql-client \
+      ffmpeg \
+      tini && \
+    ln -s /usr/lib/$(uname -m)-linux-gnu/libjemalloc.so.2 /usr/local/lib/libjemalloc.so && \
+    rm -rf /var/lib/apt/lists/*
 
-# Python config
-RUN python3 -m venv /venv
-ENV PATH="/venv/bin:$PATH"
-ENV VIRTUAL_ENV="/venv"
+# Rails 环境变量
+ENV RAILS_ENV=production \
+    BUNDLE_DEPLOYMENT=1 \
+    BUNDLE_PATH=/usr/local/bundle \
+    BUNDLE_WITHOUT=development \
+    LD_PRELOAD=/usr/local/lib/libjemalloc.so
 
-# Rails config
-ENV RAILS_ENV="production" \
-  BUNDLE_DEPLOYMENT="1" \
-  BUNDLE_PATH="/usr/local/bundle" \
-  BUNDLE_WITHOUT="development" \
-  LD_PRELOAD="/usr/local/lib/libjemalloc.so"
+# ---- 2. 拉取 whisper.cpp 静态二进制 ----
+FROM docker.1ms.run/debian:bookworm-slim AS whisper-builder
+RUN sed -i 's|deb.debian.org|mirrors.tuna.tsinghua.edu.cn|g' /etc/apt/sources.list.d/debian.sources && \
+    sed -i 's|security.debian.org|mirrors.tuna.tsinghua.edu.cn|g' /etc/apt/sources.list.d/debian.sources && \
+    sed -i 's|http://|https://|g' /etc/apt/sources.list.d/debian.sources
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates curl && \
+    rm -rf /var/lib/apt/lists/*
+WORKDIR /tmp
+# 官方 Linux x86_64 静态链接二进制（带 BLAS + AVX512，单文件）
+RUN curl -fsSL -o whisper \
+ https://github.com/ggerganov/whisper.cpp/releases/download/v1.5.4/whisper-blas-bin-x64-linux-avx512-fast-lto && \
+ chmod +x whisper
 
-# pip 换清华源 + 升级 pip
-RUN pip install --upgrade pip && \
-  pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple && \
-  pip config set global.trusted-host pypi.tuna.tsinghua.edu.cn
+# 预拉模型（base ≈ 150 MB，可换 tiny）
+RUN mkdir -p /models && \
+    curl -fsSL -o /models/ggml-base.bin \
+ https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.bin
 
-# 安装 Python 依赖（现在随便装，没任何报错）
-COPY requirements.txt /tmp/
-RUN pip install --no-cache-dir -r /tmp/requirements.txt
-
-# ====================== 编译阶段 ======================
+# ---- 3. 构建阶段（与原来相同） ----
 FROM base AS build
-
-# Install packages needed to build gems
+RUN gem sources --add https://gems.ruby-china.com/ --remove https://rubygems.org && \
+    gem install bundler:2.7.2
 RUN apt-get update -qq && \
-  apt-get install --no-install-recommends -y build-essential git libyaml-dev pkg-config && \
-  rm -rf /var/lib/apt/lists /var/cache/apt/archives \
-
-  # 安装 gems（多线程加速）
-  COPY Gemfile Gemfile.lock vendor ./
-
+    apt-get install -y --no-install-recommends build-essential git libyaml-dev pkg-config && \
+    rm -rf /var/lib/apt/lists/*
+COPY Gemfile Gemfile.lock vendor ./
 RUN bundle install && \
-  rm -rf ~/.bundle/ "${BUNDLE_PATH}"/ruby/*/cache "${BUNDLE_PATH}"/ruby/*/bundler/gems/*/.git && \
-  # -j 1 disable parallel compilation to avoid a QEMU bug: https://github.com/rails/bootsnap/issues/495
-  bundle exec bootsnap precompile -j 1 --gemfile
-
-# 拷贝完整代码
+    rm -rf ~/.bundle "${BUNDLE_PATH}"/ruby/*/cache "${BUNDLE_PATH}"/ruby/*/bundler/gems/*/.git && \
+    bundle exec bootsnap precompile -j 1 --gemfile
 COPY . .
+RUN bundle exec bootsnap precompile -j 1 app/ lib/ && \
+    SECRET_KEY_BASE_DUMMY=1 ./bin/rails assets:precompile
 
-# Bootsnap 预编译 + assets 预编译
-RUN bundle exec bootsnap precompile -j 1 app/ lib/
-RUN SECRET_KEY_BASE_DUMMY=1 ./bin/rails assets:precompile
-
-# ====================== 最终精简镜像 ======================
+# ---- 4. 最终运行镜像 ----
 FROM base
+# 拷贝 whisper 可执行文件（保持同名）
+COPY --from=whisper-builder /tmp/whisper /usr/local/bin/whisper
+# 拷贝模型
+COPY --from=whisper-builder /models /models
+# 让 whisper 命令默认找到模型（可选环境变量）
+ENV WHISPER_MODEL=/models/ggml-base.bin
 
-# 把虚拟环境也拷贝过来（关键！）
-COPY --from=build /venv /venv
-ENV PATH="/venv/bin:$PATH"
-
-# Run and own only the runtime files as a non-root user for security
+# 非 root 用户
 RUN groupadd --system --gid 1000 rails && \
-  useradd rails --uid 1000 --gid 1000 --create-home --shell /bin/bash
+    useradd rails --uid 1000 --gid 1000 --create-home --shell /bin/bash
 USER 1000:1000
 
-# Copy built artifacts: gems, application
+# 拷贝 Ruby 产物
 COPY --chown=rails:rails --from=build "${BUNDLE_PATH}" "${BUNDLE_PATH}"
 COPY --chown=rails:rails --from=build /rails /rails
 
-# Entrypoint prepares the database.
 ENTRYPOINT ["/rails/bin/docker-entrypoint"]
-
-# Start server via Thruster by default, this can be overwritten at runtime
 EXPOSE 80
 CMD ["./bin/thrust", "./bin/rails", "server"]
