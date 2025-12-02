@@ -17,7 +17,7 @@ class TencentAsrService
   # @return [Symbol, Array] 返回任务状态和结果
   def query(task_id)
     data = query_task_status(task_id).dig("Response", "Data")
-    return nil if data.nil?
+    return [ :failed, "request return nil" ] if data.nil?
 
     case data["Status"]
     when 1
@@ -104,8 +104,6 @@ class TencentAsrService
 
     response = http.request(request)
     JSON.parse(response.body)
-  rescue => e
-    { "Error" => { "Code" => "RequestFailed", "Message" => e.message } }
   end
 
   # 查询语音识别任务状态

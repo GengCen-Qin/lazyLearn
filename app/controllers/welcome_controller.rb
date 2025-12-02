@@ -38,7 +38,7 @@ class WelcomeController < ApplicationController
       render json: {
         success: true,
         redirect_to: "/videos",
-        message: "视频已存在，正在跳转到视频详情页...",
+        message: "视频正在解析，正在跳转到视频详情页...",
         video_exists: true
       }
     else

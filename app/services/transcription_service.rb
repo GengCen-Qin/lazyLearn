@@ -11,13 +11,16 @@ class TranscriptionService
   def process
     case @tool
     when :tencent
-      task_id = TencentAsrService.new.parse(@video.video_url)
+      task_id = TencentAsrService.new.parse(@video.ori_video_url)
+      Rails.logger.info "tencent asr start #{task_id}, video: #{@video.id}"
+
       sleep 20
       unless [ :success, :failed ].include?(TencentAsrService.new.query(task_id).first)
         status, response = TencentAsrService.new.query(task_id)
         raise "Transcription failed: #{response} video:#{@video.id}" if status == :failed
       end
     when :whisper
+      Rails.logger.info "whisper asr start video: #{@video.id}"
       response = WhisperTranscriptionService.new.trans_video(@video.local_path)
     end
 
