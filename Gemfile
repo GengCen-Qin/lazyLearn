@@ -78,4 +78,4 @@ gem "typhoeus", "~> 1.5"
 
 gem "psych", "~> 5.2"
 
-gem "pg", "~> 1.6", group: :production
+gem "pg", "~> 1.6"
