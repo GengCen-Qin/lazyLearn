@@ -36,18 +36,15 @@ production:
     password: <%= ENV["NEW_WEB_DATABASE_PASSWORD"] %>
     host: new_web-db
     port: 5432
-  primary:
-    <<: *default
-    database: storage/production.sqlite3
   cache:
-    <<: *default
-    database: storage/production_cache.sqlite3
+    <<: *primary_production
+    database: new_web_production_cache
     migrations_paths: db/cache_migrate
   queue:
-    <<: *default
-    database: storage/production_queue.sqlite3
+    <<: *primary_production
+    database: new_web_production_queue
     migrations_paths: db/queue_migrate
   cable:
-    <<: *default
-    database: storage/production_cable.sqlite3
+    <<: *primary_production
+    database: new_web_production_cable
     migrations_paths: db/cable_migrate
