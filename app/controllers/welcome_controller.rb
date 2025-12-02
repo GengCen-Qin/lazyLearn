@@ -27,7 +27,8 @@ class WelcomeController < ApplicationController
       video = Video.create!(
         title: result[:filename],
         description: result[:description],
-        download_link: result[:ori_url]
+        download_link: result[:ori_url],
+        ori_video_url: result[:ori_video_url]
       )
 
       video.video_file.attach(result.slice(:io, :filename, :content_type))

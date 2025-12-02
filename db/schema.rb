@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_11_23_111120) do
+ActiveRecord::Schema[8.0].define(version: 2025_12_02_124519) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -197,6 +197,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_11_23_111120) do
     t.datetime "transcription_time"
     t.integer "transcription_status", default: 0, null: false
     t.string "download_link"
+    t.string "ori_video_url"
     t.index ["download_link"], name: "index_videos_on_download_link", unique: true
     t.index ["transcription_language"], name: "index_videos_on_transcription_language"
     t.index ["transcription_status"], name: "index_videos_on_transcription_status"

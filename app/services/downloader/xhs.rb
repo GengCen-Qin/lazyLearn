@@ -27,6 +27,7 @@ class Downloader::Xhs
       io: file,
       filename: result["作品标题"],
       ori_url: link(url),
+      ori_video_url: result["视频链接"],
       description: result["作品描述"],
       content_type: Util.determine_content_type(file)
     }
