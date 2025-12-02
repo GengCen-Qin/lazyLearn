@@ -32,7 +32,7 @@ class TencentAsrService
           time_str: format_timestamp(detail["StartMs"].to_i / 1000.0)
         }
       end
-      [ :success, { "segments": result, "language": "en" } ]
+      [ :success, { "segments" => result, "language" => "en" } ]
     when 3
       Rails.logger.info("Task #{task_id} is failed")
       [ :failed, data["ErrorMsg"] ]

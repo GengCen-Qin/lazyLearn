@@ -13,17 +13,19 @@ class TranscriptionService
     when :tencent
       task_id = TencentAsrService.new.parse(@video.ori_video_url)
       Rails.logger.info "tencent asr start #{task_id}, video: #{@video.id}"
+      sleep 15
 
-      sleep 20
-      unless [ :success, :failed ].include?(TencentAsrService.new.query(task_id).first)
-        status, response = TencentAsrService.new.query(task_id)
-        raise "Transcription failed: #{response} video:#{@video.id}" if status == :failed
+      while [ :success, :failed ].exclude?(TencentAsrService.new.query(task_id).first) do
+        sleep 1
       end
+
+      status, response = TencentAsrService.new.query(task_id)
+      raise "Transcription failed: #{response} video:#{@video.id}" if status == :failed
     when :whisper
       Rails.logger.info "whisper asr start video: #{@video.id}"
       response = WhisperTranscriptionService.new.trans_video(@video.local_path)
     end
-
+    binding.irb
     @video.update!(
       transcription_segments: response["segments"],
       transcription_language: response["language"],
@@ -31,7 +33,7 @@ class TranscriptionService
       transcription_status: :completed
     )
   rescue => e
-    Rails.logger.error("Transcription failed: #{e.message}")
+    Rails.logger.error("Transcription failed: #{e.message}, #{e.backtrace.join("\n")}")
     @video.failed!
   end
 end
