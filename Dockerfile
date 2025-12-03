@@ -1,4 +1,4 @@
-# syntax=docker.m.daocloud.io/docker/dockerfile:1
+# syntax=registry.cn-hangzhou.aliyuncs.com/daocloud/dockerfile:1
 # check=error=true
 
 # This Dockerfile is designed for production, not development. Use with Kamal or build'n'run by hand:
