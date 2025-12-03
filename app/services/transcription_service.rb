@@ -25,7 +25,6 @@ class TranscriptionService
       Rails.logger.info "whisper asr start video: #{@video.id}"
       response = WhisperTranscriptionService.new.trans_video(@video.local_path)
     end
-    binding.irb
     @video.update!(
       transcription_segments: response["segments"],
       transcription_language: response["language"],
