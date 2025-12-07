@@ -41,9 +41,11 @@ class Downloader::Xhs
   def link(text)
     urls = URI.extract(text, [ "http", "https" ])
 
-    xiaohongshu_urls = urls.select { |url| url.include?("xhslink.com") }
+    targets = urls.select { |url| [ "xhslink.com", "xiaohongshu.com", "xiaohongshu" ].any? { |domain| url.include?(domain) } }
 
-    xiaohongshu_urls.first
+    raise ArgumentError, "找不到小红书链接" if targets.empty?
+
+    targets.first
   rescue => e
     Rails.logger.error "解析分享文本失败: #{e.message} #{text}"
     nil

@@ -68,8 +68,6 @@ class Downloader::XhsUrlParser
   # @return [String] 解析后的最终 URL，如果不是短链接则返回原 URL
   # @note 使用 HTTP HEAD 请求获取重定向信息
   def resolve_short_link(url)
-    return url unless url.include?("xhslink.com")
-
     response = Typhoeus.get(url, {
       timeout: @timeout,
       headers: { "User-Agent" => @user_agent },
