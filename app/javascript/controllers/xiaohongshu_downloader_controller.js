@@ -27,8 +27,8 @@ export default class extends Controller {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          // 'X-Requested-With': 'XMLHttpRequest',
-          // 'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content
+          "X-Requested-With": "XMLHttpRequest",
+          "X-CSRF-Token": document.querySelector('[name="csrf-token"]').content,
         },
         body: JSON.stringify({ url: shareText }),
       });
@@ -184,4 +184,3 @@ export default class extends Controller {
     </svg>`;
   }
 }
-
