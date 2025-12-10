@@ -9,46 +9,27 @@
     <% if @videos.any? %>
       <div class="divide-y divide-gray-200">
         <% @videos.each do |video| %>
-          <div
-            class="
-              p-4 hover:bg-gray-50 transition-colors duration-150 flex
-              justify-between items-center
-            "
-          >
+          <div class="p-4 hover:bg-gray-50 transition-colors duration-150 flex justify-between items-center">
             <div class="flex-1 min-w-0">
               <h2 class="text-lg font-medium text-gray-900 truncate">
                 <%= video.title %>
               </h2>
 
               <div class="mt-1 flex flex-wrap items-center text-sm text-gray-500">
-                <span class="mr-4">
+                <span>
                   <%= video.created_at.strftime("%Y-%m-%d %H:%M") %>
                 </span>
 
-                <span class="mr-4">
-                  <%= video.video_file.attached? ? "视频已上传" : "无视频文件" %>
-                </span>
-
-                <span
-                  class="
-                    inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                    <% case video.transcription_status
-                    when 'completed' %> bg-green-100 text-green-800
-                    <% when 'processing' %> bg-yellow-100 text-yellow-800
-                    <% when 'failed' %> bg-red-100 text-red-800
-                    <% else %> bg-gray-100 text-gray-800
-                    <% end %>
-                  "
-                >
+                <span>
                   <%= video.transcription_status_text %>
                 </span>
               </div>
             </div>
 
-            <div class="flex items-center space-x-3">
+            <div class="flex items-center space-x-0 sm:space-x-3">
               <% if video.transcription_completed? %>
                 <%= link_to "播放", video_path(video),
-                    class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+                    class: "inline-flex items-center px-4 py-2 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
               <% else %>
                 <span class="text-sm text-gray-500 italic"> 等待转录完成... </span>
               <% end %>
@@ -61,7 +42,7 @@
                       turbo_frame: "_top"
                     }
                   },
-                  class: "cursor-pointer ml-3 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500" %>
+                  class: "cursor-pointer ml-3 inline-flex items-center px-4 py-2 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500" %>
             </div>
           </div>
         <% end %>
