@@ -15,12 +15,23 @@
                 <%= video.title %>
               </h2>
 
-              <div class="mt-1 flex flex-wrap items-center text-sm text-gray-500">
+              <div class="mt-1 flex flex-wrap gap-2 items-center text-sm text-gray-500">
                 <span>
                   <%= video.created_at.strftime("%Y-%m-%d %H:%M") %>
                 </span>
 
-                <span>
+                <span class="video-status <%= case video.transcription_status
+                                          when 'pending'
+                                            'text-red-400'
+                                          when 'processing'
+                                            'text-orange-600'
+                                          when 'completed'
+                                            'text-green-600'
+                                          when 'failed'
+                                            'text-red-900'
+                                          else
+                                            'text-red-400'
+                                        end %>">
                   <%= video.transcription_status_text %>
                 </span>
               </div>

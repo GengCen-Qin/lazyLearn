@@ -15,14 +15,12 @@ export class VideoControls {
     if (typeof Plyr !== "undefined") {
       // 使用Plyr播放器，提供更好的控制界面
       this.player = new Plyr(this.videoTarget, {
-        controls: ["play", "progress", "duration", "fullscreen"], // 播放控制按钮
+        controls: ["play", "progress", "duration", "settings", "fullscreen"], // 播放控制按钮
+        settings: ["speed"],
+        clickToPlay: true,
         tooltips: {
           controls: true, // 显示控制按钮提示
           seek: true, // 显示进度条拖拽提示
-        },
-        captions: {
-          active: false, // 默认不启用字幕
-          update: false, // 不自动更新字幕
         },
         i18n: {
           // 国际化 - 中文界面
@@ -31,6 +29,8 @@ export class VideoControls {
           seek: "拖动",
           mute: "静音",
           unmute: "取消静音",
+          speed: "变速",
+          settings: "设置",
           enterFullscreen: "全屏",
           exitFullscreen: "退出全屏",
         },

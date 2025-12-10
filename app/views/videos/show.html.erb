@@ -194,32 +194,24 @@
 >
   <!-- 视频标题和状态区域 -->
   <div class="bg-white p-3 sm:p-4 border-b border-gray-200">
-    <div class="max-w-7xl mx-auto">
+    <div class="mx-auto">
       <div
-        class="
-          flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3
-          sm:gap-4
-        "
+        class="flex flex-row sm:items-center sm:justify-between gap-3 sm:gap-4"
       >
         <div class="flex items-center">
-          <h1
-            class="
-              text-gray-800 text-lg sm:text-xl md:text-2xl font-semibold
-              truncate
-            "
-          >
+          <h1 class=" text-gray-800 text-lg sm:text-xl md:text-2xl font-semibold truncate">
             <%= @video.title %>
           </h1>
 
           <span
             class="
-              ml-3 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-              <% case @video.transcription_status
-              when 'completed' %>
-              <% when 'processing' %> bg-yellow-100 text-yellow-800
-              <% when 'failed' %> bg-red-100 text-red-800
-              <% else %> bg-gray-100 text-gray-800
-              <% end %>
+              w-12 sm:w-18 ml-3 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+              <%= case @video.transcription_status
+              when 'completed' then 'bg-green-100 text-green-800'
+              when 'processing' then 'bg-yellow-100 text-yellow-800'
+              when 'failed' then 'bg-red-100 text-red-800'
+              else 'bg-gray-100 text-gray-800'
+              end %>
             "
           >
             <%= @video.transcription_status_text %>
@@ -227,8 +219,8 @@
         </div>
 
         <div class="flex items-center gap-4">
-          <%= link_to "返回列表", videos_path,
-              class: "inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+          <%= link_to "返回", videos_path,
+              class: "w-14 inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
         </div>
       </div>
     </div>
