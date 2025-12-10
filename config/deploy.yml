@@ -40,6 +40,8 @@ env:
     - KAMAL_REGISTRY_PASSWORD
     - POSTGRES_PASSWORD
     - NEW_WEB_DATABASE_PASSWORD
+    - TENCENTCLOUD_SECRET_ID
+    - TENCENTCLOUD_SECRET_KEY
 
   clear:
     # Run the Solid Queue Supervisor inside the web server's Puma process to do jobs.
