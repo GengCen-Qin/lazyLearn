@@ -160,7 +160,6 @@ export class SubtitleManager {
 
   // 添加单词点击事件监听器
   addWordClickListeners(handler) {
-    console.log('SubtitleManager: addWordClickListeners called with handler', handler);
     // 移除旧的事件监听器，避免重复绑定
     document.querySelectorAll(".word-lookup").forEach((element) => {
       element.replaceWith(element.cloneNode(true));
@@ -168,13 +167,10 @@ export class SubtitleManager {
 
     // 重新获取所有单词元素并添加事件监听器
     const wordElements = document.querySelectorAll(".word-lookup");
-    console.log('SubtitleManager: Found', wordElements.length, 'word elements');
     wordElements.forEach((element, index) => {
       const word = element.dataset.word;
-      console.log('SubtitleManager: Adding click listener to word', word);
       element.addEventListener("click", (e) => {
         e.stopPropagation(); // 阻止事件冒泡
-        console.log('SubtitleManager: Word clicked:', word, 'Handler available:', handler && typeof handler.lookupWord === 'function');
         // 调用主控制器的lookupWord方法
         if (handler && typeof handler.lookupWord === 'function') {
           handler.lookupWord(word, e.target);

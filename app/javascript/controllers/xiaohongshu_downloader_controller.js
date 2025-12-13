@@ -4,7 +4,6 @@ export default class extends Controller {
   static targets = ["input", "form", "resultArea", "button"];
 
   connect() {
-    console.log("Xiaohongshu downloader controller connected");
   }
 
   async download(event) {

@@ -358,12 +358,6 @@ export default class extends Controller {
    * 发送请求到后端API，创建多层弹窗显示释义
    */
   async lookupWord(word, clickedElement, sourceLayer = 0) {
-    console.log(
-      "Main Controller: lookupWord called with word:",
-      word,
-      "sourceLayer:",
-      sourceLayer,
-    );
     await this.wordLookup.lookupWord(word, clickedElement, this, sourceLayer);
   }
   getCSRFToken() {
