@@ -51,7 +51,7 @@ export class WordLookup {
   }
 
   // 异步查询单词释义
-  async lookupWord(word, handler) {
+  async lookupWord(word) {
 
     try {
       // 发送查询请求到后端API
@@ -66,7 +66,7 @@ export class WordLookup {
       const data = await response.json();
       if (data.success && data.word) {
         const processDef = (text, skipEnglish = false) => this.processDefinitionText(text, skipEnglish, this.escapeHtmlFunc);
-        this.showPopupDefinition(null, data.word, word, processDef, handler);
+        this.showPopupDefinition(null, data.word, word, processDef);
       }
     } catch (error) {
       // 网络错误或其他异常
@@ -217,7 +217,7 @@ export class WordLookup {
   }
 
   // 显示单词释义
-  showPopupDefinition(popupId, wordData, sourceWord, processDefinitionText, handler) {
+  showPopupDefinition(popupId, wordData, sourceWord, processDefinitionText) {
     const contentElement = document.querySelector(`#wordDetail`);
 
     if (!contentElement) return;
@@ -313,7 +313,7 @@ export class WordLookup {
     contentElement.innerHTML = html;
 
     // 为新创建的弹窗中的单词添加点击事件
-    this.addPopupWordClickListeners(popupId, handler);
+    this.addPopupWordClickListeners();
   }
 
   // 处理定义文本
@@ -377,14 +377,13 @@ export class WordLookup {
   }
 
   // 添加弹窗单词点击监听器
-  addPopupWordClickListeners(popupId, handler) {
+  addPopupWordClickListeners() {
     const wordElements = document.querySelectorAll(".word-lookup-popup");
     wordElements.forEach((element) => {
-      const word = element.dataset.word;
       element.addEventListener("click", (e) => {
         e.stopPropagation();
 
-        this.lookupWord(word, handler)
+        this.lookupWord(element.dataset.word)
       });
     });
   }

@@ -42,7 +42,7 @@ export class SubtitleManager {
       // 设置字幕行点击事件（用于时间跳转）
       item.addEventListener("click", (e) => {
         // 如果点击的是单词，不触发时间跳转（避免冲突）
-        if (e.target.classList.contains("word-lookup")) {
+        if (e.target.classList.contains("word-lookup-popup")) {
           e.stopPropagation();
           return;
         }
@@ -161,12 +161,12 @@ export class SubtitleManager {
   // 添加单词点击事件监听器
   addWordClickListeners(handler) {
     // 移除旧的事件监听器，避免重复绑定
-    document.querySelectorAll(".word-lookup").forEach((element) => {
+    document.querySelectorAll(".word-lookup-popup").forEach((element) => {
       element.replaceWith(element.cloneNode(true));
     });
 
     // 重新获取所有单词元素并添加事件监听器
-    const wordElements = document.querySelectorAll(".word-lookup");
+    const wordElements = document.querySelectorAll(".word-lookup-popup");
     wordElements.forEach((element, index) => {
       const word = element.dataset.word;
       element.addEventListener("click", (e) => {
