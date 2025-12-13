@@ -6,9 +6,9 @@
 
 <div
   class="video-subtitle-app-container h-screen flex flex-col bg-gray-50 dark:bg-gray-900"
-  data-controller="video-subtitle-merged"
-  data-video-subtitle-merged-video-path-value="<%= @video.video_file.attached? ? url_for(@video.video_file) : '' %>"
-  data-video-subtitle-merged-subtitles-value="<%= (@video.formatted_transcription || []).to_json %>"
+  data-controller="subtitle-merged"
+  data-subtitle-merged-video-path-value="<%= @video.video_file.attached? ? url_for(@video.video_file) : '' %>"
+  data-subtitle-merged-subtitles-value="<%= (@video.formatted_transcription || []).to_json %>"
 >
   <%= render 'videos/video_header', video: @video %>
 

@@ -5,7 +5,7 @@
 
     <span
       id="subtitleCount"
-      data-video-subtitle-merged-target="subtitleCount"
+      data-subtitle-merged-target="subtitleCount"
       class="text-gray-600 dark:text-gray-300 text-xs sm:text-sm bg-gray-200 dark:bg-gray-600 px-2 py-1 rounded-full"
     >
       <%= video.has_transcription? ? video.transcription_segments.size : 0 %>
@@ -13,7 +13,7 @@
     </span>
   </div>
 
-  <div class="flex-1 overflow-y-auto p-2 sm:p-3 bg-white dark:bg-gray-800" data-video-subtitle-merged-target="subtitleList" id="subtitleList">
+  <div class="flex-1 overflow-y-auto p-2 sm:p-3 bg-white dark:bg-gray-800" data-subtitle-merged-target="subtitleList" id="subtitleList">
     <div class="no-subtitles text-center text-gray-500 dark:text-gray-400 p-6 text-sm">
       <% if video.has_transcription? %>
         正在加载字幕...
