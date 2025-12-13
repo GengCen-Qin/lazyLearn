@@ -2,45 +2,7 @@
 
 <%= stylesheet_link_tag "plyr", "data-turbo-track": "reload" %>
 <%= stylesheet_link_tag "video_player_tailwind_fix", "data-turbo-track": "reload" %>
-
-<style>
-/* 单词高亮样式 */
-.word-lookup-popup {
-  position: relative;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  border-radius: 2px;
-}
-
-.word-lookup-popup:hover {
-  background: #dbeafe;
-}
-
-.dark .word-lookup-popup:hover {
-  background: #1e3a8a;
-}
-
-.word-lookup-popup:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.15);
-}
-
-.dark .word-lookup-popup:hover {
-  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
-}
-
-.word-lookup-popup:hover::after {
-  content: '';
-  position: absolute;
-  bottom: -2px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 80%;
-  height: 2px;
-  background: #3b82f6;
-  border-radius: 1px;
-  transition: width 0.2s ease;
-}
-</style>
+<%= stylesheet_link_tag "word_lookup", "data-turbo-track": "reload" %>
 
 <div
   class="video-subtitle-app-container h-screen flex flex-col bg-gray-50 dark:bg-gray-900"
@@ -48,142 +10,17 @@
   data-video-subtitle-merged-video-path-value="<%= @video.video_file.attached? ? url_for(@video.video_file) : '' %>"
   data-video-subtitle-merged-subtitles-value="<%= (@video.formatted_transcription || []).to_json %>"
 >
-  <!-- 视频标题和状态区域 -->
-  <div class="bg-white dark:bg-gray-800 p-3 sm:p-4 border-b border-gray-200 dark:border-gray-700">
-    <div class="mx-auto">
-      <div
-        class="flex flex-row items-center sm:items-center sm:justify-between gap-3 sm:gap-4"
-      >
-        <h1 class="text-gray-800 dark:text-gray-100 text-lg sm:text-xl md:text-2xl font-semibold truncate">
-          <%= @video.title %>
-        </h1>
-
-        <%= link_to "<", videos_path,
-            class: "inline-flex items-center px-3 py-1.5 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
-      </div>
-    </div>
-  </div>
+  <%= render 'videos/video_header', video: @video %>
 
   <!-- 主播放器布局 -->
   <div class="flex-1 overflow-hidden flex flex-col">
-    <div
-      class="
-        grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-4 md:gap-5 flex-1
-        overflow-hidden p-3 sm:p-4
-      "
-    >
-      <!-- 视频播放器 - 占用更多空间 -->
-      <div
-        class="
-          lg:col-span-8 bg-black rounded-lg sm:rounded-xl overflow-hidden
-          flex flex-col
-        "
-        id="video-player-container"
-      >
-        <div>
-          <video
-            id="videoPlayer"
-            data-video-subtitle-merged-target="video"
-            controls
-            class="w-full h-full object-contain"
-            <% if @video.video_file.attached? %>
-              src="<%= url_for(@video.video_file) %>"
-            <% end %>
-          >
-            您的浏览器不支持 HTML5 视频。
-          </video>
-        </div>
-      </div>
-
-      <!-- 字幕列表 - 占用较少空间 -->
-      <div
-        class="
-          lg:col-span-4 bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl overflow-hidden
-          flex flex-col border border-gray-200 dark:border-gray-700
-        "
-        id="subtitle-container"
-      >
-        <div
-          class="
-            p-2 sm:p-3 bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600 flex
-            justify-between items-center
-          "
-        >
-          <h3 class="text-gray-800 dark:text-gray-100 text-sm sm:text-base font-medium">字幕列表</h3>
-
-          <span
-            id="subtitleCount"
-            data-video-subtitle-merged-target="subtitleCount"
-            class="
-              text-gray-600 dark:text-gray-300 text-xs sm:text-sm bg-gray-200 dark:bg-gray-600 px-2 py-1
-              rounded-full
-            "
-          >
-            <%= @video.has_transcription? ? @video.transcription_segments.size : 0 %>
-            条字幕
-          </span>
-        </div>
-
-        <div
-          class="flex-1 overflow-y-auto p-2 sm:p-3 bg-white dark:bg-gray-800"
-          data-video-subtitle-merged-target="subtitleList"
-          id="subtitleList"
-        >
-          <div class="no-subtitles text-center text-gray-500 dark:text-gray-400 p-6 text-sm">
-            <% if @video.has_transcription? %>
-              正在加载字幕...
-            <% else %>
-              此视频暂无字幕
-            <% end %>
-          </div>
-        </div>
-      </div>
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-4 md:gap-5 flex-1 overflow-hidden p-3 sm:p-4">
+      <%= render 'videos/video_player', video: @video %>
+      <%= render 'videos/subtitle_list', video: @video %>
     </div>
 
-    <!-- 状态信息 -->
-    <div class="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-2 sm:p-3">
-      <div
-        class="
-          max-w-7xl mx-auto flex flex-row justify-center
-          gap-3 sm:gap-6 text-xs sm:text-sm text-center
-        "
-      >
-        <div class="flex items-center gap-2">
-          <span class="text-gray-600 dark:text-gray-400 font-medium">当前时间:</span>
-
-          <span
-            id="currentTime"
-            data-video-subtitle-merged-target="currentTime"
-            class="text-gray-800 dark:text-gray-200 font-mono"
-          >
-            00:00
-          </span>
-        </div>
-
-        <div class="flex items-center gap-2">
-          <span class="text-gray-600 dark:text-gray-400 font-medium">当前字幕:</span>
-
-          <span
-            id="currentSubtitleIndex"
-            data-video-subtitle-merged-target="currentSubtitleIndex"
-            class="text-gray-800 dark:text-gray-200 font-mono"
-          >
-            - / -
-          </span>
-        </div>
-      </div>
-    </div>
+    <%= render 'videos/status_bar' %>
   </div>
 </div>
 
-<dialog id="wordInfo" class="modal">
-  <div class="modal-box bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100" style="max-height: 85vh; display: flex; flex-direction: column;">
-    <button id="wordBackBtn" class="btn btn-sm text-xl btn-circle absolute left-2 top-2 hidden bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600">‹</button>
-
-    <form method="dialog">
-      <button id="wordCloseBtn" class="btn btn-sm text-xl btn-circle absolute right-2 top-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600">✕</button>
-    </form>
-
-    <p class="py-4" id="wordDetail" style="max-height: 60vh; overflow-y: auto;"></p>
-  </div>
-</dialog>
+<%= render 'videos/word_lookup_modal' %>

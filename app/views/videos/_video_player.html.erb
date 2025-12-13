@@ -1,0 +1,16 @@
+<!-- 视频播放器 - 占用更多空间 -->
+<div class="lg:col-span-8 bg-black rounded-lg sm:rounded-xl overflow-hidden flex flex-col" id="video-player-container">
+  <div>
+    <video
+      id="videoPlayer"
+      data-video-subtitle-merged-target="video"
+      controls
+      class="w-full h-full object-contain"
+      <% if video.video_file.attached? %>
+        src="<%= url_for(video.video_file) %>"
+      <% end %>
+    >
+      您的浏览器不支持 HTML5 视频。
+    </video>
+  </div>
+</div>

@@ -1,0 +1,36 @@
+/* 单词高亮样式 */
+.word-lookup-popup {
+  position: relative;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 2px;
+}
+
+.word-lookup-popup:hover {
+  background: #dbeafe;
+}
+
+.dark .word-lookup-popup:hover {
+  background: #1e3a8a;
+}
+
+.word-lookup-popup:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.15);
+}
+
+.dark .word-lookup-popup:hover {
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+}
+
+.word-lookup-popup:hover::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  height: 2px;
+  background: #3b82f6;
+  border-radius: 1px;
+  transition: width 0.2s ease;
+}
