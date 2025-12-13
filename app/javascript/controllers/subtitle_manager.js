@@ -168,12 +168,12 @@ export class SubtitleManager {
     // 重新获取所有单词元素并添加事件监听器
     const wordElements = document.querySelectorAll(".word-lookup-popup");
     wordElements.forEach((element, index) => {
-      const word = element.dataset.word;
       element.addEventListener("click", (e) => {
         e.stopPropagation(); // 阻止事件冒泡
+        e.stopImmediatePropagation(); // 阻止其他事件执行
         // 调用主控制器的lookupWord方法
         if (handler && typeof handler.lookupWord === 'function') {
-          handler.lookupWord(word, e.target);
+          handler.lookupWord(element.dataset.word, e.target);
         }
       });
     });
