@@ -1,10 +1,10 @@
 <div
-  class="min-h-screen flex flex-col items-center justify-center bg-white p-4"
+  class="min-h-screen flex flex-col items-center justify-center bg-white dark:bg-gray-900 p-4"
   data-controller="xiaohongshu-downloader"
 >
   <% if Video.count > 0 %>
-    <div class="absolute top-4 right-4">
-      <%= link_to "视频列表", videos_path, class: "bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full transition duration-200" %>
+    <div class="absolute top-6 right-6">
+      <%= link_to "视频列表", videos_path, class: "bg-blue-500 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-800 text-white font-bold py-2 px-4 rounded-full transition duration-200" %>
     </div>
   <% end %>
 
@@ -21,7 +21,7 @@
       class="
         text-4xl xl:text-6xl
         font-bold bg-clip-text text-transparent p-2
-        bg-linear-to-r from-red-500 via-yellow-500 to-green-500
+        bg-gradient-to-r from-red-500 via-yellow-500 to-green-500
       "
     >
       Lazy Learn
@@ -34,18 +34,18 @@
                             action: "submit->xiaohongshu-downloader#download" } do |form| %>
         <div
           class="
-            flex items-center border border-gray-300 rounded-full px-4 py-2
-            shadow-sm hover:shadow-md focus-within:shadow-md
+            flex items-center border border-gray-300 dark:border-gray-600 rounded-full px-4 py-2
+            shadow-sm hover:shadow-md focus-within:shadow-md bg-white dark:bg-gray-800
             transition-shadow
           "
         >
           <%= form.text_field :url,
                               placeholder: "请输入小红书分享内容...",
-                              class: "flex-grow outline-none text-xl",
+                              class: "flex-grow outline-none text-xl bg-transparent text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400",
                               data: { xiaohongshu_downloader_target: "input" } %>
 
           <%= form.button type: "submit",
-                          class: "ml-4 bg-blue-500 text-white rounded-full p-3 hover:bg-blue-600 focus:outline-none cursor-pointer transition-all duration-200",
+                          class: "ml-4 bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white rounded-full p-3 focus:outline-none cursor-pointer transition-all duration-200",
                           data: { xiaohongshu_downloader_target: "button" } do %>
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -66,7 +66,7 @@
       <% end %>
     </div>
 
-    <p class="text-gray-600 text-lg">
+    <p class="text-gray-600 dark:text-gray-400 text-lg">
       输入小红书分享内容，系统将自动解析并下载视频
     </p>
   </div>

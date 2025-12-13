@@ -36,7 +36,7 @@ export class Utils {
       .map((token) => {
         // 只对长度>=2的英文单词添加点击功能
         if (token.type === "word" && token.value.length >= 2) {
-          return `<span class="word-lookup-popup inline-block px-0.5 rounded hover:bg-blue-100 hover:text-blue-700 cursor-pointer transition-colors duration-150" data-word="${token.value}">${escapeHtml(token.value)}</span>`;
+          return `<span class="word-lookup-popup inline-block px-0.5 rounded hover:bg-blue-100 hover:text-blue-700 dark:hover:bg-blue-900 dark:hover:text-blue-300 cursor-pointer transition-colors duration-150" data-word="${token.value}">${escapeHtml(token.value)}</span>`;
         }
         // 其他情况（标点、中文字符、数字等）直接显示
         return escapeHtml(token.value);

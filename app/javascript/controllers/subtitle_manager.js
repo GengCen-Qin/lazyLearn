@@ -15,7 +15,7 @@ export class SubtitleManager {
 
     // 无字幕时显示提示信息
     if (subtitlesValue.length === 0) {
-      container.innerHTML = '<div class="no-subtitles text-center text-gray-500 p-6 text-sm">请上传字幕文件</div>';
+      container.innerHTML = '<div class="no-subtitles text-center text-gray-500 dark:text-gray-400 p-6 text-sm">请上传字幕文件</div>';
       return;
     }
 
@@ -35,8 +35,8 @@ export class SubtitleManager {
       const processedText = processSubtitleText(subtitle.text, escapeHtml);
 
       item.innerHTML = `
-        <div class="text-xs text-gray-500 mb-1">${time}</div>
-        <div class="text-sm text-gray-800">${processedText}</div>
+        <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">${time}</div>
+        <div class="text-sm text-gray-800 dark:text-gray-200">${processedText}</div>
       `;
 
       // 设置字幕行点击事件（用于时间跳转）

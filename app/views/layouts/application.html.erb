@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html data-controller="dark-mode">
   <head>
     <title><%= content_for(:title) || "探索你自己的英语教材" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -21,8 +21,10 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <body class="<%= controller_name == 'video_player' ? 'video-player-page' : '' %>">
-    <main class="<%= controller_name == 'video_player' ? '' : 'container mx-auto' %>">
+  <body class=" bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-200">
+    <%= render 'components/dark_mode_toggle' %>
+
+    <main>
       <%= yield %>
     </main>
   </body>

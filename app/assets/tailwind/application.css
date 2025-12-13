@@ -8,3 +8,4 @@
 @plugin "./daisyui-theme.mjs" {
   /* custom theme here */
 }
+@custom-variant dark (&:where(.dark, .dark *));

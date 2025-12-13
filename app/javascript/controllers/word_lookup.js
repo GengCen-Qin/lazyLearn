@@ -189,8 +189,8 @@ export class WordLookup {
     const contentElement = document.querySelector('#wordDetail');
     if (contentElement) {
       contentElement.innerHTML = `
-        <div class="text-center text-gray-500 py-8">
-          <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <div class="text-center text-gray-500 dark:text-gray-400 py-8">
+          <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 dark:border-blue-400"></div>
           <p class="mt-2 text-sm">查询中...</p>
         </div>
       `;
@@ -202,8 +202,8 @@ export class WordLookup {
     const contentElement = document.querySelector('#wordDetail');
     if (contentElement) {
       contentElement.innerHTML = `
-        <div class="text-center text-gray-500 py-8">
-          <svg class="w-12 h-12 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="text-center text-gray-500 dark:text-gray-400 py-8">
+          <svg class="w-12 h-12 mx-auto text-gray-400 dark:text-gray-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
           </svg>
           <p class="text-sm">${message}</p>
@@ -247,16 +247,16 @@ export class WordLookup {
     const html = `
       <div class="space-y-4">
         <!-- 单词标题 -->
-        <div class="text-center border-b border-gray-200 pb-3">
-          <h2 class="text-2xl font-bold text-gray-900 mb-2">${wordData.word}</h2>
-          ${wordData.phonetic ? `<p class="text-gray-600">[${wordData.phonetic}]</p>` : ""}
+        <div class="text-center border-b border-gray-200 dark:border-gray-700 pb-3">
+          <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">${wordData.word}</h2>
+          ${wordData.phonetic ? `<p class="text-gray-600 dark:text-gray-400">[${wordData.phonetic}]</p>` : ""}
         </div>
         <!-- 核心词汇标记 -->
         ${
           wordData.core
             ? `
           <div class="flex justify-center">
-            <span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-medium">
+            <span class="bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 px-3 py-1 rounded-full text-sm font-medium">
               ⭐ 核心词汇
             </span>
           </div>
@@ -268,13 +268,13 @@ export class WordLookup {
           wordData.definition
             ? `
           <div>
-            <h3 class="font-semibold text-gray-900 mb-2 flex items-center">
-              <svg class="w-4 h-4 mr-2 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+            <h3 class="font-semibold text-gray-900 dark:text-gray-100 mb-2 flex items-center">
+              <svg class="w-4 h-4 mr-2 text-blue-600 dark:text-blue-400" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M3 5a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2h-2.22l.123.489.804.804A1 1 0 0113 18H7a1 1 0 01-.707-1.707l.804-.804L7.22 15H5a2 2 0 01-2-2V5zm5.771 7H5V5h10v7H8.771z" clip-rule="evenodd"/>
               </svg>
               英文释义
             </h3>
-            <div class="text-gray-700 text-sm leading-relaxed bg-gray-50 p-3 rounded">
+            <div class="text-gray-700 dark:text-gray-300 text-sm leading-relaxed bg-gray-50 dark:bg-gray-700 p-3 rounded">
               ${processedDefinition}
             </div>
           </div>
@@ -286,13 +286,13 @@ export class WordLookup {
           wordData.translation
             ? `
           <div>
-            <h3 class="font-semibold text-gray-900 mb-2 flex items-center">
-              <svg class="w-4 h-4 mr-2 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+            <h3 class="font-semibold text-gray-900 dark:text-gray-100 mb-2 flex items-center">
+              <svg class="w-4 h-4 mr-2 text-green-600 dark:text-green-400" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"/>
               </svg>
               中文释义
             </h3>
-            <div class="text-gray-700 text-sm leading-relaxed bg-green-50 p-3 rounded">
+            <div class="text-gray-700 dark:text-gray-300 text-sm leading-relaxed bg-green-50 dark:bg-green-900/30 p-3 rounded">
               ${processedTranslation}
             </div>
           </div>
@@ -304,13 +304,13 @@ export class WordLookup {
           wordData.detail
             ? `
           <div>
-            <h3 class="font-semibold text-gray-900 mb-2 flex items-center">
-              <svg class="w-4 h-4 mr-2 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+            <h3 class="font-semibold text-gray-900 dark:text-gray-100 mb-2 flex items-center">
+              <svg class="w-4 h-4 mr-2 text-purple-600 dark:text-purple-400" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z"/>
               </svg>
               详细说明
             </h3>
-            <div class="text-gray-700 text-sm leading-relaxed bg-purple-50 p-3 rounded">
+            <div class="text-gray-700 dark:text-gray-300 text-sm leading-relaxed bg-purple-50 dark:bg-purple-900/30 p-3 rounded">
               ${processedDetail}
             </div>
           </div>
@@ -341,7 +341,7 @@ export class WordLookup {
     return this.tokenizeText(text)
       .map((token) => {
         if (token.type === "word" && token.value.length >= 2) {
-          return `<span class="word-lookup-popup inline-block px-0.5 rounded hover:bg-blue-100 hover:text-blue-700 cursor-pointer transition-colors duration-150" data-word="${token.value}">${escapeHtml(token.value)}</span>`;
+          return `<span class="word-lookup-popup inline-block px-0.5 rounded hover:bg-blue-100 hover:text-blue-700 dark:hover:bg-blue-900 dark:hover:text-blue-300 cursor-pointer transition-colors duration-150" data-word="${token.value}">${escapeHtml(token.value)}</span>`;
         }
         // 其他情况（标点、中文字符、数字等）直接显示
         return escapeHtml(token.value);

@@ -1,36 +1,36 @@
 <% content_for :title, "视频列表" %>
 
-<div class="p-6 max-w-7xl mx-auto">
+<div class="p-6 h-screen max-w-7xl mx-auto">
   <div class="flex justify-between items-center mb-6">
-    <h1 class="text-2xl font-bold text-gray-800">视频列表</h1>
+    <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100">视频列表</h1>
   </div>
 
-  <div class="bg-white rounded-lg shadow overflow-hidden">
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
     <% if @videos.any? %>
-      <div class="divide-y divide-gray-200">
+      <div class="divide-y divide-gray-200 dark:divide-gray-700">
         <% @videos.each do |video| %>
-          <div class="p-4 hover:bg-gray-50 transition-colors duration-150 flex justify-between items-center">
+          <div class="p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150 flex justify-between items-center">
             <div class="flex-1 min-w-0">
-              <h2 class="text-lg font-medium text-gray-900 truncate">
+              <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 truncate">
                 <%= video.title %>
               </h2>
 
-              <div class="mt-1 flex flex-wrap gap-2 items-center text-sm text-gray-500">
+              <div class="mt-1 flex flex-wrap gap-2 items-center text-sm text-gray-500 dark:text-gray-400">
                 <span>
                   <%= video.created_at.strftime("%Y-%m-%d %H:%M") %>
                 </span>
 
                 <span class="video-status <%= case video.transcription_status
                                           when 'pending'
-                                            'text-red-400'
+                                            'text-red-400 dark:text-red-500'
                                           when 'processing'
-                                            'text-orange-600'
+                                            'text-orange-600 dark:text-orange-500'
                                           when 'completed'
-                                            'text-green-600'
+                                            'text-green-600 dark:text-green-500'
                                           when 'failed'
-                                            'text-red-900'
+                                            'text-red-900 dark:text-red-400'
                                           else
-                                            'text-red-400'
+                                            'text-red-400 dark:text-red-500'
                                         end %>">
                   <%= video.transcription_status_text %>
                 </span>
@@ -40,9 +40,9 @@
             <div class="flex items-center space-x-0 sm:space-x-3">
               <% if video.transcription_completed? %>
                 <%= link_to "播放", video_path(video),
-                    class: "inline-flex items-center px-4 py-2 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+                    class: "inline-flex items-center px-4 py-2 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
               <% else %>
-                <span class="text-sm text-gray-500 italic"> 等待转录完成... </span>
+                <span class="text-sm text-gray-500 dark:text-gray-400 italic"> 等待转录完成... </span>
               <% end %>
 
               <%= button_to "删除", video_path(video),
@@ -53,7 +53,7 @@
                       turbo_frame: "_top"
                     }
                   },
-                  class: "cursor-pointer ml-3 inline-flex items-center px-4 py-2 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500" %>
+                  class: "cursor-pointer ml-3 inline-flex items-center px-4 py-2 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500" %>
             </div>
           </div>
         <% end %>
@@ -61,7 +61,7 @@
     <% else %>
       <div class="text-center py-12">
         <svg
-          class="mx-auto h-12 w-12 text-gray-400"
+          class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -74,9 +74,9 @@
           />
         </svg>
 
-        <h3 class="mt-2 text-sm font-medium text-gray-900">暂无视频</h3>
+        <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">暂无视频</h3>
 
-        <p class="mt-1 text-sm text-gray-500">
+        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
           上传视频文件以开始使用。
         </p>
       </div>
