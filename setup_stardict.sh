@@ -15,7 +15,7 @@ else
 
     # 下载 zip 文件
     echo "正在下载 $DOWNLOAD_URL"
-    if ! wget -O "$TEMP_ZIP" "$DOWNLOAD_URL"; then
+    if ! curl -L -o "$TEMP_ZIP" "$DOWNLOAD_URL"; then
         echo "下载失败，请检查网络连接。"
         exit 1
     fi
