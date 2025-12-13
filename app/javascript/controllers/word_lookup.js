@@ -52,6 +52,11 @@ export class WordLookup {
 
   // 异步查询单词释义
   async lookupWord(word) {
+    // 立即显示弹窗
+    document.getElementById('wordInfo').showModal();
+
+    // 显示加载状态
+    this.showLoadingMessage();
 
     try {
       // 发送查询请求到后端API
@@ -67,12 +72,43 @@ export class WordLookup {
       if (data.success && data.word) {
         const processDef = (text, skipEnglish = false) => this.processDefinitionText(text, skipEnglish, this.escapeHtmlFunc);
         this.showPopupDefinition(null, data.word, word, processDef);
+      } else {
+        // 请求失败但无网络错误
+        this.showErrorMessage('未找到单词释义');
       }
     } catch (error) {
       // 网络错误或其他异常
       console.error('WordLookup: Error during lookup:', error);
+      this.showErrorMessage('查询失败，请稍后重试');
     }
-    document.getElementById('wordInfo').showModal()
+  }
+
+  // 显示加载状态
+  showLoadingMessage() {
+    const contentElement = document.querySelector('#wordDetail');
+    if (contentElement) {
+      contentElement.innerHTML = `
+        <div class="text-center text-gray-500 py-8">
+          <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <p class="mt-2 text-sm">查询中...</p>
+        </div>
+      `;
+    }
+  }
+
+  // 显示错误信息
+  showErrorMessage(message) {
+    const contentElement = document.querySelector('#wordDetail');
+    if (contentElement) {
+      contentElement.innerHTML = `
+        <div class="text-center text-gray-500 py-8">
+          <svg class="w-12 h-12 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <p class="text-sm">${message}</p>
+        </div>
+      `;
+    }
   }
 
   escapeHtmlFunc(text) {
