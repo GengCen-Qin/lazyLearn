@@ -4,56 +4,157 @@
  */
 export class WordLookup {
   constructor() {
-    // 多层弹窗系统初始化
-    this.popupContainer = document.getElementById("wordPopupContainer"); // 弹窗容器
-    this.popupTemplate = document.getElementById("wordPopupTemplate"); // 弹窗HTML模板
-    this.activePopups = []; // 当前活动的弹窗列表
+    // 单词查询历史记录系统
+    this.wordDialog = document.getElementById("wordInfo");
+    this.wordBackBtn = document.getElementById("wordBackBtn");
+    this.wordCloseBtn = document.getElementById("wordCloseBtn");
+
+    // 初始化历史记录
+    this.initWordHistory();
   }
 
   // 初始化单词查询功能
   setupWordLookup() {
-    // 设置全局事件监听
-    this.setupGlobalPopupEvents();
+    // 设置事件监听
+    this.setupWordHistoryEvents();
   }
 
-  setupGlobalPopupEvents() {
-    // ESC键关闭最上层弹窗
+  // 初始化单词查询历史记录
+  initWordHistory() {
+    if (!this.wordDialog) return;
+
+    // 初始化历史记录数据
+    this.wordDialog.dataset.wordHistory = JSON.stringify([]);
+    this.wordDialog.dataset.currentIndex = "0";
+  }
+
+  // 设置单词历史记录事件监听
+  setupWordHistoryEvents() {
+    if (!this.wordDialog || !this.wordBackBtn || !this.wordCloseBtn) return;
+
+    // 回退按钮事件
+    this.wordBackBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      this.goBackToPreviousWord();
+    });
+
+    // 关闭按钮事件 - 清空历史记录
+    this.wordCloseBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      this.clearWordHistory();
+      this.wordDialog.close();
+    });
+
+    // ESC键清空历史记录并关闭
     document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && this.activePopups.length > 0) {
+      if (e.key === "Escape" && this.wordDialog.open) {
         e.preventDefault();
-        e.stopPropagation();
-        this.closeTopPopup();
+        this.clearWordHistory();
+        this.wordDialog.close();
       }
     });
 
-    // 点击弹窗外部区域关闭最上层弹窗
-    if (this.popupContainer) {
-      this.popupContainer.addEventListener("click", (e) => {
-        if (e.target === this.popupContainer && this.activePopups.length > 0) {
-          this.closeTopPopup();
-        }
+    // 点击dialog外部清空历史记录并关闭
+    this.wordDialog.addEventListener("click", (e) => {
+      if (e.target === this.wordDialog) {
+        this.clearWordHistory();
+        this.wordDialog.close();
+      }
+    });
+  }
+
+  // 添加单词到历史记录
+  addToWordHistory(word) {
+    const history = JSON.parse(this.wordDialog.dataset.wordHistory || "[]");
+
+    history.push(word);
+
+    this.wordDialog.dataset.wordHistory = JSON.stringify(history);
+    this.wordDialog.dataset.currentIndex = (history.length - 1).toString();
+
+    this.updateBackButtonVisibility();
+  }
+
+  // 回退到上一个单词
+  goBackToPreviousWord() {
+    const history = JSON.parse(this.wordDialog.dataset.wordHistory || "[]");
+    const currentIndex = parseInt(this.wordDialog.dataset.currentIndex || "0");
+    if (currentIndex > 0) {
+      const newIndex = currentIndex - 1;
+      const previousWord = history[newIndex];
+
+      this.wordDialog.dataset.currentIndex = newIndex.toString();
+
+      this.wordDialog.dataset.wordHistory = JSON.stringify(history.slice(0, newIndex + 1));
+
+      this.updateBackButtonVisibility();
+
+      // 重新查询上一个单词
+      this.lookupWordByHistory(previousWord);
+    }
+  }
+
+  // 通过历史查询单词（不添加到历史记录）
+  async lookupWordByHistory(word) {
+    this.showLoadingMessage();
+
+    try {
+      const response = await fetch("/word_lookup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRF-Token": this.getCSRFToken(),
+        },
+        body: JSON.stringify({ word: word }),
       });
+
+      const data = await response.json();
+      if (data.success && data.word) {
+        const processDef = (text, skipEnglish = false) => this.processDefinitionText(text, skipEnglish, this.escapeHtmlFunc);
+        this.showPopupDefinition(null, data.word, word, processDef);
+      } else {
+        this.showErrorMessage('未找到单词释义');
+      }
+    } catch (error) {
+      console.error('WordLookup: Error during history lookup:', error);
+      this.showErrorMessage('查询失败，请稍后重试');
     }
   }
 
-  // 显示弹窗容器
-  showPopupContainer() {
-    if (this.popupContainer) {
-      this.popupContainer.classList.remove("hidden");
+  // 更新回退按钮可见性
+  updateBackButtonVisibility() {
+    const currentIndex = parseInt(this.wordDialog.dataset.currentIndex || "0");
+
+    if (currentIndex > 0) {
+      this.wordBackBtn.classList.remove("hidden");
+    } else {
+      this.wordBackBtn.classList.add("hidden");
     }
   }
 
-  // 隐藏弹窗容器
-  hidePopupContainer() {
-    if (this.popupContainer) {
-      this.popupContainer.classList.add("hidden");
-    }
+  // 清空历史记录
+  clearWordHistory() {
+    console.log('clearWorkdHsitasd')
+    this.wordDialog.dataset.wordHistory = JSON.stringify([]);
+    this.wordDialog.dataset.currentIndex = "0";
+    this.updateBackButtonVisibility();
   }
 
   // 异步查询单词释义
   async lookupWord(word) {
+    // 检查是否已经有历史记录
+    const history = JSON.parse(this.wordDialog.dataset.wordHistory || "[]");
+
+    if (history.length === 0) {
+      this.clearWordHistory();
+    }
+
+    this.addToWordHistory(word);
+
     // 立即显示弹窗
-    document.getElementById('wordInfo').showModal();
+    this.wordDialog.showModal();
 
     // 显示加载状态
     this.showLoadingMessage();
@@ -123,134 +224,6 @@ export class WordLookup {
     return meta ? meta.getAttribute("content") : "";
   }
 
-  // 创建新弹窗层
-  createPopupLayer(word, sourceLayer = 0, showImmediately = true) {
-    if (!this.popupTemplate || !this.popupContainer) return null;
-
-    // 克隆HTML模板
-    const template = this.popupTemplate.content.cloneNode(true);
-    const popupLayer = template.querySelector(".word-popup-layer");
-
-    // 设置唯一ID和层级属性
-    const popupId = `word-popup-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    popupLayer.id = popupId;
-    popupLayer.dataset.word = word;
-    popupLayer.dataset.layer = this.activePopups.length;
-
-    // 添加到容器
-    this.popupContainer.appendChild(popupLayer);
-
-    // 设置事件监听
-    this.setupPopupEvents(popupId, word);
-
-    // 添加到活动弹窗列表
-    const popupData = {
-      id: popupId,
-      word: word,
-      element: popupLayer,
-      sourceLayer: sourceLayer,
-    };
-    this.activePopups.push(popupData);
-
-    // 确保容器可见
-    if (this.popupContainer.classList.contains("hidden")) {
-      this.popupContainer.classList.remove("hidden");
-    }
-
-    return popupId;
-  }
-
-  // 设置弹窗事件监听器
-  setupPopupEvents(popupId, word) {
-    const popupLayer = document.getElementById(popupId);
-    if (!popupLayer) return;
-
-    // 关闭按钮事件
-    const closeBtn = popupLayer.querySelector(".word-popup-close");
-    if (closeBtn) {
-      closeBtn.addEventListener("click", () => {
-        this.closePopup(popupId);
-      });
-    }
-
-    // 阻止事件冒泡，避免点击弹窗内容时关闭弹窗
-    popupLayer.addEventListener("click", (e) => {
-      e.stopPropagation();
-    });
-  }
-
-  // 关闭指定弹窗
-  closePopup(popupId) {
-    const popupIndex = this.activePopups.findIndex((p) => p.id === popupId);
-    if (popupIndex === -1) return;
-
-    const popupData = this.activePopups[popupIndex];
-
-    // 移除DOM元素
-    if (popupData.element && popupData.element.parentNode) {
-      popupData.element.parentNode.removeChild(popupData.element);
-    }
-
-    // 从活动列表中移除
-    this.activePopups.splice(popupIndex, 1);
-
-    // 如果没有活动弹窗，隐藏容器
-    if (this.activePopups.length === 0) {
-      this.hidePopupContainer();
-    }
-  }
-
-  // 关闭最顶层弹窗
-  closeTopPopup() {
-    if (this.activePopups.length > 0) {
-      const topPopup = this.activePopups[this.activePopups.length - 1];
-      this.closePopup(topPopup.id);
-    }
-  }
-
-  // 显示弹窗加载状态
-  showPopupLoading(popupId) {
-    const contentElement = document.querySelector(
-      `#${popupId} .word-popup-content`,
-    );
-    if (contentElement) {
-      contentElement.innerHTML = `
-        <div class="text-center text-gray-500 py-8">
-          <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          <p class="mt-2 text-sm">查询中...</p>
-        </div>
-      `;
-    }
-  }
-
-  // 显示弹窗错误状态
-  showPopupError(popupId, message) {
-    const contentElement = document.querySelector(
-      `#${popupId} .word-popup-content`,
-    );
-    if (contentElement) {
-      contentElement.innerHTML = `
-        <div class="text-center text-gray-500 py-8">
-          <svg class="w-12 h-12 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-          </svg>
-          <p class="text-sm">${message}</p>
-        </div>
-      `;
-    }
-  }
-
-  // 显示弹窗（从隐藏状态到可见状态）
-  revealPopup(popupId) {
-    const popupLayer = document.getElementById(popupId);
-    if (!popupLayer) return;
-
-    // 短暂延迟确保DOM已更新
-    requestAnimationFrame(() => {
-      popupLayer.style.opacity = "1";
-      popupLayer.style.pointerEvents = "auto";
-    });
-  }
 
   // 显示单词释义
   showPopupDefinition(popupId, wordData, sourceWord, processDefinitionText) {
@@ -424,11 +397,11 @@ export class WordLookup {
     });
   }
 
-  // 清理函数，关闭所有弹窗
+  // 清理函数，关闭弹窗并清理历史记录
   disconnect() {
-    // 关闭所有活动弹窗
-    while (this.activePopups.length > 0) {
-      this.closeTopPopup();
+    if (this.wordDialog && this.wordDialog.open) {
+      this.clearWordHistory();
+      this.wordDialog.close();
     }
   }
 }
