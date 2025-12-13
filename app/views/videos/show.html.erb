@@ -4,28 +4,6 @@
 <%= stylesheet_link_tag "video_player_tailwind_fix", "data-turbo-track": "reload" %>
 
 <style>
-/* 多层单词查询弹窗样式 */
-.word-popup-layer {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-}
-
-.word-popup-layer .bg-white {
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  border: 1px solid rgba(209, 213, 219, 0.8);
-  backdrop-filter: blur(8px);
-}
-
-/* 深层级的视觉增强效果 */
-
-
-/* 弹窗标题栏样式 */
-.word-popup-layer .flex.justify-between {
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-  border-bottom-color: rgba(209, 213, 219, 0.8);
-}
-
 /* 单词高亮样式 */
 .word-lookup-popup {
   position: relative;
@@ -55,135 +33,6 @@
 .word-lookup-popup:hover::after {
   width: 80%;
 }
-
-/* 动画效果 */
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(0.9) translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1) translateY(0);
-  }
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-.word-popup-layer {
-  animation: slideIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.word-popup-content {
-  animation: fadeIn 0.2s ease-out 0.1s;
-}
-
-/* 响应式设计 */
-@media (max-width: 640px) {
-  .word-popup-layer .bg-white {
-    max-width: 95vw;
-    margin: 0 2.5vw;
-  }
-
-  .word-popup-layer {
-    left: 10px !important;
-    top: 10px !important;
-  }
-}
-
-@media (max-width: 480px) {
-  .word-popup-layer .bg-white {
-    max-width: 98vw;
-    margin: 0 1vw;
-  }
-
-  .word-popup-layer {
-    left: 5px !important;
-    top: 5px !important;
-  }
-
-  .word-layer-indicator {
-    font-size: 0.7rem;
-    padding: 0.25rem 0.5rem;
-  }
-}
-
-/* 容器样式 */
-#wordPopupContainer {
-  transition: opacity 0.3s ease;
-}
-
-#wordPopupContainer.hidden {
-  opacity: 0;
-  pointer-events: none;
-}
-
-/* 弹窗预加载动画 */
-@keyframes popupPreload {
-  0% {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(0.8) translateY(20px);
-  }
-  50% {
-    opacity: 0.6;
-    transform: translate(-50%, -50%) scale(0.95) translateY(5px);
-  }
-  100% {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1) translateY(0);
-  }
-}
-
-.word-popup-layer {
-  animation: popupPreload 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-/* 按钮交互效果 */
-.word-popup-back,
-.word-popup-close {
-  transition: all 0.2s ease;
-  border-radius: 4px;
-  padding: 4px;
-}
-
-.word-popup-back:hover,
-.word-popup-close:hover {
-  background-color: rgba(239, 68, 68, 0.1);
-  transform: scale(1.1);
-}
-
-.word-popup-back:active,
-.word-popup-close:active {
-  transform: scale(0.95);
-}
-
-/* 加载动画优化 */
-.word-popup-content .animate-spin {
-  border-top-color: #3b82f6;
-  border-left-color: #3b82f6;
-}
-
-/* 内容区域滚动条样式 */
-.word-popup-content::-webkit-scrollbar {
-  width: 6px;
-}
-
-.word-popup-content::-webkit-scrollbar-track {
-  background: #f1f5f9;
-  border-radius: 3px;
-}
-
-.word-popup-content::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 3px;
-}
-
-.word-popup-content::-webkit-scrollbar-thumb:hover {
-  background: #9ca3af;
-}
 </style>
 
 <div
@@ -203,7 +52,7 @@
           </h1>
 
           <%= link_to "<", videos_path,
-              class: "w-14 inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+              class: "inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
       </div>
     </div>
   </div>
@@ -320,73 +169,11 @@
   </div>
 </div>
 
-<!-- 多层单词查询弹窗容器 -->
-<div
-  id="wordPopupContainer"
-  class="hidden fixed z-40"
-  style="top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.5); backdrop-filter: blur(2px);"
->
-  <!-- 动态创建的多层弹窗将插入这里 -->
-</div>
-
-<!-- 单词查询弹窗模板 (用于创建多层弹窗) -->
-<template id="wordPopupTemplate">
-  <div
-    class="word-popup-layer absolute flex items-center justify-center"
-    style="z-index: 50;"
-  >
-    <div
-      class="
-        bg-white rounded-lg shadow-xl max-w-md w-full mx-4 max-h-[80vh]
-        overflow-hidden border border-gray-200
-      "
-    >
-      <!-- 弹窗头部 -->
-      <div
-        class="
-          flex justify-between items-center p-4 border-b border-gray-200
-          bg-gray-50
-        "
-      >
-        <h3 class="text-lg font-semibold text-gray-900">单词释义</h3>
-
-        <button
-          class="
-            word-popup-close text-gray-400 hover:text-gray-600
-            transition-colors
-          "
-          title="关闭"
-        >
-          <svg
-            class="w-6 h-6"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M6 18L18 6M6 6l12 12"
-            ></path>
-          </svg>
-        </button>
-      </div>
-
-      <!-- 弹窗内容 -->
-      <div class="word-popup-content p-4 max-h-[60vh] overflow-y-auto">
-        <!-- 单词内容将在这里动态插入 -->
-        <div class="text-center text-gray-500 py-8">
-          <div
-            class="
-              inline-block animate-spin rounded-full h-8 w-8 border-b-2
-              border-blue-600
-            "
-          ></div>
-
-          <p class="mt-2 text-sm">查询中...</p>
-        </div>
-      </div>
-    </div>
+<dialog id="wordInfo" class="modal">
+  <div class="modal-box">
+    <form method="dialog">
+      <button class="btn btn-sm btn-circle absolute right-2 top-2">✕</button>
+    </form>
+    <p class="py-4" id="wordDetail"></p>
   </div>
-</template>
+</dialog>

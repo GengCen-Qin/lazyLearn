@@ -8,10 +8,6 @@ export class WordLookup {
     this.popupContainer = document.getElementById("wordPopupContainer"); // 弹窗容器
     this.popupTemplate = document.getElementById("wordPopupTemplate"); // 弹窗HTML模板
     this.activePopups = []; // 当前活动的弹窗列表
-    this.popupHistory = []; // 弹窗历史
-    this.maxPopups = 10; // 最大弹窗层数，防止无限嵌套
-    this.baseZIndex = 50; // 基础z-index值
-    this.offsetStep = 20; // 每层弹窗的视觉偏移
   }
 
   // 初始化单词查询功能
@@ -55,30 +51,7 @@ export class WordLookup {
   }
 
   // 异步查询单词释义
-  async lookupWord(word, clickedElement, handler, sourceLayer = 0) {
-    console.log('WordLookup: lookupWord called with word:', word, 'sourceLayer:', sourceLayer, 'handler:', handler);
-    // 验证输入和弹窗数量限制
-    if (!word || this.activePopups.length >= this.maxPopups) {
-      console.log('WordLookup: Validation failed - word:', !!word, 'popup count:', this.activePopups.length);
-      return;
-    }
-
-    // 检查是否已经在顶层显示这个单词（避免重复查询）
-    if (this.activePopups.length > 0) {
-      const topPopup = this.activePopups[this.activePopups.length - 1];
-      if (topPopup.word === word) {
-        console.log('WordLookup: Word already displayed on top');
-        return; // 已经在顶层显示
-      }
-    }
-
-    console.log('WordLookup: Showing popup container');
-    // 先显示弹窗容器
-    this.showPopupContainer();
-
-    // 创建新的弹窗层（初始隐藏，等待数据加载完成）
-    const popupId = this.createPopupLayer(word, sourceLayer, false);
-    console.log('WordLookup: Created popup layer with id:', popupId);
+  async lookupWord(word, handler) {
 
     try {
       // 发送查询请求到后端API
@@ -90,31 +63,22 @@ export class WordLookup {
         },
         body: JSON.stringify({ word: word }),
       });
-      console.log('WordLookup: Fetch response received, status:', response.status);
       const data = await response.json();
-      console.log('WordLookup: Fetch response data:', data);
-
       if (data.success && data.word) {
-        // 查询成功，显示单词释义
-        console.log('WordLookup: Showing popup definition');
-        // 从handler（主控制器）获取utils的escapeHtml方法
-        const escapeHtmlFunc = handler.utils.escapeHtml.bind(handler.utils);
-        // 创建一个包装函数
-        const processDef = (text, skipEnglish = false) => this.processDefinitionText(text, skipEnglish, escapeHtmlFunc);
-        this.showPopupDefinition(popupId, data.word, word, processDef, handler);
-        this.revealPopup(popupId);
-      } else {
-        // 未找到单词
-        console.log('WordLookup: Word not found');
-        this.showPopupError(popupId, `未找到单词 "${word}" 的释义`);
-        this.revealPopup(popupId);
+        const processDef = (text, skipEnglish = false) => this.processDefinitionText(text, skipEnglish, this.escapeHtmlFunc);
+        this.showPopupDefinition(null, data.word, word, processDef, handler);
       }
     } catch (error) {
       // 网络错误或其他异常
       console.error('WordLookup: Error during lookup:', error);
-      this.showPopupError(popupId, `查询失败，请稍后重试`);
-      this.revealPopup(popupId);
     }
+    document.getElementById('wordInfo').showModal()
+  }
+
+  escapeHtmlFunc(text) {
+    const div = document.createElement("div");
+    div.textContent = text;
+    return div.innerHTML;
   }
 
   // 获取CSRF令牌
@@ -137,17 +101,6 @@ export class WordLookup {
     popupLayer.dataset.word = word;
     popupLayer.dataset.layer = this.activePopups.length;
 
-    // 计算视觉偏移位置（每层偏移，创建嵌套效果）
-    const offset = this.activePopups.length * this.offsetStep;
-    popupLayer.style.left = `${offset}px`;
-    popupLayer.style.top = `${offset}px`;
-    popupLayer.style.zIndex = this.baseZIndex + this.activePopups.length;
-
-    // 确保容器可见
-    if (this.popupContainer.classList.contains("hidden")) {
-      this.popupContainer.classList.remove("hidden");
-    }
-
     // 添加到容器
     this.popupContainer.appendChild(popupLayer);
 
@@ -163,11 +116,9 @@ export class WordLookup {
     };
     this.activePopups.push(popupData);
 
-    // 初始隐藏，等待显示指令（用于加载状态的显示）
-    if (!showImmediately) {
-      popupLayer.style.opacity = "0";
-      popupLayer.style.pointerEvents = "none";
-      popupLayer.style.transition = "opacity 0.2s ease";
+    // 确保容器可见
+    if (this.popupContainer.classList.contains("hidden")) {
+      this.popupContainer.classList.remove("hidden");
     }
 
     return popupId;
@@ -267,9 +218,8 @@ export class WordLookup {
 
   // 显示单词释义
   showPopupDefinition(popupId, wordData, sourceWord, processDefinitionText, handler) {
-    const contentElement = document.querySelector(
-      `#${popupId} .word-popup-content`,
-    );
+    const contentElement = document.querySelector(`#wordDetail`);
+
     if (!contentElement) return;
 
     // 处理英文释义中的单词，使其可点击
@@ -292,16 +242,6 @@ export class WordLookup {
           <h2 class="text-2xl font-bold text-gray-900 mb-2">${wordData.word}</h2>
           ${wordData.phonetic ? `<p class="text-gray-600">[${wordData.phonetic}]</p>` : ""}
         </div>
-        <!-- 词性 -->
-        ${
-          wordData.pos
-            ? `
-          <div class="flex justify-center">
-            <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded">${wordData.pos}</span>
-          </div>
-        `
-            : ""
-        }
         <!-- 核心词汇标记 -->
         ${
           wordData.core
@@ -364,25 +304,6 @@ export class WordLookup {
             <div class="text-gray-700 text-sm leading-relaxed bg-purple-50 p-3 rounded">
               ${processedDetail}
             </div>
-          </div>
-        `
-            : ""
-        }
-        <!-- 标签信息 -->
-        ${
-          wordData.tag
-            ? `
-          <div class="flex flex-wrap gap-2 pt-2">
-            ${wordData.tag
-              .split(",")
-              .map(
-                (tag) => `
-              <span class="bg-gray-100 text-gray-800 px-2 py-1 rounded text-xs">
-                ${tag.trim()}
-              </span>
-            `,
-              )
-              .join("")}
           </div>
         `
             : ""
@@ -457,33 +378,13 @@ export class WordLookup {
 
   // 添加弹窗单词点击监听器
   addPopupWordClickListeners(popupId, handler) {
-    console.log('WordLookup: addPopupWordClickListeners called for popup', popupId, 'with handler', handler);
-    const popupElement = document.getElementById(popupId);
-    if (!popupElement) {
-      console.log('WordLookup: Popup element not found for id', popupId);
-      return;
-    }
-
-    const wordElements = popupElement.querySelectorAll(".word-lookup-popup");
-    console.log('WordLookup: Found', wordElements.length, 'word elements in popup', popupId);
+    const wordElements = document.querySelectorAll(".word-lookup-popup");
     wordElements.forEach((element) => {
       const word = element.dataset.word;
-      console.log('WordLookup: Adding click listener to popup word', word);
       element.addEventListener("click", (e) => {
         e.stopPropagation();
 
-        // 查找当前弹窗的层级信息
-        const currentPopup = this.activePopups.find((p) => p.id === popupId);
-        const sourceLayer = currentPopup
-          ? parseInt(currentPopup.element.dataset.layer) || 0
-          : 0;
-
-        console.log('WordLookup: Popup word clicked:', word, 'Source layer:', sourceLayer, 'Handler available:', handler && typeof handler.lookupWord === 'function');
-        // 查找新单词，源层级为当前弹窗的层级
-        // 这里需要通过handler调用主控制器的lookupWord方法
-        if (handler && typeof handler.lookupWord === 'function') {
-          handler.lookupWord(word, e.target, sourceLayer + 1);
-        }
+        this.lookupWord(word, handler)
       });
     });
   }

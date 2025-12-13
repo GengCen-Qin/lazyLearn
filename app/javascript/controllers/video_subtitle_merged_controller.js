@@ -405,9 +405,8 @@ export default class extends Controller {
 
   showPopupDefinition(popupId, wordData, sourceWord) {
     // 使用正确的processDefinitionText方法
-    const escapeHtmlFunc = this.utils.escapeHtml.bind(this.utils);
     const processDef = (text, skipEnglish = false) =>
-      this.wordLookup.processDefinitionText(text, skipEnglish, escapeHtmlFunc);
+      this.wordLookup.processDefinitionText(text, skipEnglish, this.escapeHtml);
     this.wordLookup.showPopupDefinition(
       popupId,
       wordData,
@@ -433,11 +432,7 @@ export default class extends Controller {
     }
   }
 
-  // Utility method that was removed from the main controller
-  escapeHtml(text) {
-    return this.utils.escapeHtml(text);
-  }
-
+  
   // 加载字幕
   loadInitialSubtitles() {
     // 检查是否有初始字幕数据（从HTML data属性传递）
