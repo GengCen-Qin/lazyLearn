@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_12_02_124519) do
+ActiveRecord::Schema[8.0].define(version: 2025_12_14_025454) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -58,6 +58,102 @@ ActiveRecord::Schema[8.0].define(version: 2025_12_02_124519) do
     t.index ["collins"], name: "index_ecdict_words_on_collins"
     t.index ["oxford"], name: "index_ecdict_words_on_oxford"
     t.index ["word"], name: "index_ecdict_words_on_word", unique: true
+  end
+
+  create_table "rails_pulse_operations", force: :cascade do |t|
+    t.integer "request_id", null: false
+    t.integer "query_id"
+    t.string "operation_type", null: false
+    t.string "label", null: false
+    t.decimal "duration", precision: 15, scale: 6, null: false
+    t.string "codebase_location"
+    t.float "start_time", default: 0.0, null: false
+    t.datetime "occurred_at", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["created_at", "query_id"], name: "idx_operations_for_aggregation"
+    t.index ["created_at"], name: "idx_operations_created_at"
+    t.index ["occurred_at", "duration", "operation_type"], name: "index_rails_pulse_operations_on_time_duration_type"
+    t.index ["occurred_at"], name: "index_rails_pulse_operations_on_occurred_at"
+    t.index ["operation_type"], name: "index_rails_pulse_operations_on_operation_type"
+    t.index ["query_id", "duration", "occurred_at"], name: "index_rails_pulse_operations_query_performance"
+    t.index ["query_id", "occurred_at"], name: "index_rails_pulse_operations_on_query_and_time"
+    t.index ["query_id"], name: "index_rails_pulse_operations_on_query_id"
+    t.index ["request_id"], name: "index_rails_pulse_operations_on_request_id"
+  end
+
+  create_table "rails_pulse_queries", force: :cascade do |t|
+    t.string "normalized_sql", limit: 1000, null: false
+    t.datetime "analyzed_at"
+    t.text "explain_plan"
+    t.text "issues"
+    t.text "metadata"
+    t.text "query_stats"
+    t.text "backtrace_analysis"
+    t.text "index_recommendations"
+    t.text "n_plus_one_analysis"
+    t.text "suggestions"
+    t.text "tags"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["normalized_sql"], name: "index_rails_pulse_queries_on_normalized_sql", unique: true
+  end
+
+  create_table "rails_pulse_requests", force: :cascade do |t|
+    t.integer "route_id", null: false
+    t.decimal "duration", precision: 15, scale: 6, null: false
+    t.integer "status", null: false
+    t.boolean "is_error", default: false, null: false
+    t.string "request_uuid", null: false
+    t.string "controller_action"
+    t.datetime "occurred_at", null: false
+    t.text "tags"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["created_at", "route_id"], name: "idx_requests_for_aggregation"
+    t.index ["created_at"], name: "idx_requests_created_at"
+    t.index ["occurred_at"], name: "index_rails_pulse_requests_on_occurred_at"
+    t.index ["request_uuid"], name: "index_rails_pulse_requests_on_request_uuid", unique: true
+    t.index ["route_id", "occurred_at"], name: "index_rails_pulse_requests_on_route_id_and_occurred_at"
+    t.index ["route_id"], name: "index_rails_pulse_requests_on_route_id"
+  end
+
+  create_table "rails_pulse_routes", force: :cascade do |t|
+    t.string "method", null: false
+    t.string "path", null: false
+    t.text "tags"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["method", "path"], name: "index_rails_pulse_routes_on_method_and_path", unique: true
+  end
+
+  create_table "rails_pulse_summaries", force: :cascade do |t|
+    t.datetime "period_start", null: false
+    t.datetime "period_end", null: false
+    t.string "period_type", null: false
+    t.string "summarizable_type", null: false
+    t.integer "summarizable_id", null: false
+    t.integer "count", default: 0, null: false
+    t.float "avg_duration"
+    t.float "min_duration"
+    t.float "max_duration"
+    t.float "p50_duration"
+    t.float "p95_duration"
+    t.float "p99_duration"
+    t.float "total_duration"
+    t.float "stddev_duration"
+    t.integer "error_count", default: 0
+    t.integer "success_count", default: 0
+    t.integer "status_2xx", default: 0
+    t.integer "status_3xx", default: 0
+    t.integer "status_4xx", default: 0
+    t.integer "status_5xx", default: 0
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["created_at"], name: "index_rails_pulse_summaries_on_created_at"
+    t.index ["period_type", "period_start"], name: "index_rails_pulse_summaries_on_period"
+    t.index ["summarizable_type", "summarizable_id", "period_type", "period_start"], name: "idx_pulse_summaries_unique", unique: true
+    t.index ["summarizable_type", "summarizable_id"], name: "index_rails_pulse_summaries_on_summarizable"
   end
 
   create_table "solid_queue_blocked_executions", force: :cascade do |t|
@@ -205,6 +301,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_12_02_124519) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "rails_pulse_operations", "rails_pulse_queries", column: "query_id"
+  add_foreign_key "rails_pulse_operations", "rails_pulse_requests", column: "request_id"
+  add_foreign_key "rails_pulse_requests", "rails_pulse_routes", column: "route_id"
   add_foreign_key "solid_queue_blocked_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_claimed_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_failed_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade

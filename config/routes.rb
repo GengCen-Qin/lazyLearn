@@ -9,6 +9,7 @@ Rails.application.routes.draw do
   post "word_lookup", to: "word_lookup#create"
 
   mount MissionControl::Jobs::Engine, at: "/jobs"
+  mount RailsPulse::Engine => "/rails_pulse"
 
   # Render dynamic PWA files from app/views/pwa/* (remember to link manifest in application.html.erb)
   get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
