@@ -33,10 +33,8 @@ ENV RAILS_ENV="production" \
 # Throw-away build stage to reduce size of final image
 FROM base AS build
 
-# 关键两行：先把 gem 源永久换成国内源，再装正确版本的 bundler
-RUN gem sources --add https://gems.ruby-china.com/ --remove https://rubygems.org \
-    && gem update --system \
-    && gem install bundler:2.7.2
+# gem 加速
+RUN bundle config mirror.https://rubygems.org https://gems.ruby-china.com
 
 # Install packages needed to build gems
 RUN apt-get update -qq && \
