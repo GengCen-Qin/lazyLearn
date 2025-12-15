@@ -30,6 +30,7 @@ class XhsParseController < ApplicationController
 
       video.video_file.attach(result.slice(:io, :filename, :content_type))
       video.trigger_transcription_async
+      video.oss_upload_async
       VideoLinkCache.cache_video(share_text, video)
 
       render json: {

@@ -74,16 +74,17 @@ group :test do
   gem "selenium-webdriver"
 end
 
+# 文件下载
 gem "down", "~> 5.4"
-
+# HTML，XML解析
 gem "nokogiri", "~> 1.18"
-
+# HTTP请求库
 gem "typhoeus", "~> 1.5"
-
+# YAML解析
 gem "psych", "~> 5.2"
-
+# POSTGRESQL
 gem "pg", "~> 1.6"
-
+# 请求底层
 gem "openssl", "~> 3.3"
-
+# 性能监控
 gem 'rails_pulse'

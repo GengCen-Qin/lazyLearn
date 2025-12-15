@@ -53,6 +53,41 @@ class Video < ApplicationRecord
     TranscriptionJob.perform_later(id, language)
   end
 
+  # 附件上传
+  def oss_upload_async
+    return if ori_video_url.blank? || !Rails.env.production?
+
+    response = Typhoeus.post(
+      "http://new_web-cos:8080/api/v1/upload",
+      headers: { "Content-Type" => "application/json" },
+      body: { file_url: ori_video_url.split("/")[-1] }.to_json
+    )
+    if response.success?
+      JSON.parse(response.body)["cos_key"]
+      # 节省成本把服务器存储的附件删除掉
+      video_file.purge_later
+    else
+      Rails.logger.error "OSS 上传失败: #{response}"
+    end
+  end
+
+  # 获取OSS临时链接
+  def oss_link
+    return if ori_video_url.blank? || !Rails.env.production?
+
+    response = Typhoeus.post(
+      "http://new_web-cos:8080/api/v1/presigned-url",
+      headers: { "Content-Type" => "application/json" },
+      body: { file_url: ori_video_url.split("/")[-1] + ".mp4" }.to_json
+    )
+
+    if response.success?
+      JSON.parse(response.body)["presigned_url"]
+    else
+      Rails.logger.error "OSS 获取链接失败: #{response.code}, #{response.body}"
+    end
+  end
+
   # 触发转录（同步，主要用于调试）
   def trigger_transcription(language: "en")
     update!(transcription_language: language, transcription_status: :processing)
