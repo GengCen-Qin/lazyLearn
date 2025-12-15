@@ -1,0 +1,2 @@
+module XhsParseHelper
+end

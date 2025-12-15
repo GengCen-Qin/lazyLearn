@@ -3,7 +3,7 @@ Rails.application.routes.draw do
 
   root "welcome#index"
 
-  post "download_xiaohongshu" => "welcome#download_xiaohongshu"
+  post "xhs_parse" => "xhs_parse#create"
 
   resources :videos, only: [ :index, :show, :destroy ]
   post "word_lookup", to: "word_lookup#create"

@@ -29,7 +29,7 @@
 
     <!-- Search Form -->
     <div class="w-full max-w-2xl mb-6">
-      <%= form_with url: "/download_xiaohongshu", method: :post, local: true,
+      <%= form_with url: "/xhs_parse", method: :post, local: true,
                     data: { xiaohongshu_downloader_target: "form",
                             action: "submit->xiaohongshu-downloader#download" } do |form| %>
         <div

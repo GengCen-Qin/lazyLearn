@@ -22,7 +22,7 @@ export default class extends Controller {
     this.setButtonLoading(true);
 
     try {
-      const response = await fetch("/download_xiaohongshu", {
+      const response = await fetch("/xhs_parse", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
