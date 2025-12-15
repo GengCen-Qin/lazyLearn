@@ -114,3 +114,12 @@ accessories:
       - db/production.sql:/docker-entrypoint-initdb.d/setup.sql
     directories:
       - /var/lib/postgresql/data:/var/lib/postgresql/data
+  cos:
+    image: ccr.ccs.tencentyun.com/lucas_rcc/cos-upload-service
+    host: 101.35.96.142
+    port: "127.0.0.1:8080:8080"
+    env:
+      secret:
+        - TENCENTCLOUD_SECRET_ID
+        - TENCENTCLOUD_SECRET_KEY
+        - COS_BUCKET_URL
