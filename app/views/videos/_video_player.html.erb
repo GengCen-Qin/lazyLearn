@@ -6,8 +6,10 @@
       data-subtitle-merged-target="video"
       controls
       class="absolute inset-0 w-full h-full object-contain"
-      <% if video.video_file.attached? %>
-        src="<%= video.oss_link || url_for(video.video_file) %>"
+      <% if video.oss_link.present? %>
+        src="<%= video.oss_link %>"
+      <% elsif video.video_file.attached? %>
+        src="<%= url_for(video.video_file) %>"
       <% end %>
     >
       您的浏览器不支持 HTML5 视频。
