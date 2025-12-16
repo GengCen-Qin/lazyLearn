@@ -55,20 +55,7 @@ class Video < ApplicationRecord
 
   # 附件上传
   def oss_upload_async
-    return if ori_video_url.blank? || !Rails.env.production?
-
-    response = Typhoeus.post(
-      "http://new_web-cos:8080/api/v1/upload",
-      headers: { "Content-Type" => "application/json" },
-      body: { file_url: ori_video_url }.to_json
-    )
-    if response.success?
-      JSON.parse(response.body)["cos_key"]
-      # 节省成本把服务器存储的附件删除掉
-      video_file.purge_later
-    else
-      Rails.logger.error "OSS 上传失败: #{response.body}"
-    end
+    CosUploadJob.perform_later(id)
   end
 
   # 获取OSS临时链接
