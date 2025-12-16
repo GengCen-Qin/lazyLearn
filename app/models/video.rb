@@ -60,7 +60,7 @@ class Video < ApplicationRecord
     response = Typhoeus.post(
       "http://new_web-cos:8080/api/v1/upload",
       headers: { "Content-Type" => "application/json" },
-      body: { file_url: ori_video_url.split("/")[-1] }.to_json
+      body: { file_url: ori_video_url }.to_json
     )
     if response.success?
       JSON.parse(response.body)["cos_key"]
@@ -78,7 +78,7 @@ class Video < ApplicationRecord
     response = Typhoeus.post(
       "http://new_web-cos:8080/api/v1/presigned-url",
       headers: { "Content-Type" => "application/json" },
-      body: { file_url: ori_video_url.split("/")[-1] + ".mp4" }.to_json
+      body: { file_path: ori_video_url.split("/")[-1] + ".mp4" }.to_json
     )
 
     if response.success?
