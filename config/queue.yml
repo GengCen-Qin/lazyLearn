@@ -7,15 +7,6 @@ default: &default
       threads: 3
       processes: <%= ENV.fetch("JOB_CONCURRENCY", 1) %>
       polling_interval: 0.1
-      cron:
-        - name: "summary_job"
-          cron: "5 * * * *"
-          class: "RailsPulse::SummaryJob"
-          args: []
-        - name: "cleanup_job"
-          cron: "0 1 * * *"
-          class: "RailsPulse::CleanupJob"
-          args: []
 
 development:
   <<: *default
