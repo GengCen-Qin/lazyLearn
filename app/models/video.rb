@@ -67,7 +67,7 @@ class Video < ApplicationRecord
       # 节省成本把服务器存储的附件删除掉
       video_file.purge_later
     else
-      Rails.logger.error "OSS 上传失败: #{response}"
+      Rails.logger.error "OSS 上传失败: #{response.body}"
     end
   end
 
