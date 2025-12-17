@@ -44,7 +44,9 @@ class EcdictWord < ActiveRecord::Base
       clean_word = word.to_s.strip.gsub(/[^a-zA-Z]/, "").downcase
       return nil if clean_word.blank?
 
-      # 尝试精确匹配
+      word_record = find_by(word: clean_word)
+      return word_record if word_record
+
       word_record = find_by("lower(word) = ?", clean_word)
       return word_record if word_record
 
