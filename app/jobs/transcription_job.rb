@@ -8,10 +8,6 @@ class TranscriptionJob < ApplicationJob
 
     video = Video.find(video_id)
 
-    raise "视频文件不存在: Video ID: #{video_id}" unless video.has_video_file?
-
-    raise "不支持的语言: #{language}" unless video.transcription_language.in? %w[zh en ja ko es fr de]
-
     video.processing!
 
     TranscriptionService.new(video, language).process
