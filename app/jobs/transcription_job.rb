@@ -3,9 +3,6 @@
 class TranscriptionJob < ApplicationJob
   queue_as :transcription
 
-  # 禁止重试
-  retry_with 0
-
   def perform(video_id, language = "en")
     Rails.logger.info "开始执行转录任务: Video ID: #{video_id}, Language: #{language}"
 

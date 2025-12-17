@@ -1,9 +1,6 @@
 class LocalUploadJob < ApplicationJob
   queue_as :upload
 
-  # 禁止重试
-  retry_with 0
-
   def perform(id)
     record = Video.find(id)
     file = Down.download(record.ori_video_url)
