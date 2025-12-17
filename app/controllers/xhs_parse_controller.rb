@@ -7,17 +7,6 @@ class XhsParseController < ApplicationController
       return
     end
 
-    cached_video = VideoLinkCache.find_video(share_text)
-    if cached_video
-      render json: {
-        success: true,
-        redirect_to: "/videos/#{cached_video.id}",
-        message: "视频已存在，正在跳转到视频详情页...",
-        video_exists: true
-      }
-      return
-    end
-
     result = Downloader::Xhs.new.parse(share_text)
 
     if result[:success]
@@ -27,8 +16,6 @@ class XhsParseController < ApplicationController
         download_link: result[:ori_url],
         ori_video_url: result[:ori_video_url]
       )
-
-      video.video_file.attach(result.slice(:io, :filename, :content_type))
       video.trigger_transcription_async
       video.oss_upload_async
       VideoLinkCache.cache_video(share_text, video)

@@ -29,6 +29,11 @@ class Video < ApplicationRecord
   validates :title, presence: true
   validates :transcription_language, inclusion: { in: %w[zh en ja ko es fr de], message: "%{value} 不是支持的语言" }
 
+  after_save_commit do
+    local_upload_async if Rails.env.development?
+    oss_upload_async if Rails.env.production?
+  end
+
   def local_path
     return nil unless video_file.attached?
     video_file.blob.service.send(:path_for, video_file.blob.key)
@@ -53,9 +58,14 @@ class Video < ApplicationRecord
     TranscriptionJob.perform_later(id, language)
   end
 
-  # 附件上传
+  # OSS云存储
   def oss_upload_async
     CosUploadJob.perform_later(id)
+  end
+
+  # 本地存储（开发测试环境）
+  def local_upload_async
+    LocalUploadJob.perform_later(id)
   end
 
   # 获取OSS临时链接
