@@ -15,7 +15,7 @@ export default class extends Controller {
       return;
     }
 
-    if (!confirm("确定要下载这个小红书视频吗？")) {
+    if (!confirm("确定要解析这个小红书视频吗？")) {
       return;
     }
 
