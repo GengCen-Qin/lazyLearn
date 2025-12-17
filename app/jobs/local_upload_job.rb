@@ -1,9 +1,14 @@
 class LocalUploadJob < ApplicationJob
-  queue_as :default
+  queue_as :upload
+
+  # 禁止重试
+  retry_with 0
 
   def perform(id)
     record = Video.find(id)
     file = Down.download(record.ori_video_url)
     video_file.attach(io: file, filename: record.title, content_type: Util.determine_content_type(file))
+  rescue StandardError => e
+    Rails.logger.error "本地上传失败: #{e.message}, #{record.id}"
   end
 end

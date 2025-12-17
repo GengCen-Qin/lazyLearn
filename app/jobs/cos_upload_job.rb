@@ -1,5 +1,8 @@
 class CosUploadJob < ApplicationJob
-  queue_as :default
+  queue_as :upload
+
+  # 禁止重试
+  retry_with 0
 
   def perform(video_id)
     video = Video.find_by(id: video_id)
@@ -15,5 +18,7 @@ class CosUploadJob < ApplicationJob
     else
       Rails.logger.error "OSS 上传失败: #{response.body}, #{video.ori_video_url}"
     end
+  rescue StandardError => e
+    Rails.logger.error "OSS 上传失败: #{e.message}, #{video.ori_video_url}"
   end
 end
