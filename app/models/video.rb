@@ -29,7 +29,7 @@ class Video < ApplicationRecord
   validates :title, presence: true
   validates :transcription_language, inclusion: { in: %w[zh en ja ko es fr de], message: "%{value} 不是支持的语言" }
 
-  after_save_commit do
+  after_create_commit do
     local_upload_async if Rails.env.development?
     oss_upload_async if Rails.env.production?
     trigger_transcription_async
