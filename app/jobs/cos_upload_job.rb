@@ -1,5 +1,5 @@
 class CosUploadJob < ApplicationJob
-  queue_as :upload
+  queue_as :new_upload
 
   def perform(video_id)
     video = Video.find_by(id: video_id)

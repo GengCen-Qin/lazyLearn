@@ -1,7 +1,7 @@
 # 视频转录任务
 # 处理视频文件的异步转录
 class TranscriptionJob < ApplicationJob
-  queue_as :transcription
+  queue_as :new_transcription
 
   def perform(video_id, language = "en")
     Rails.logger.info "开始执行转录任务: Video ID: #{video_id}, Language: #{language}"
