@@ -32,6 +32,7 @@ class Video < ApplicationRecord
   after_save_commit do
     local_upload_async if Rails.env.development?
     oss_upload_async if Rails.env.production?
+    trigger_transcription_async
   end
 
   def local_path
@@ -54,7 +55,6 @@ class Video < ApplicationRecord
 
   # 触发转录（异步）
   def trigger_transcription_async(language: "en")
-    update!(transcription_language: language, transcription_status: :pending)
     TranscriptionJob.perform_later(id, language)
   end
 

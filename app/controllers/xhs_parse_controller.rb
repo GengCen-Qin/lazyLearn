@@ -14,11 +14,9 @@ class XhsParseController < ApplicationController
         title: result[:filename],
         description: result[:description],
         download_link: result[:ori_url],
-        ori_video_url: result[:ori_video_url]
+        ori_video_url: result[:ori_video_url],
+        transcription_status: :pending
       )
-      video.trigger_transcription_async
-      video.oss_upload_async
-      VideoLinkCache.cache_video(share_text, video)
 
       render json: {
         success: true,
