@@ -20,7 +20,7 @@ gem "jbuilder"
 # 任务监控
 gem "mission_control-jobs"
 # Use Active Model has_secure_password [https://guides.rubyonrails.org/active_model_basics.html#securepassword]
-# gem "bcrypt", "~> 3.1.7"
+gem "bcrypt", "~> 3.1.7"
 
 # HTTP client for transcription service communication
 gem "httparty"
