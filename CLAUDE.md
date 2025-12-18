@@ -17,11 +17,20 @@ This is a Ruby on Rails 8.0.4 application called "new_web" that provides video d
 
 ## Common Development Commands
 
+### Development Setup
+```bash
+# Initial setup (installs dependencies, prepares database, starts server)
+./bin/setup
+
+# Start development server with CSS hot-reload
+./bin/dev
+
+# Or start Rails server only
+./bin/rails server
+```
+
 ### Rails Commands
 ```bash
-# Start development server
-./bin/rails server
-
 # Database operations
 ./bin/rails db:migrate
 ./bin/rails db:schema:load
@@ -75,6 +84,26 @@ This is a Ruby on Rails 8.0.4 application called "new_web" that provides video d
 
 ## Architecture
 
+This Rails application follows several key architectural patterns:
+
+### Service-Oriented Architecture
+- Business logic encapsulated in service classes rather than models or controllers
+- Clear separation between models, views, and services
+- Service objects handle complex operations like transcription and word lookup
+
+### Multi-Database Setup
+- Primary PostgreSQL database for application data
+- Legacy SQLite database for ECDICT dictionary
+- Separate database configurations in database.yml
+
+### State Machine Pattern
+- Video transcription status follows: `pending` → `processing` → `completed`/`failed`
+- Automatic state transitions with proper error handling
+
+### Background Processing
+- Solid Queue for async operations (transcription, file uploads)
+- Mission Control interface for job monitoring at /jobs
+
 ### Core Models
 
 **Video** (`app/models/video.rb`)
@@ -89,16 +118,24 @@ This is a Ruby on Rails 8.0.4 application called "new_web" that provides video d
 - Has attached files via Active Storage
 
 **EcdictWord** (`app/models/ecdict_word.rb`)
-- Dictionary model for English words
-- Contains word definitions, phonetics, translations
-- Indexed for efficient word lookup
+- Legacy model connecting to SQLite dictionary database
+- Contains 107,363 English words with definitions, phonetics, translations
+- Abstract class that connects to `stardict` table via legacy connection
+- Provides efficient word lookup with multiple search strategies
+- Includes scopes for core vocabulary, CET4/CET6 words
 
 ### Key Services
 
 **TranscriptionService** (`app/services/transcription_service.rb`)
-- Handles video transcription via external API at localhost:8000
-- Processes video files and stores transcription segments
-- Updates video transcription status
+- Orchestrates video transcription process
+- Supports multiple transcription tools: Tencent ASR and OpenAI Whisper
+- Handles different transcription workflows
+- Updates video with transcription results
+
+**WordLookupService** (`app/services/word_lookup_service.rb`)
+- Service object pattern for word lookup
+- Returns structured success/failure results
+- Integrates with EcdictWord model
 
 **XiaohongshuApiService** (`app/services/xiaohongshu_api_service.rb`)
 - Extracts content information from Xiaohongshu share URLs
@@ -120,41 +157,69 @@ This is a Ruby on Rails 8.0.4 application called "new_web" that provides video d
 - Uses Solid Queue with retry logic
 - Handles transcription service failures gracefully
 
+**CosUploadJob** (`app/jobs/cos_upload_job.rb`)
+- Handles cloud storage uploads (production)
+- Uploads files to Tencent COS
+
+**LocalUploadJob** (`app/jobs/local_upload_job.rb`)
+- Handles local file uploads (development)
+- Manages file storage operations
+
 ### Controllers
+
+**WelcomeController** (`app/controllers/welcome_controller.rb`)
+- Main landing page controller
+- Handles Xiaohongshu video download requests
+- Integrates with caching and API services
 
 **VideosController** (`app/controllers/videos_controller.rb`)
 - RESTful controller for video management
 - CRUD operations (index, show, destroy)
 
-**WelcomeController** (`app/controllers/welcome_controller.rb`)
-- Main page controller
-- Handles Xiaohongshu video download requests
-- Integrates with caching and API services
-
 **VideoPlayerController** (`app/controllers/video_player_controller.rb`)
 - Manages video playback interface
 - Handles video streaming and subtitle display
 
+**WordLookupController** (`app/controllers/word_lookup_controller.rb`)
+- API endpoint for word lookup
+- Returns JSON responses for English words
+
+**XhsParseController** (`app/controllers/xhs_parse_controller.rb`)
+- Handles Xiaohongshu URL parsing
+- Extracts video metadata from share URLs
+
 ## External Dependencies
 
-### Transcription Service
-- External transcription API running on localhost:8000
+### Transcription Services
+- Supports multiple transcription engines:
+  - Tencent ASR service
+  - OpenAI Whisper (localhost:8000)
 - Expects file path and language parameters
 - Returns segmented transcription data with timestamps
+
+### Dictionary Database
+- ECDICT SQLite database (107,363 English words)
+- Setup script: `./setup_stardict.sh`
+- Automatically downloads and installs in storage/stardict.db
 
 ### File Storage
 - Uses Active Storage with local disk storage
 - Supports various video formats (mp4, mov, avi, mkv, webm, etc.)
-- Configurable for cloud storage in production
+- Cloud storage via Tencent COS in production
 
 ## Database Schema
 
+### Primary Database (PostgreSQL)
 Key tables:
 - `videos` - Video metadata and transcription data
 - `uploads` - File upload management
-- `ecdict_words` - English dictionary with 107,363 words
+- `users`, `sessions` - Authentication
 - `active_storage_*` - File storage management
 - `solid_queue_*` - Background job processing
+
+### Legacy Database (SQLite)
+- `stardict` table - ECDICT English dictionary (107,363 words)
+- Connected via separate `legacy` configuration in database.yml
 
 ## Development Notes
 
