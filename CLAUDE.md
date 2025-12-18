@@ -27,6 +27,12 @@ This is a Ruby on Rails 8.0.4 application called "new_web" that provides video d
 
 # Or start Rails server only
 ./bin/rails server
+
+# Start background job processors
+./bin/jobs
+
+# Setup ECDICT dictionary database
+./setup_stardict.sh
 ```
 
 ### Rails Commands
@@ -104,6 +110,26 @@ This Rails application follows several key architectural patterns:
 - Solid Queue for async operations (transcription, file uploads)
 - Mission Control interface for job monitoring at /jobs
 
+### Authentication & Session Management
+- Complete user authentication system with registration, login, password reset
+- Secure password storage using bcrypt and `has_secure_password`
+- Session tracking with IP address logging
+- Email-based password reset workflow
+
+### Frontend Architecture (Hotwire + Stimulus)
+- Modular Stimulus controllers for video player functionality:
+  - `VideoControls`: Video playback controls
+  - `SubtitleManager`: Subtitle display and synchronization
+  - `WordLookup`: English word lookup integration
+  - `Utils`: Shared utility functions
+- Unified `SubtitleMergedController` coordinating all modules
+- Dark mode support via `dark_mode_controller.js`
+
+### PWA Support
+- Service Worker registration at `/service-worker`
+- Web App Manifest at `/manifest`
+- Progressive Web App capabilities for offline functionality
+
 ### Core Models
 
 **Video** (`app/models/video.rb`)
@@ -123,6 +149,15 @@ This Rails application follows several key architectural patterns:
 - Abstract class that connects to `stardict` table via legacy connection
 - Provides efficient word lookup with multiple search strategies
 - Includes scopes for core vocabulary, CET4/CET6 words
+
+**User** (`app/models/user.rb`)
+- User authentication and management
+- Secure password handling with bcrypt
+- Session tracking and IP address logging
+
+**Session** (`app/models/session.rb`)
+- User session management with expiration
+- IP address and user agent tracking
 
 ### Key Services
 
@@ -146,6 +181,13 @@ This Rails application follows several key architectural patterns:
 - Saves videos to database with proper metadata
 - Handles file validation and content type detection
 
+**Xiaohongshu Video Ecosystem** (`app/services/xiaohongshu_*`)
+- **Xhs**: Main downloader service for Xiaohongshu videos
+- **XhsConverter**: Format conversion and processing
+- **XhsExplore**: Content exploration and discovery
+- **XhsUrlParser**: URL parsing and validation
+- Supports multiple Xiaohongshu link formats and content types
+
 **VideoLinkCache** (`app/services/video_link_cache.rb`)
 - Caches video links to avoid duplicate downloads
 - Improves performance and reduces API calls
@@ -166,6 +208,12 @@ This Rails application follows several key architectural patterns:
 - Manages file storage operations
 
 ### Controllers
+
+**Authentications Controllers** (`app/controllers/authentications/`)
+- **RegistrationsController**: User registration workflow
+- **SessionsController**: User login/logout management
+- **PasswordsController**: Password reset functionality
+- **PasswordsMailer**: Email delivery for password resets
 
 **WelcomeController** (`app/controllers/welcome_controller.rb`)
 - Main landing page controller
@@ -248,6 +296,39 @@ The application supports multiple transcription languages:
 - Database indexes on transcription status and language
 - Solid Queue for efficient job processing
 
+## Development Tools & Quality Assurance
+
+### Code Quality Tools
+```bash
+# Run security vulnerability scanner
+./bin/brakeman
+
+# Run Ruby code style checker
+./bin/rubocop
+
+# Auto-correct RuboCop style issues
+./bin/rubocop -a
+
+# Generate model annotations
+./bin/rails annotate
+
+# JavaScript dependency audit
+./bin/rails importmap:audit
+```
+
+### Performance Monitoring
+- **Rails Pulse**: Detailed performance monitoring with configurable thresholds
+- **Mission Control Jobs**: Background job monitoring at `/jobs`
+- **Health Checks**: Application status endpoint at `/up`
+
+### CI/CD Pipeline
+- **GitHub Actions** workflows:
+  - Ruby security scanning (Brakeman)
+  - JavaScript dependency auditing (Importmap audit)
+  - Code style enforcement (RuboCop)
+  - Automated testing including system tests
+- **Dependabot**: Automated dependency updates
+
 ## Deployment
 
 ### Docker Configuration
@@ -257,7 +338,11 @@ The application supports multiple transcription languages:
 - Exposes port 80
 
 ### Kamal Deployment
-- Configured for Kamal deployment tool
+- **Multi-server architecture**: Separate web and job servers
+- **PostgreSQL accessory**: Dedicated database container
+- **Tencent COS accessory**: Cloud storage upload service
+- **SSL certificates**: Automatic Let's Encrypt integration
+- **Container registry**: Tencent Cloud container registry
 - Production-ready with proper health checks
 - Environment variables and secrets management
 
