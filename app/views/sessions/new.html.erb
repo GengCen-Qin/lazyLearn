@@ -1,31 +1,75 @@
-<div class="mx-auto md:w-2/3 w-full">
-  <% if alert = flash[:alert] %>
-    <p class="py-2 px-3 bg-red-50 mb-5 text-red-500 font-medium rounded-lg inline-block" id="alert"><%= alert %></p>
-  <% end %>
-
-  <% if notice = flash[:notice] %>
-    <p class="py-2 px-3 bg-green-50 mb-5 text-green-500 font-medium rounded-lg inline-block" id="notice"><%= notice %></p>
-  <% end %>
-
-  <h1 class="font-bold text-4xl">Sign in</h1>
-
-  <%= form_with url: session_url, class: "contents" do |form| %>
-    <div class="my-5">
-      <%= form.email_field :email_address, required: true, autofocus: true, autocomplete: "username", placeholder: "Enter your email address", value: params[:email_address], class: "block shadow-sm rounded-md border border-gray-400 focus:outline-blue-600 px-3 py-2 mt-2 w-full" %>
+<div class="min-h-screen bg-base-200 flex items-center justify-center p-4">
+  <div class="w-full max-w-md">
+    <!-- 标题区域 -->
+    <div class="text-center mb-8">
+      <h1 class="text-3xl font-bold text-base-content mb-2">欢迎回来</h1>
+      <p class="text-base-content/70">登录您的账户继续学习</p>
     </div>
 
-    <div class="my-5">
-      <%= form.password_field :password, required: true, autocomplete: "current-password", placeholder: "Enter your password", maxlength: 72, class: "block shadow-sm rounded-md border border-gray-400 focus:outline-blue-600 px-3 py-2 mt-2 w-full" %>
-    </div>
+    <!-- 登录表单 -->
+    <div class="card bg-base-100 border border-base-300 shadow-lg">
+      <div class="card-body p-6 md:p-8">
+        <%= form_with url: session_path, class: "space-y-6" do |form| %>
+          <!-- 消息提示 -->
+          <% if alert = flash[:alert] %>
+            <div class="alert alert-error">
+              <span><%= alert %></span>
+            </div>
+          <% end %>
 
-    <div class="col-span-6 sm:flex sm:items-center sm:gap-4">
-      <div class="inline">
-        <%= form.submit "Sign in", class: "w-full sm:w-auto text-center rounded-md px-3.5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white inline-block font-medium cursor-pointer" %>
+          <% if notice = flash[:notice] %>
+            <div class="alert alert-success">
+              <span><%= notice %></span>
+            </div>
+          <% end %>
+
+          <!-- 邮箱输入 -->
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text font-medium">邮箱地址</span>
+            </label>
+            <%= form.email_field :email_address,
+                required: true,
+                autofocus: true,
+                autocomplete: "username",
+                placeholder: "请输入您的邮箱",
+                value: params[:email_address],
+                class: "input input-bordered w-full" %>
+          </div>
+
+          <!-- 密码输入 -->
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text font-medium">密码</span>
+            </label>
+            <%= form.password_field :password,
+                required: true,
+                autocomplete: "current-password",
+                placeholder: "请输入密码",
+                maxlength: 72,
+                class: "input input-bordered w-full" %>
+            <label class="label">
+              <%= link_to "忘记密码？", new_password_path, class: "label-text-alt link link-primary text-sm hover:underline" %>
+            </label>
+          </div>
+
+          <!-- 登录按钮 -->
+          <div class="form-control pt-2">
+            <%= form.submit "登录", class: "btn btn-primary w-full" %>
+          </div>
+        <% end %>
+
+        <!-- 分隔线 -->
+        <div class="divider my-6">或</div>
+
+        <!-- 注册链接 -->
+        <div class="text-center">
+          <p class="text-base-content/70 text-sm mb-3">还没有账户？</p>
+          <%= link_to "立即注册",
+                      new_registration_path,
+                      class: "btn btn-outline btn-secondary w-full" %>
+        </div>
       </div>
-
-      <div class="mt-4 text-sm text-gray-500 sm:mt-0">
-        <%= link_to "Forgot password?", new_password_path, class: "text-gray-700 underline hover:no-underline" %>
-      </div>
     </div>
-  <% end %>
+  </div>
 </div>

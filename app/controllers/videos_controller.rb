@@ -1,4 +1,5 @@
 class VideosController < ApplicationController
+  allow_unauthenticated_access only: [ :index, :show, :destroy ]
   before_action :set_video, only: [ :show, :destroy ]
 
   # GET /videos
