@@ -1,4 +1,6 @@
 class WordLookupController < ApplicationController
+  allow_unauthenticated_access only: [ :create ]
+
   # POST /word_lookup
   def create
     result = WordLookupService.call(params[:word])
