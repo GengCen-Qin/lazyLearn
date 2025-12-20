@@ -173,7 +173,7 @@ export class SubtitleManager {
         e.stopImmediatePropagation(); // 阻止其他事件执行
         // 调用主控制器的lookupWord方法
         if (handler && typeof handler.lookupWord === 'function') {
-          handler.lookupWord(element.dataset.word, e.target);
+          handler.lookupWord(element.dataset.word);
         }
       });
     });

@@ -319,14 +319,6 @@ export default class extends Controller {
   // 单词查询相关方法
   // ========================================
 
-  /**
-   * 设置单词查询功能
-   * 初始化多层弹窗管理系统，支持嵌套查词
-   */
-  setupWordLookup() {
-    // 多层弹窗管理系统初始化 is now handled by the WordLookup module
-  }
-
   showPopupContainer() {
     this.wordLookup.showPopupContainer();
   }
@@ -357,8 +349,9 @@ export default class extends Controller {
    * 异步查询单词释义
    * 发送请求到后端API，创建多层弹窗显示释义
    */
-  async lookupWord(word, clickedElement, sourceLayer = 0) {
-    await this.wordLookup.lookupWord(word, clickedElement, this, sourceLayer);
+  async lookupWord(word) {
+    this.videoControls.pause();
+    await this.wordLookup.lookupWord(word);
   }
   getCSRFToken() {
     return this.wordLookup.getCSRFToken();
@@ -432,7 +425,7 @@ export default class extends Controller {
     }
   }
 
-  
+
   // 加载字幕
   loadInitialSubtitles() {
     // 检查是否有初始字幕数据（从HTML data属性传递）

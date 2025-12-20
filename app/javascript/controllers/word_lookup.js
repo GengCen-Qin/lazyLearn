@@ -136,7 +136,6 @@ export class WordLookup {
 
   // 清空历史记录
   clearWordHistory() {
-    console.log('clearWorkdHsitasd')
     this.wordDialog.dataset.wordHistory = JSON.stringify([]);
     this.wordDialog.dataset.currentIndex = "0";
     this.updateBackButtonVisibility();

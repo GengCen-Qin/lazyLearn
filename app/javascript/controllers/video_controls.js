@@ -154,7 +154,19 @@ export class VideoControls {
           this.player.pause();
         }
       }
+    } else {
+      console.error("视频控制器未初始化");
     }
+  }
+
+  // 播放
+  play() {
+    this.player.play();
+  }
+
+  // 暂停
+  pause() {
+    this.player.pause();
   }
 
   // 更新当前时间（从主控制器调用）
