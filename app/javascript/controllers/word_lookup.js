@@ -101,19 +101,25 @@ export class WordLookup {
     this.showLoadingMessage();
 
     try {
-      const response = await fetch("/word_lookup", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-CSRF-Token": this.getCSRFToken(),
-        },
-        body: JSON.stringify({ word: word }),
-      });
+      // 并行调用本地和外部API
+      const [localResponse, externalResponse] = await Promise.allSettled([
+        fetch("/word_lookup", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRF-Token": this.getCSRFToken(),
+          },
+          body: JSON.stringify({ word: word }),
+        }),
+        this.fetchExternalWordData(word)
+      ]);
 
-      const data = await response.json();
-      if (data.success && data.word) {
+      const localData = localResponse.status === 'fulfilled' ? await localResponse.value.json() : null;
+      const externalData = externalResponse.status === 'fulfilled' ? externalResponse.value : null;
+
+      if (localData && localData.success && localData.word) {
         const processDef = (text, skipEnglish = false) => this.processDefinitionText(text, skipEnglish, this.escapeHtmlFunc);
-        this.showPopupDefinition(null, data.word, word, processDef);
+        this.showPopupDefinition(null, localData.word, word, processDef, externalData);
       } else {
         this.showErrorMessage('未找到单词释义');
       }
@@ -159,19 +165,18 @@ export class WordLookup {
     this.showLoadingMessage();
 
     try {
-      // 发送查询请求到后端API
-      const response = await fetch("/word_lookup", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-CSRF-Token": this.getCSRFToken(),
-        },
-        body: JSON.stringify({ word: word }),
-      });
-      const data = await response.json();
-      if (data.success && data.word) {
+      // 并行调用本地和外部API
+      const [localResponse, externalResponse] = await Promise.allSettled([
+        this.fetchLocalWordData(word),
+        this.fetchExternalWordData(word)
+      ]);
+
+      const localData = localResponse.status === 'fulfilled' ? await localResponse.value.json() : null;
+      const externalData = externalResponse.status === 'fulfilled' ? externalResponse.value : null;
+
+      if (localData && localData.success && localData.word) {
         const processDef = (text, skipEnglish = false) => this.processDefinitionText(text, skipEnglish, this.escapeHtmlFunc);
-        this.showPopupDefinition(null, data.word, word, processDef);
+        this.showPopupDefinition(null, localData.word, word, processDef, externalData);
       } else {
         // 请求失败但无网络错误
         this.showErrorMessage('未找到单词释义');
@@ -223,9 +228,45 @@ export class WordLookup {
     return meta ? meta.getAttribute("content") : "";
   }
 
+  async fetchLocalWordData(word) {
+    return await fetch("/word_lookup", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "X-CSRF-Token": this.getCSRFToken(),
+              },
+              body: JSON.stringify({ word: word }),
+            })
+  }
+
+  // 调用外部API获取单词数据
+  async fetchExternalWordData(word) {
+    try {
+      const response = await fetch(`https://v2.xxapi.cn/api/englishwords?word=${encodeURIComponent(word)}`);
+
+      if (response.ok) {
+        const data = await response.json();
+
+        if (data.code === 200 && data.data) {
+          return {
+            sentences: data.data.sentences || [],
+            ukphone: data.data.ukphone,
+            ukspeech: data.data.ukspeech,
+            usphone: data.data.usphone,
+            usspeech: data.data.usspeech
+          };
+        }
+      }
+      return null;
+    } catch (error) {
+      console.warn('Failed to fetch external word data:', error);
+      return null;
+    }
+  }
+
 
   // 显示单词释义
-  showPopupDefinition(popupId, wordData, sourceWord, processDefinitionText) {
+  showPopupDefinition(popupId, wordData, sourceWord, processDefinitionText, externalData = null) {
     const contentElement = document.querySelector(`#wordDetail`);
 
     if (!contentElement) return;
@@ -243,12 +284,20 @@ export class WordLookup {
       ? processDefinitionText(wordData.detail, true) // 详细信息不处理英文单词
       : "";
 
+    // 处理音标信息
+    const phoneticSection = this.buildPhoneticSection(wordData.phonetic, externalData);
+
+    // 处理例句信息
+    const sentencesSection = externalData && externalData.sentences && externalData.sentences.length > 0
+      ? this.buildSentencesSection(externalData.sentences)
+      : '';
+
     const html = `
       <div class="space-y-4">
         <!-- 单词标题 -->
         <div class="text-center border-b border-gray-200 dark:border-gray-700 pb-3">
           <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">${wordData.word}</h2>
-          ${wordData.phonetic ? `<p class="text-gray-600 dark:text-gray-400">[${wordData.phonetic}]</p>` : ""}
+          ${phoneticSection}
         </div>
         <!-- 核心词汇标记 -->
         ${
@@ -316,12 +365,17 @@ export class WordLookup {
         `
             : ""
         }
+        <!-- 例句 -->
+        ${sentencesSection}
       </div>
     `;
     contentElement.innerHTML = html;
 
     // 为新创建的弹窗中的单词添加点击事件
     this.addPopupWordClickListeners();
+
+    // 为发音按钮添加点击事件
+    this.addPronunciationListeners();
   }
 
   // 处理定义文本
@@ -394,6 +448,117 @@ export class WordLookup {
         this.lookupWord(element.dataset.word)
       });
     });
+  }
+
+  // 添加发音监听器
+  addPronunciationListeners() {
+    const pronunciationButtons = document.querySelectorAll(".pronunciation-btn");
+    pronunciationButtons.forEach((button) => {
+      button.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const audioUrl = button.dataset.audioUrl;
+        if (audioUrl) {
+          this.playAudio(audioUrl);
+        }
+      });
+    });
+  }
+
+  // 播放音频
+  playAudio(audioUrl) {
+    try {
+      const audio = new Audio(audioUrl);
+      audio.play().catch(error => {
+        console.warn('Failed to play pronunciation audio:', error);
+      });
+    } catch (error) {
+      console.warn('Failed to create audio element:', error);
+    }
+  }
+
+  // 构建音标部分
+  buildPhoneticSection(localPhonetic, externalData) {
+    let phoneticHtml = '';
+
+    // 本地音标
+    if (externalData == null) {
+      phoneticHtml += `<p class="text-gray-600 dark:text-gray-400">[${localPhonetic}]</p>`;
+    }
+
+    // 外部音标和发音
+    if (externalData) {
+      const ukPhone = externalData.ukphone;
+      const usPhone = externalData.usphone;
+      const ukSpeech = externalData.ukspeech;
+      const usSpeech = externalData.usspeech;
+
+      if (ukPhone || usPhone || ukSpeech || usSpeech) {
+        phoneticHtml += '<div class="flex flex-wrap justify-center items-center gap-4 text-sm text-gray-600 dark:text-gray-400 mt-2">';
+
+        if (ukPhone) {
+          phoneticHtml += `<div class="flex items-center gap-1">`;
+          phoneticHtml += `<span class="font-medium">UK:</span> [${ukPhone}]`;
+          if (ukSpeech) {
+            phoneticHtml += `<button class="pronunciation-btn ml-1 p-1 hover:bg-blue-100 dark:hover:bg-blue-900 rounded transition-colors" data-audio-url="${ukSpeech}" title="英式发音">`;
+            phoneticHtml += `<svg class="w-4 h-4 text-blue-600 dark:text-blue-400" fill="currentColor" viewBox="0 0 20 20">`;
+            phoneticHtml += `<path fill-rule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM12.293 7.293a1 1 0 011.414 0L15 8.586l1.293-1.293a1 1 0 111.414 1.414L16.414 10l1.293 1.293a1 1 0 01-1.414 1.414L15 11.414l-1.293 1.293a1 1 0 01-1.414-1.414L13.586 10l-1.293-1.293a1 1 0 010-1.414z" clip-rule="evenodd"/>`;
+            phoneticHtml += `</svg></button>`;
+          }
+          phoneticHtml += `</div>`;
+        }
+
+        if (usPhone) {
+          phoneticHtml += `<div class="flex items-center gap-1">`;
+          phoneticHtml += `<span class="font-medium">US:</span> [${usPhone}]`;
+          if (usSpeech) {
+            phoneticHtml += `<button class="pronunciation-btn ml-1 p-1 hover:bg-blue-100 dark:hover:bg-blue-900 rounded transition-colors" data-audio-url="${usSpeech}" title="美式发音">`;
+            phoneticHtml += `<svg class="w-4 h-4 text-blue-600 dark:text-blue-400" fill="currentColor" viewBox="0 0 20 20">`;
+            phoneticHtml += `<path fill-rule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM14.657 2.929a1 1 0 011.414 0A9.972 9.972 0 0119 10a9.972 9.972 0 01-2.929 7.071 1 1 0 01-1.414-1.414A7.971 7.971 0 0017 10c0-2.21-.894-4.208-2.343-5.657a1 1 0 010-1.414zm-2.829 2.828a1 1 0 011.415 0A5.983 5.983 0 0115 10a5.984 5.984 0 01-1.757 4.243 1 1 0 01-1.415-1.415A3.984 3.984 0 0013 10a3.983 3.983 0 00-1.172-2.828 1 1 0 010-1.415z" clip-rule="evenodd"/>`;
+            phoneticHtml += `</svg></button>`;
+          }
+          phoneticHtml += `</div>`;
+        }
+
+        phoneticHtml += '</div>';
+      }
+    }
+
+    return phoneticHtml;
+  }
+
+  // 构建例句部分
+  buildSentencesSection(sentences) {
+    if (!sentences || sentences.length === 0) {
+      return '';
+    }
+
+    const sentencesHtml = sentences.map(sentence => {
+      const sContent = this.escapeHtmlFunc(sentence.s_content || '');
+      const sCn = this.escapeHtmlFunc(sentence.s_cn || '');
+      const processDef = (text) => this.processDefinitionText(text, false, this.escapeHtmlFunc);
+      const processedContent = processDef(sContent);
+
+      return `
+        <div class="border-l-4 border-orange-400 dark:border-orange-600 pl-4 py-2">
+          <p class="text-gray-800 dark:text-gray-200 text-sm leading-relaxed">${processedContent}</p>
+          <p class="text-gray-600 dark:text-gray-400 text-sm mt-1">${sCn}</p>
+        </div>
+      `;
+    }).join('');
+
+    return `
+      <div>
+        <h3 class="font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center">
+          <svg class="w-4 h-4 mr-2 text-orange-600 dark:text-orange-400" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"/>
+          </svg>
+          例句
+        </h3>
+        <div class="space-y-3 bg-orange-50 dark:bg-orange-900/20 p-4 rounded-lg">
+          ${sentencesHtml}
+        </div>
+      </div>
+    `;
   }
 
   // 清理函数，关闭弹窗并清理历史记录
