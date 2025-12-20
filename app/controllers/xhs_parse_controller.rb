@@ -1,4 +1,6 @@
 class XhsParseController < ApplicationController
+  allow_unauthenticated_access only: [ :create ]
+
   def create
     share_text = params[:url]
 
