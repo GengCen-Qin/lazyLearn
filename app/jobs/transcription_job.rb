@@ -8,6 +8,13 @@ class TranscriptionJob < ApplicationJob
 
     video = Video.find(video_id)
 
+    # 本地视频解析通过Whisper，依赖文件存储在本地，通过本地去处理，这里等待下载好后再处理
+    if Rails.env.development?
+      until video.video_file.attached?
+        sleep 1
+      end
+    end
+
     video.processing!
 
     TranscriptionService.new(video, language).process
