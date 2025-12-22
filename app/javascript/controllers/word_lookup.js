@@ -328,7 +328,7 @@ export class WordLookup {
               英文释义
             </h3>
             <div class="text-gray-700 dark:text-gray-300 text-sm leading-relaxed bg-gray-50 dark:bg-gray-700 p-3 rounded">
-              ${processedDefinition}
+              ${processDefinitionText(wordData.formatted_definition || wordData.definition)}
             </div>
           </div>
         `
@@ -602,6 +602,7 @@ export class WordLookup {
     `;
   }
 
+  
   // 清理函数，关闭弹窗并清理历史记录
   disconnect() {
     if (this.wordDialog && this.wordDialog.open) {

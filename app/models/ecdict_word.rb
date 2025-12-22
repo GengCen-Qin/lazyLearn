@@ -81,15 +81,24 @@ class EcdictWord < ActiveRecord::Base
       tag: tag,
       exchange: exchange,
       word_forms: word_forms, # 添加解析后的变形信息
+      formatted_definition: formatted_definition, # 添加格式化定义
       bnc: bnc,
       frq: frq
     }
   end
 
-  # 格式化定义 - 分割并清理
+  # 格式化定义 - 简化版
   def formatted_definition
-    return [] if definition.blank?
-    definition.split(";").map(&:strip).reject(&:blank?)
+    return "" if definition.blank?
+
+    # 清理：移除网络标记和word标签，按分号或换行分割
+    cleaned = definition.gsub(/\[网络\]/i, '').gsub(/\[\/?word\]/, '').strip
+
+    # 按分号或换行分割，然后清理空格
+    items = cleaned.split(/[;\n]/).map(&:strip).reject(&:blank?)
+
+    # 用分号加空格连接
+    items.join('; ')
   end
 
   # 格式化翻译 - 分割并清理
