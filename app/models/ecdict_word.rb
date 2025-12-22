@@ -80,6 +80,7 @@ class EcdictWord < ActiveRecord::Base
       core: core?,
       tag: tag,
       exchange: exchange,
+      word_forms: word_forms, # 添加解析后的变形信息
       bnc: bnc,
       frq: frq
     }
@@ -101,5 +102,45 @@ class EcdictWord < ActiveRecord::Base
   def formatted_tags
     return [] if tag.blank?
     tag.split(",").map(&:strip).reject(&:blank?)
+  end
+
+  # 解析单词变形信息
+  def parsed_exchange
+    return {} if exchange.blank?
+
+    exchange_types = {
+      'p' => '过去式',
+      'd' => '过去分词',
+      'i' => '现在分词',
+      '3' => '第三人称单数',
+      'r' => '形容词比较级',
+      't' => '形容词最高级',
+      's' => '名词复数',
+      '0' => '词根',
+      '1' => '词根变形'
+    }
+
+    result = {}
+    exchange.split('/').each do |item|
+      next if item.blank?
+
+      if item.include?(':')
+        type, form = item.split(':', 2)
+        if exchange_types[type] && form.present?
+          result[type] = {
+            type: exchange_types[type],
+            form: form,
+            type_code: type
+          }
+        end
+      end
+    end
+
+    result
+  end
+
+  # 获取单词变形信息，用于前端显示
+  def word_forms
+    parsed_exchange.values
   end
 end

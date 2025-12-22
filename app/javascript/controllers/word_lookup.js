@@ -287,6 +287,9 @@ export class WordLookup {
     // 处理音标信息
     const phoneticSection = this.buildPhoneticSection(wordData.phonetic, externalData);
 
+    // 处理词形变化信息
+    const wordFormsSection = this.buildWordFormsSection(wordData.word_forms);
+
     // 处理例句信息
     const sentencesSection = externalData && externalData.sentences && externalData.sentences.length > 0
       ? this.buildSentencesSection(externalData.sentences)
@@ -311,6 +314,8 @@ export class WordLookup {
         `
             : ""
         }
+        <!-- 词形变化 -->
+        ${wordFormsSection}
         <!-- 英文释义 -->
         ${
           wordData.definition
@@ -481,7 +486,7 @@ export class WordLookup {
     let phoneticHtml = '';
 
     // 本地音标
-    if (externalData == null) {
+    if (externalData == null && localPhonetic) {
       phoneticHtml += `<p class="text-gray-600 dark:text-gray-400">[${localPhonetic}]</p>`;
     }
 
@@ -524,6 +529,42 @@ export class WordLookup {
     }
 
     return phoneticHtml;
+  }
+
+  // 构建词形变化部分
+  buildWordFormsSection(wordForms) {
+    if (!wordForms || wordForms.length === 0) {
+      return '';
+    }
+
+    // 按照优先级排序：动词形式 > 名词复数 > 形容词级 > 其他
+    const priorityOrder = ['3', 'p', 'd', 'i', 's', 'r', 't', '0', '1'];
+    const sortedForms = wordForms.sort((a, b) => {
+      const indexA = priorityOrder.indexOf(a.type_code);
+      const indexB = priorityOrder.indexOf(b.type_code);
+      return (indexA === -1 ? 999 : indexA) - (indexB === -1 ? 999 : indexB);
+    });
+
+    const formsHtml = sortedForms.map(form => {
+      const processedForm = this.processDefinitionText(form.form, false, this.escapeHtmlFunc);
+      return `
+        <div class="flex items-center justify-between gap-1">
+          <span class="text-sm text-gray-600 dark:text-gray-400">${form.type}:</span>
+          <span data-word="${form.form}">
+            ${processedForm}
+          </span>
+        </div>
+      `;
+    }).join('');
+
+    return `
+      <div>
+        <h3 class="font-semibold text-gray-900 dark:text-gray-100 mb-2">词形变化</h3>
+        <div class="text-sm leading-relaxed bg-gray-50 dark:bg-gray-700 p-3 rounded">
+          ${formsHtml}
+        </div>
+      </div>
+    `;
   }
 
   // 构建例句部分
