@@ -2,10 +2,10 @@ class TranscriptionService
   # @param [Video] video - The video to be transcribe.
   # @param [String] language - The language of the video.
   # @param [Symbol] tool - 使用哪个工具处理（:tencent 腾讯, :whisper OpenAI）
-  def initialize(video, language = "en", tool = :tencent)
+  def initialize(video, language = "en", tool = nil)
     @video = video
     @language = language
-    @tool = tool
+    @tool = Rails.env.development? ? :whisper : tool || :tencent
   end
 
   def process
