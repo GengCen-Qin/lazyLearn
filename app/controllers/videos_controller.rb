@@ -4,7 +4,7 @@ class VideosController < ApplicationController
 
   # GET /videos
   def index
-    @videos = Video.all.order(created_at: :desc)
+    @pagy, @videos = pagy(Video.all.order(created_at: :desc), limit: 10)
   end
 
   # GET /videos/:id

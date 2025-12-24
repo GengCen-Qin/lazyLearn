@@ -494,6 +494,7 @@ DEPENDENCIES
   mission_control-jobs
   nokogiri (~> 1.18)
   openssl (~> 3.3)
+  pagy (~> 43.2)
   pg (~> 1.6)
   propshaft
   psych (~> 5.2)

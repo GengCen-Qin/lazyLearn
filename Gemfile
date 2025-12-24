@@ -88,3 +88,5 @@ gem "pg", "~> 1.6"
 gem "openssl", "~> 3.3"
 # 性能监控
 gem 'rails_pulse'
+
+gem "pagy", "~> 43.2"

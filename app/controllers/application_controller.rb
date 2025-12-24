@@ -1,5 +1,6 @@
 class ApplicationController < ActionController::Base
   include Authentication
+  include Pagy::Method
 
   # Skip authentication for health checks and mounted engines
   skip_before_action :require_authentication, if: :should_skip_authentication?
