@@ -1,0 +1,126 @@
+<%#
+  可复用的分页导航组件
+  使用方法: render 'shared/pagination', pagy: @pagy
+  参数: pagy - Pagy 对象，来自 controller 的 pagy 方法
+%>
+
+<%# 只在有多页时显示分页 -%>
+<% if pagy.pages > 1 %>
+  <div class="px-4 py-3 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
+    <!-- 移动端简化的分页导航 -->
+    <div class="flex justify-between items-center gap-2 sm:hidden">
+      <% if pagy.previous %>
+        <%= link_to pagy.page_url(:previous),
+            class: 'flex-1 inline-flex justify-center items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 active:bg-gray-100 dark:active:bg-gray-600 transition-colors' do %>
+          <svg class="w-4 h-4 mr-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+          </svg>
+          上一页
+        <% end %>
+      <% else %>
+        <span class="flex-1 inline-flex justify-center items-center px-4 py-2 border border-gray-200 dark:border-gray-700 text-sm font-medium rounded-md text-gray-400 dark:text-gray-600 bg-gray-50 dark:bg-gray-800 cursor-not-allowed">
+          <svg class="w-4 h-4 mr-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+          </svg>
+          上一页
+        </span>
+      <% end %>
+
+      <% if pagy.next %>
+        <%= link_to pagy.page_url(:next),
+            class: 'flex-1 inline-flex justify-center items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 active:bg-gray-100 dark:active:bg-gray-600 transition-colors' do %>
+          下一页
+          <svg class="w-4 h-4 ml-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+          </svg>
+        <% end %>
+      <% else %>
+        <span class="flex-1 inline-flex justify-center items-center px-4 py-2 border border-gray-200 dark:border-gray-700 text-sm font-medium rounded-md text-gray-400 dark:text-gray-600 bg-gray-50 dark:bg-gray-800 cursor-not-allowed">
+          下一页
+          <svg class="w-4 h-4 ml-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+          </svg>
+        </span>
+      <% end %>
+    </div>
+
+    <!-- 移动端分页信息 -->
+    <div class="mt-3 text-center sm:hidden">
+      <p class="text-xs text-gray-500 dark:text-gray-400">
+        第 <span class="font-medium text-gray-700 dark:text-gray-300"><%= pagy.page %></span> / <span class="font-medium text-gray-700 dark:text-gray-300"><%= pagy.pages %></span> 页
+        · 共 <span class="font-medium text-gray-700 dark:text-gray-300"><%= pagy.count %></span> 条
+      </p>
+    </div>
+
+    <!-- 桌面端完整的分页导航 -->
+    <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+      <!-- 分页信息 -->
+      <div>
+        <p class="text-sm text-gray-700 dark:text-gray-300">
+          显示第
+          <span class="font-medium"><%= pagy.from %></span>
+          到
+          <span class="font-medium"><%= pagy.to %></span>
+          条，共
+          <span class="font-medium"><%= pagy.count %></span>
+          条结果
+        </p>
+      </div>
+
+      <!-- 分页按钮 -->
+      <div>
+        <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="分页">
+          <!-- 上一页按钮 -->
+          <% if pagy.previous %>
+            <%= link_to pagy.page_url(:previous),
+                class: 'relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm font-medium text-gray-500 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600',
+                aria: { label: '上一页' } do %>
+              <span class="sr-only">上一页</span>
+              <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+              </svg>
+            <% end %>
+          <% else %>
+            <span class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-600 text-sm font-medium text-gray-400 dark:text-gray-500 cursor-not-allowed">
+              <span class="sr-only">上一页</span>
+              <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+              </svg>
+            </span>
+          <% end %>
+
+          <!-- 页码按钮: 使用简单的循环显示所有页码 -->
+          <% (1..pagy.pages).each do |page_num| %>
+            <% if page_num == pagy.page %>
+              <span class="relative inline-flex items-center px-4 py-2 border border-indigo-500 dark:border-indigo-500 text-sm font-medium bg-indigo-50 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-200">
+                <%= page_num %>
+              </span>
+            <% else %>
+              <%= link_to page_num, pagy.page_url(page_num),
+                  class: 'relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600' %>
+            <% end %>
+          <% end %>
+
+          <!-- 下一页按钮 -->
+          <% if pagy.next %>
+            <%= link_to pagy.page_url(:next),
+                class: 'relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm font-medium text-gray-500 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600',
+                aria: { label: '下一页' } do %>
+              <span class="sr-only">下一页</span>
+              <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+              </svg>
+            <% end %>
+          <% else %>
+            <span class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-600 text-sm font-medium text-gray-400 dark:text-gray-500 cursor-not-allowed">
+              <span class="sr-only">下一页</span>
+              <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+              </svg>
+            </span>
+          <% end %>
+        </nav>
+      </div>
+    </div>
+  </div>
+<% end %>

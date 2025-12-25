@@ -58,6 +58,9 @@
           </div>
         <% end %>
       </div>
+
+      <!-- 分页导航 -->
+      <%= render 'shared/pagination', pagy: @pagy %>
     <% else %>
       <div class="text-center py-12">
         <svg
