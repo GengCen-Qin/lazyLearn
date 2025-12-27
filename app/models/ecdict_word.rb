@@ -92,13 +92,13 @@ class EcdictWord < ActiveRecord::Base
     return "" if definition.blank?
 
     # 清理：移除网络标记和word标签，按分号或换行分割
-    cleaned = definition.gsub(/\[网络\]/i, '').gsub(/\[\/?word\]/, '').strip
+    cleaned = definition.gsub(/\[网络\]/i, "").gsub(/\[\/?word\]/, "").strip
 
     # 按分号或换行分割，然后清理空格
     items = cleaned.split(/[;\n]/).map(&:strip).reject(&:blank?)
 
     # 用分号加空格连接
-    items.join('; ')
+    items.join("; ")
   end
 
   # 格式化翻译 - 分割并清理
@@ -118,23 +118,23 @@ class EcdictWord < ActiveRecord::Base
     return {} if exchange.blank?
 
     exchange_types = {
-      'p' => '过去式',
-      'd' => '过去分词',
-      'i' => '现在分词',
-      '3' => '第三人称单数',
-      'r' => '形容词比较级',
-      't' => '形容词最高级',
-      's' => '名词复数',
-      '0' => '词根',
-      '1' => '词根变形'
+      "p" => "过去式",
+      "d" => "过去分词",
+      "i" => "现在分词",
+      "3" => "第三人称单数",
+      "r" => "形容词比较级",
+      "t" => "形容词最高级",
+      "s" => "名词复数",
+      "0" => "词根",
+      "1" => "词根变形"
     }
 
     result = {}
-    exchange.split('/').each do |item|
+    exchange.split("/").each do |item|
       next if item.blank?
 
-      if item.include?(':')
-        type, form = item.split(':', 2)
+      if item.include?(":")
+        type, form = item.split(":", 2)
         if exchange_types[type] && form.present?
           result[type] = {
             type: exchange_types[type],

@@ -1,0 +1,3 @@
+<%= turbo_stream.update "turbo_word_detail" do %>
+  <%= render "word_lookup/word_detail", word: @word, external_data: @external_data %>
+<% end %>

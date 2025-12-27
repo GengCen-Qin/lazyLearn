@@ -1,0 +1,54 @@
+<%# 单词音标局部模板 %>
+<%# locals: word (EcdictWord), external_data (Hash with ukphone, usphone, ukspeech, usspeech) %>
+
+<% local_phonetic = word.phonetic %>
+<% external_data = local_assigns[:external_data] %>
+
+<% if external_data.nil? && local_phonetic.present? %>
+  <p class="text-gray-600 dark:text-gray-400">[<%= local_phonetic %>]</p>
+<% end %>
+
+<% if external_data.present? %>
+  <% uk_phone = external_data[:ukphone] %>
+  <% us_phone = external_data[:usphone] %>
+  <% uk_speech = external_data[:ukspeech] %>
+  <% us_speech = external_data[:usspeech] %>
+
+  <% if uk_phone.present? || us_phone.present? || uk_speech.present? || us_speech.present? %>
+    <div class="flex flex-wrap justify-center items-center gap-4 text-sm text-gray-600 dark:text-gray-400 mt-2">
+
+      <% if uk_phone.present? %>
+        <div class="flex items-center gap-1">
+          <span class="font-medium">UK:</span> [<%= uk_phone %>]
+          <% if uk_speech.present? %>
+            <button class="pronunciation-btn ml-1 p-1 hover:bg-blue-100 dark:hover:bg-blue-900 rounded transition-colors"
+                    data-audio-url="<%= uk_speech %>"
+                    data-action="click->word-lookup#playAudio"
+                    title="英式发音">
+              <svg class="w-4 h-4 text-blue-600 dark:text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM12.293 7.293a1 1 0 011.414 0L15 8.586l1.293-1.293a1 1 0 111.414 1.414L16.414 10l1.293 1.293a1 1 0 01-1.414 1.414L15 11.414l-1.293 1.293a1 1 0 01-1.414-1.414L13.586 10l-1.293-1.293a1 1 0 010-1.414z" clip-rule="evenodd"/>
+              </svg>
+            </button>
+          <% end %>
+        </div>
+      <% end %>
+
+      <% if us_phone.present? %>
+        <div class="flex items-center gap-1">
+          <span class="font-medium">US:</span> [<%= us_phone %>]
+          <% if us_speech.present? %>
+            <button class="pronunciation-btn ml-1 p-1 hover:bg-blue-100 dark:hover:bg-blue-900 rounded transition-colors"
+                    data-audio-url="<%= us_speech %>"
+                    data-action="click->word-lookup#playAudio"
+                    title="美式发音">
+              <svg class="w-4 h-4 text-blue-600 dark:text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM14.657 2.929a1 1 0 011.414 0A9.972 9.972 0 0119 10a9.972 9.972 0 01-2.929 7.071 1 1 0 01-1.414-1.414A7.971 7.971 0 0017 10c0-2.21-.894-4.208-2.343-5.657a1 1 0 010-1.414zm-2.829 2.828a1 1 0 011.415 0A5.983 5.983 0 0115 10a5.984 5.984 0 01-1.757 4.243 1 1 0 01-1.415-1.415A3.984 3.983 0 0013 10a3.983 3.983 0 00-1.172-2.828 1 1 0 010-1.415z" clip-rule="evenodd"/>
+              </svg>
+            </button>
+          <% end %>
+        </div>
+      <% end %>
+
+    </div>
+  <% end %>
+<% end %>

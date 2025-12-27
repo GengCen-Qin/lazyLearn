@@ -1,0 +1,22 @@
+<%# 词形变化局部模板 %>
+<%# locals: word_forms (Array of WordForm) %>
+
+<% if word_forms.present? && word_forms.length > 0 %>
+  <%# 按照优先级排序：动词形式 > 名词复数 > 形容词级 > 其他 %>
+  <% priority_order = ['3', 'p', 'd', 'i', 's', 'r', 't', '0', '1'] %>
+  <% sorted_forms = word_forms.sort_by { |form| priority_order.index(form[:type_code]) || 999 } %>
+
+  <div>
+    <h3 class="font-semibold text-gray-900 dark:text-gray-100 mb-2">词形变化</h3>
+    <div class="text-sm leading-relaxed bg-gray-50 dark:bg-gray-700 p-3 rounded">
+      <% sorted_forms.each do |form| %>
+        <div class="flex items-center justify-between gap-1">
+          <span class="text-sm text-gray-600 dark:text-gray-400"><%= form[:type] %>:</span>
+          <span data-word="<%= form[:form] %>">
+            <%= process_definition_with_clickable_words(form[:form]) %>
+          </span>
+        </div>
+      <% end %>
+    </div>
+  </div>
+<% end %>
