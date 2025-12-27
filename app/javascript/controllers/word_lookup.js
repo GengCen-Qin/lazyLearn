@@ -492,25 +492,10 @@ export class WordLookup {
 
     // 外部音标和发音
     if (externalData) {
-      let ukPhone = externalData.ukphone;
-      let usPhone = externalData.usphone;
+      const ukPhone = externalData.ukphone;
+      const usPhone = externalData.usphone;
       const ukSpeech = externalData.ukspeech;
       const usSpeech = externalData.usspeech;
-
-      // 清理音标中的额外说明文字（如 "(for v.)", "(for adj.)" 等）
-      const cleanPhonetic = (phone) => {
-        if (!phone) return '';
-        // 移除类似 "(for v.) ˈsepəreɪt; (for adj.) ˈseprət" 中的说明文字
-        // 保留实际的音标部分
-        return phone
-          .replace(/\(for\s+[^\)]+\)\s*/g, '') // 移除 (for xxx) 说明
-          .replace(/;\s*\(for\s+[^\)]+\)\s*/g, '; ') // 移除分号后的说明
-          .replace(/;\s*/g, '; ') // 标准化分号
-          .trim();
-      };
-
-      ukPhone = cleanPhonetic(ukPhone);
-      usPhone = cleanPhonetic(usPhone);
 
       if (ukPhone || usPhone || ukSpeech || usSpeech) {
         phoneticHtml += '<div class="flex flex-wrap justify-center items-center gap-4 text-sm text-gray-600 dark:text-gray-400 mt-2">';
