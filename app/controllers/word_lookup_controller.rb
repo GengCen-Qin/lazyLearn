@@ -45,11 +45,15 @@ class WordLookupController < ApplicationController
         data = JSON.parse(response.body)
 
         if data["code"] == 200 && data["data"]
+          # 清理音标中的额外说明文字
+          ukphone = clean_phonetic(data["data"]["ukphone"])
+          usphone = clean_phonetic(data["data"]["usphone"])
+
           return {
             sentences: data["data"]["sentences"] || [],
-            ukphone: data["data"]["ukphone"],
+            ukphone: ukphone,
             ukspeech: data["data"]["ukspeech"],
-            usphone: data["data"]["usphone"],
+            usphone: usphone,
             usspeech: data["data"]["usspeech"]
           }
         end
@@ -60,6 +64,18 @@ class WordLookupController < ApplicationController
       Rails.logger.warn("Failed to fetch external word data: #{error.message}")
       nil
     end
+  end
+
+  # 清理音标中的额外说明文字
+  def clean_phonetic(phone)
+    return nil if phone.blank?
+
+    # 移除类似 "(for v.) ˈsepəreɪt; (for adj.) ˈseprət" 中的说明文字
+    phone
+      .gsub(/\(for\s+[^\)]+\)\s*/, '') # 移除 (for xxx) 说明
+      .gsub(/;\s*\(for\s+[^\)]+\)\s*/, '; ') # 移除分号后的说明
+      .gsub(/;\s*/, '; ') # 标准化分号
+      .strip
   end
 
   def render_error(message)
