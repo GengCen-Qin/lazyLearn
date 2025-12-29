@@ -90,3 +90,5 @@ gem "openssl", "~> 3.3"
 gem 'rails_pulse'
 
 gem "pagy", "~> 43.2"
+
+gem "letter_opener", "~> 1.10"
