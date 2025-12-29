@@ -8,6 +8,20 @@
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
+    <%# 防止暗色模式闪烁 - 在样式加载前立即设置主题 %>
+    <script>
+      (function() {
+        const darkMode = localStorage.getItem("darkMode");
+        const isDark = darkMode === "true" || (!darkMode && window.matchMedia("(prefers-color-scheme: dark)").matches);
+        if (isDark) {
+          document.documentElement.classList.add("dark");
+          document.documentElement.setAttribute("data-theme", "dark");
+        } else {
+          document.documentElement.setAttribute("data-theme", "light");
+        }
+      })();
+    </script>
+
     <%= yield :head %>
 
     <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
