@@ -1,12 +1,25 @@
 class RegistrationsController < ApplicationController
   allow_unauthenticated_access only: [ :new, :create ]
-  rate_limit to: 3, within: 3.minutes, only: :create, with: -> { redirect_to new_registration_url, alert: "Try again later." }
+  rate_limit to: 20, within: 10.minutes, only: :create, with: -> { redirect_to new_registration_url, alert: "请稍后重试." }
 
   def new
     @user = User.new
   end
 
   def create
+    # 验证邮箱验证码
+    verification_result = VerificationCodeService.verify(
+      params[:user][:email_address],
+      params[:user][:verification_code]
+    )
+
+    unless verification_result[:success]
+      @user = User.new(user_params)
+      flash.now[:alert] = verification_result[:error]
+      render :new, status: :unprocessable_entity
+      return
+    end
+
     @user = User.new(user_params)
 
     if @user.save

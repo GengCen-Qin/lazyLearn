@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_12_18_120948) do
+ActiveRecord::Schema[8.0].define(version: 2025_12_29_124642) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -58,6 +58,32 @@ ActiveRecord::Schema[8.0].define(version: 2025_12_18_120948) do
     t.index ["collins"], name: "index_ecdict_words_on_collins"
     t.index ["oxford"], name: "index_ecdict_words_on_oxford"
     t.index ["word"], name: "index_ecdict_words_on_word", unique: true
+  end
+
+  create_table "email_verifications", force: :cascade do |t|
+    t.string "email", null: false
+    t.string "code_digest", null: false
+    t.datetime "expires_at", null: false
+    t.boolean "used", default: false, null: false
+    t.integer "attempts_count", default: 0, null: false
+    t.string "ip_address"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["created_at"], name: "index_email_verifications_on_created_at"
+    t.index ["email"], name: "index_email_verifications_on_email"
+    t.index ["expires_at"], name: "index_email_verifications_on_expires_at"
+  end
+
+  create_table "guest_users", force: :cascade do |t|
+    t.string "fingerprint", null: false
+    t.string "ip_address"
+    t.text "user_agent"
+    t.datetime "last_active_at"
+    t.integer "converted_to_user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["converted_to_user_id"], name: "index_guest_users_on_converted_to_user_id"
+    t.index ["fingerprint"], name: "index_guest_users_on_fingerprint", unique: true
   end
 
   create_table "rails_pulse_operations", force: :cascade do |t|
@@ -292,6 +318,33 @@ ActiveRecord::Schema[8.0].define(version: 2025_12_18_120948) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "usage_limits", force: :cascade do |t|
+    t.integer "user_id"
+    t.integer "guest_user_id"
+    t.string "plan_type", null: false
+    t.integer "total_limit", null: false
+    t.integer "used_count", default: 0
+    t.datetime "expires_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["guest_user_id"], name: "index_usage_limits_on_guest_user_id"
+    t.index ["plan_type"], name: "index_usage_limits_on_plan_type"
+    t.index ["user_id"], name: "index_usage_limits_on_user_id"
+  end
+
+  create_table "user_videos", force: :cascade do |t|
+    t.integer "video_id", null: false
+    t.integer "user_id"
+    t.integer "guest_user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["guest_user_id", "video_id"], name: "index_user_videos_on_guest_user_id_and_video_id", unique: true, where: "guest_user_id IS NOT NULL"
+    t.index ["guest_user_id"], name: "index_user_videos_on_guest_user_id"
+    t.index ["user_id", "video_id"], name: "index_user_videos_on_user_id_and_video_id", unique: true, where: "user_id IS NOT NULL"
+    t.index ["user_id"], name: "index_user_videos_on_user_id"
+    t.index ["video_id"], name: "index_user_videos_on_video_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "email_address", null: false
     t.string "password_digest", null: false
@@ -328,4 +381,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_12_18_120948) do
   add_foreign_key "solid_queue_ready_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_recurring_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_scheduled_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
+  add_foreign_key "usage_limits", "guest_users"
+  add_foreign_key "usage_limits", "users"
+  add_foreign_key "user_videos", "guest_users"
+  add_foreign_key "user_videos", "users"
+  add_foreign_key "user_videos", "videos"
 end

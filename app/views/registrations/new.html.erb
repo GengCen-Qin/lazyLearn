@@ -9,7 +9,7 @@
     <!-- 注册表单 -->
     <div class="card bg-base-100 border border-base-300 shadow-lg">
       <div class="card-body p-6 md:p-8">
-        <%= form_with model: @user, url: registrations_path, class: "space-y-6" do |form| %>
+        <%= form_with model: @user, url: registrations_path, class: "space-y-6", data: { controller: "email-verification" } do |form| %>
           <!-- 消息提示 -->
           <% if alert = flash[:alert] %>
             <div class="alert alert-error">
@@ -46,7 +46,37 @@
                 autofocus: true,
                 autocomplete: "username",
                 placeholder: "请输入您的邮箱地址",
-                class: "input input-bordered w-full" %>
+                class: "input input-bordered w-full",
+                data: {
+                  action: "blur->email-verification#validateEmail",
+                  email_verification_target: "email"
+                } %>
+          </div>
+
+          <!-- 邮箱验证码 -->
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text font-medium">邮箱验证码</span>
+            </label>
+            <div class="flex gap-2">
+              <%= form.text_field :verification_code,
+                  required: true,
+                  maxlength: 6,
+                  placeholder: "6位验证码",
+                  class: "input input-bordered flex-1",
+                  data: { email_verification_target: "code" } %>
+              <button type="button"
+                      class="btn btn-secondary min-w-fit"
+                      data-action="click->email-verification#sendCode"
+                      data-email-verification-target="button">
+                获取验证码
+              </button>
+            </div>
+            <label class="label">
+              <span class="label-text-alt text-base-content/60 text-xs"
+                    data-email-verification-target="countdown"
+                    style="display: none;"></span>
+            </label>
           </div>
 
           <!-- 密码输入 -->

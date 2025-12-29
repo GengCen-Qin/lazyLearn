@@ -2,6 +2,7 @@ Rails.application.routes.draw do
   resource :session, except: [:show, :edit, :update]
   resources :registrations, only: [ :new, :create ]
   resources :passwords, param: :token
+  resources :email_verifications, only: [:create]
 
   get "up" => "rails/health#show", as: :rails_health_check
 
