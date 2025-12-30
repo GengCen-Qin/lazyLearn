@@ -1,4 +1,10 @@
 class VerificationMailer < ApplicationMailer
+  attr_accessor :params
+
+  def initialize(params)
+    @params = params
+  end
+
   def verification_code
     @email = params[:email]
     @code = params[:code]
