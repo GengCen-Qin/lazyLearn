@@ -2,6 +2,17 @@ class XhsParseController < ApplicationController
   allow_unauthenticated_access only: [ :create ]
 
   def create
+    # 检查用户是否登录
+    unless Current.user
+      render json: {
+        success: false,
+        need_login: true,
+        error: "请先登录",
+        redirect_to: "/session/new"
+      }, status: :unauthorized
+      return
+    end
+
     share_text = params[:url]
 
     unless share_text.present?
@@ -19,6 +30,8 @@ class XhsParseController < ApplicationController
         ori_video_url: result[:ori_video_url],
         transcription_status: :pending
       )
+
+      Current.user.user_videos.find_or_create_by(video: video)
 
       render json: {
         success: true,

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_12_29_124642) do
+ActiveRecord::Schema[8.0].define(version: 2025_12_30_125617) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -333,14 +333,11 @@ ActiveRecord::Schema[8.0].define(version: 2025_12_29_124642) do
   end
 
   create_table "user_videos", force: :cascade do |t|
+    t.integer "user_id", null: false
     t.integer "video_id", null: false
-    t.integer "user_id"
-    t.integer "guest_user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["guest_user_id", "video_id"], name: "index_user_videos_on_guest_user_id_and_video_id", unique: true, where: "guest_user_id IS NOT NULL"
-    t.index ["guest_user_id"], name: "index_user_videos_on_guest_user_id"
-    t.index ["user_id", "video_id"], name: "index_user_videos_on_user_id_and_video_id", unique: true, where: "user_id IS NOT NULL"
+    t.index ["user_id", "video_id"], name: "index_user_videos_on_user_id_and_video_id", unique: true
     t.index ["user_id"], name: "index_user_videos_on_user_id"
     t.index ["video_id"], name: "index_user_videos_on_video_id"
   end
@@ -364,7 +361,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_12_29_124642) do
     t.integer "transcription_status", default: 0, null: false
     t.string "download_link"
     t.string "ori_video_url"
+    t.boolean "free", default: false, null: false
     t.index ["download_link"], name: "index_videos_on_download_link", unique: true
+    t.index ["free"], name: "index_videos_on_free"
     t.index ["transcription_language"], name: "index_videos_on_transcription_language"
     t.index ["transcription_status"], name: "index_videos_on_transcription_status"
   end
@@ -383,7 +382,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_12_29_124642) do
   add_foreign_key "solid_queue_scheduled_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "usage_limits", "guest_users"
   add_foreign_key "usage_limits", "users"
-  add_foreign_key "user_videos", "guest_users"
   add_foreign_key "user_videos", "users"
   add_foreign_key "user_videos", "videos"
 end

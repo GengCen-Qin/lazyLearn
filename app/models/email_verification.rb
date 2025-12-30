@@ -24,7 +24,7 @@ class EmailVerification < ApplicationRecord
   validates :expires_at, presence: true
   validates :attempts_count, numericality: { greater_than_or_equal_to: 0 }
 
-  scope :active, -> { where(used: false).where("expires_at > ?", Time.current) }
+  scope :active, -> { where("expires_at > ?", Time.current) }
   scope :for_email, ->(email) { where(email: email) }
   scope :recent, ->(minutes = 1) { where("created_at > ?", minutes.minutes.ago) }
 

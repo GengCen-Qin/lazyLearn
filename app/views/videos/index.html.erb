@@ -21,17 +21,12 @@
                 </span>
 
                 <span class="video-status <%= case video.transcription_status
-                                          when 'pending'
-                                            'text-red-400 dark:text-red-500'
-                                          when 'processing'
-                                            'text-orange-600 dark:text-orange-500'
-                                          when 'completed'
-                                            'text-green-600 dark:text-green-500'
-                                          when 'failed'
-                                            'text-red-900 dark:text-red-400'
-                                          else
-                                            'text-red-400 dark:text-red-500'
-                                        end %>">
+                                              when 'pending' then 'text-red-400 dark:text-red-500'
+                                              when 'processing' then 'text-orange-600 dark:text-orange-500'
+                                              when 'completed' then 'text-green-600 dark:text-green-500'
+                                              when 'failed' then 'text-red-900 dark:text-red-400'
+                                              else 'text-red-400 dark:text-red-500'
+                                            end %>">
                   <%= video.transcription_status_text %>
                 </span>
               </div>
@@ -42,18 +37,21 @@
                 <%= link_to "播放", video_path(video),
                     class: "inline-flex items-center px-4 py-2 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
               <% else %>
-                <span class="text-sm text-gray-500 dark:text-gray-400 italic"> 等待转录完成... </span>
+                <span class="text-sm text-gray-500 dark:text-gray-400 italic">等待转录完成...</span>
               <% end %>
 
-              <%= button_to "删除", video_path(video),
-                  method: :delete,
-                  form: {
-                    data: {
-                      turbo_confirm: "确定要删除这个视频吗？此操作无法撤销。",
-                      turbo_frame: "_top"
-                    }
-                  },
-                  class: "cursor-pointer ml-3 inline-flex items-center px-4 py-2 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500" %>
+              <!-- 只对拥有该视频的登录用户显示删除按钮 -->
+              <% if Current.user && Current.user.videos.include?(video) %>
+                <%= button_to "删除", video_path(video),
+                    method: :delete,
+                    form: {
+                      data: {
+                        turbo_confirm: "确定要删除这个视频吗？此操作无法撤销。",
+                        turbo_frame: "_top"
+                      }
+                    },
+                    class: "cursor-pointer ml-3 inline-flex items-center px-4 py-2 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500" %>
+              <% end %>
             </div>
           </div>
         <% end %>
@@ -80,7 +78,11 @@
         <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">暂无视频</h3>
 
         <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-          上传视频文件以开始使用。
+          <% if Current.user %>
+            上传视频文件或添加小红书链接以开始使用。
+          <% else %>
+            <%= link_to "注册", new_registration_path %> 或 <%= link_to "登录", new_session_path %> 后查看更多视频。
+          <% end %>
         </p>
       </div>
     <% end %>

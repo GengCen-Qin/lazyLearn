@@ -5,6 +5,7 @@
 #  id                     :integer          not null, primary key
 #  description            :text
 #  download_link          :string
+#  free                   :boolean          default(FALSE), not null
 #  ori_video_url          :string
 #  title                  :string
 #  transcription_language :string           default("zh")
@@ -17,6 +18,7 @@
 # Indexes
 #
 #  index_videos_on_download_link           (download_link) UNIQUE
+#  index_videos_on_free                    (free)
 #  index_videos_on_transcription_language  (transcription_language)
 #  index_videos_on_transcription_status    (transcription_status)
 #

@@ -26,7 +26,7 @@ class VerificationCodeService
     # 发送邮件
     deliver_verification_email(email, code)
 
-    Rails.logger.info "验证码已发送至: #{email}, 过期时间: #{verification.expires_at}"
+    Rails.logger.info "验证码已发送至: #{email}, #{code}, 过期时间: #{verification.expires_at}"
 
     {
       success: true,
@@ -44,24 +44,17 @@ class VerificationCodeService
     verification = EmailVerification.active.for_email(email).first
 
     return { success: false, error: "验证码不存在或已过期" } unless verification
-    return { success: false, error: "验证码已使用" } if verification.used?
-    return { success: false, error: "验证尝试次数过多" } if verification.max_attempts_reached?
 
     # 验证码错误
     unless correct_code?(verification, code)
       verification.increment_attempts!
       remaining_attempts = MAX_ATTEMPTS - verification.attempts_count
-      Rails.logger.warn "验证码错误: #{email}, 剩余尝试次数: #{remaining_attempts}"
       return {
         success: false,
         error: "验证码错误",
         remaining_attempts: remaining_attempts
       }
     end
-
-    # 验证成功 - 标记为已使用
-    verification.update!(used: true)
-    Rails.logger.info "验证码验证成功: #{email}"
 
     { success: true, message: "验证成功" }
   end

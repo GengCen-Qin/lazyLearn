@@ -34,6 +34,15 @@ export default class extends Controller {
 
       const data = await response.json();
 
+      // 处理需要登录的情况
+      if (data.need_login) {
+        this.showError(data.error || "请先登录");
+        setTimeout(() => {
+          window.location.href = data.redirect_to || "/session/new";
+        }, 500);
+        return;
+      }
+
       if (data.success) {
         if (data.redirect_to) {
           this.showRedirectMessage(data.message || "下载成功，正在跳转...");

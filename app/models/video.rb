@@ -5,6 +5,7 @@
 #  id                     :integer          not null, primary key
 #  description            :text
 #  download_link          :string
+#  free                   :boolean          default(FALSE), not null
 #  ori_video_url          :string
 #  title                  :string
 #  transcription_language :string           default("zh")
@@ -17,17 +18,23 @@
 # Indexes
 #
 #  index_videos_on_download_link           (download_link) UNIQUE
+#  index_videos_on_free                    (free)
 #  index_videos_on_transcription_language  (transcription_language)
 #  index_videos_on_transcription_status    (transcription_status)
 #
 class Video < ApplicationRecord
   has_one_attached :video_file
+  has_many :user_videos, dependent: :destroy
+  has_many :users, through: :user_videos
 
   enum :transcription_status, { pending: 0, processing: 1, completed: 2, failed: 3 }
 
   # 验证
   validates :title, presence: true
   validates :transcription_language, inclusion: { in: %w[zh en ja ko es fr de], message: "%{value} 不是支持的语言" }
+
+  # Scopes
+  scope :free, -> { where(free: true) }
 
   after_create_commit do
     local_upload_async if Rails.env.development?
