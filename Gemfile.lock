@@ -449,6 +449,7 @@ DEPENDENCIES
   brakeman
   capybara
   debug
+  dotenv
   down (~> 5.4)
   httparty
   importmap-rails

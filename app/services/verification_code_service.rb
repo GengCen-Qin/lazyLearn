@@ -115,8 +115,6 @@ class VerificationCodeService
   end
 
   def self.deliver_verification_email(email, code)
-    VerificationMailer.with(email: email, code: code)
-                      .verification_code
-                      .deliver_later
+    VerificationMailer.with(email: email, code: code).verification_code
   end
 end
