@@ -44,3 +44,5 @@
 /db/development.sqlite3
 /db/test.sqlite3# Ignore bundled gems (Bundler deployment)
 /vendor/bundle/
+
+/node_modules
