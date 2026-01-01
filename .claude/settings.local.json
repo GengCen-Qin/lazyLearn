@@ -11,7 +11,14 @@
       "mcp__context7__get-library-docs",
       "Bash(./bin/rails:*)",
       "mcp__serena__replace_symbol_body",
-      "WebSearch"
+      "WebSearch",
+      "mcp__context7__query-docs",
+      "Bash(./bin/bundle:*)",
+      "Bash(bundle add:*)",
+      "Bash(yarn add:*)",
+      "Bash(yarn build:*)",
+      "Bash(bundle install:*)",
+      "Bash(curl:*)"
     ]
   }
 }
