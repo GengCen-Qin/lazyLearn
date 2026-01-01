@@ -74,18 +74,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_12_30_125617) do
     t.index ["expires_at"], name: "index_email_verifications_on_expires_at"
   end
 
-  create_table "guest_users", force: :cascade do |t|
-    t.string "fingerprint", null: false
-    t.string "ip_address"
-    t.text "user_agent"
-    t.datetime "last_active_at"
-    t.integer "converted_to_user_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["converted_to_user_id"], name: "index_guest_users_on_converted_to_user_id"
-    t.index ["fingerprint"], name: "index_guest_users_on_fingerprint", unique: true
-  end
-
   create_table "rails_pulse_operations", force: :cascade do |t|
     t.integer "request_id", null: false
     t.integer "query_id"
@@ -318,20 +306,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_12_30_125617) do
     t.datetime "updated_at", null: false
   end
 
-  create_table "usage_limits", force: :cascade do |t|
-    t.integer "user_id"
-    t.integer "guest_user_id"
-    t.string "plan_type", null: false
-    t.integer "total_limit", null: false
-    t.integer "used_count", default: 0
-    t.datetime "expires_at"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["guest_user_id"], name: "index_usage_limits_on_guest_user_id"
-    t.index ["plan_type"], name: "index_usage_limits_on_plan_type"
-    t.index ["user_id"], name: "index_usage_limits_on_user_id"
-  end
-
   create_table "user_videos", force: :cascade do |t|
     t.integer "user_id", null: false
     t.integer "video_id", null: false
@@ -380,8 +354,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_12_30_125617) do
   add_foreign_key "solid_queue_ready_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_recurring_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_scheduled_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
-  add_foreign_key "usage_limits", "guest_users"
-  add_foreign_key "usage_limits", "users"
   add_foreign_key "user_videos", "users"
   add_foreign_key "user_videos", "videos"
 end
