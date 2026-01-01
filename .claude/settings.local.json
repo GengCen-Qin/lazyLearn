@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(sqlite3:*)",
+      "mcp__sequential-thinking__sequentialthinking",
+      "Bash(./bin/rails test:*)",
+      "mcp__serena__find_symbol",
+      "mcp__serena__activate_project",
+      "mcp__context7__resolve-library-id",
+      "Bash(./bin/rails generate model:*)",
+      "mcp__context7__get-library-docs",
+      "Bash(./bin/rails:*)",
+      "mcp__serena__replace_symbol_body",
+      "WebSearch"
+    ]
+  }
+}

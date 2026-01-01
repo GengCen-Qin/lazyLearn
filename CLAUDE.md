@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a Ruby on Rails 8.0.4 application called "new_web" that provides video download and transcription services for Xiaohongshu (Little Red Book) videos. The application includes video management, automated transcription processing, and a dictionary feature for English learning.
+This is a Ruby on Rails 8.0.4 application (codenamed "lazy") that provides video download and transcription services for Xiaohongshu (Little Red Book) videos. The application includes video management, automated transcription processing, and a dictionary feature for English learning. The application is deployed to production via Kamal with multi-server architecture.
 
 ## Key Features
 
@@ -51,11 +51,23 @@ This is a Ruby on Rails 8.0.4 application called "new_web" that provides video d
 
 ### Testing
 ```bash
-# Run tests
+# Run all tests (unit + system)
 ./bin/rails test
 
-# Run system tests
+# Run only unit tests
+./bin/rails test:test
+
+# Run only system tests
 ./bin/rails test:system
+
+# Prepare test database
+./bin/rails db:test:prepare
+
+# Run specific test file
+./bin/rails test test/models/video_test.rb
+
+# Run specific test case
+./bin/rails test test/models/video_test.rb -n test_should_create_video
 ```
 
 ### Asset Management
@@ -118,12 +130,15 @@ This Rails application follows several key architectural patterns:
 
 ### Frontend Architecture (Hotwire + Stimulus)
 - Modular Stimulus controllers for video player functionality:
-  - `VideoControls`: Video playback controls
-  - `SubtitleManager`: Subtitle display and synchronization
-  - `WordLookup`: English word lookup integration
-  - `Utils`: Shared utility functions
+  - `VideoControls`: Video playback controls (separate module)
+  - `SubtitleManager`: Subtitle display and synchronization (separate module)
+  - `WordLookup`: English word lookup integration (separate module)
+  - `Utils`: Shared utility functions (separate module)
 - Unified `SubtitleMergedController` coordinating all modules
 - Dark mode support via `dark_mode_controller.js`
+- Email verification support via `email_verification_controller.js`
+- Xiaohongshu downloader integration via `xiaohongshu_downloader_controller.js`
+- Importmap for JavaScript dependency management (no build step required)
 
 ### PWA Support
 - Service Worker registration at `/service-worker`
@@ -153,44 +168,59 @@ This Rails application follows several key architectural patterns:
 **User** (`app/models/user.rb`)
 - User authentication and management
 - Secure password handling with bcrypt
-- Session tracking and IP address logging
+- Email normalization and validation
+- Has many sessions with dependent destroy
 
 **Session** (`app/models/session.rb`)
 - User session management with expiration
 - IP address and user agent tracking
 
+**EmailVerification** (`app/models/email_verification.rb`)
+- Email verification code management
+- Code expiration and attempt tracking
+- Used for user registration verification
+
 ### Key Services
 
 **TranscriptionService** (`app/services/transcription_service.rb`)
 - Orchestrates video transcription process
-- Supports multiple transcription tools: Tencent ASR and OpenAI Whisper
-- Handles different transcription workflows
-- Updates video with transcription results
+- Automatically uses Whisper in development, Tencent ASR in production (unless tool specified)
+- Polls Tencent ASR for completion status
+- Updates video with transcription results or marks as failed
 
 **WordLookupService** (`app/services/word_lookup_service.rb`)
 - Service object pattern for word lookup
 - Returns structured success/failure results
 - Integrates with EcdictWord model
 
-**XiaohongshuApiService** (`app/services/xiaohongshu_api_service.rb`)
-- Extracts content information from Xiaohongshu share URLs
-- Provides download URLs and metadata
+**VerificationCodeService** (`app/services/verification_code_service.rb`)
+- Generates and validates email verification codes
+- Supports code expiration and attempt limits
+- Used for user registration email verification
 
-**XiaohongshuVideoDownloader** (`app/services/xiaohongshu_video_downloader.rb`)
-- Downloads videos from Xiaohongshu URLs
-- Saves videos to database with proper metadata
-- Handles file validation and content type detection
+**Downloader::Xhs** (`app/services/downloader/xhs.rb`)
+- Main downloader service for Xiaohongshu videos
+- Delegates to XhsUrlParser for link parsing
+- Extracts video title, description, and download URLs
+- Handles multiple Xiaohongshu link formats
 
-**Xiaohongshu Video Ecosystem** (`app/services/xiaohongshu_*`)
-- **Xhs**: Main downloader service for Xiaohongshu videos
-- **XhsConverter**: Format conversion and processing
-- **XhsExplore**: Content exploration and discovery
-- **XhsUrlParser**: URL parsing and validation
-- Supports multiple Xiaohongshu link formats and content types
+**XhsConverter** (`app/services/downloader/xhs_converter.rb`)
+- Format conversion and processing
 
-**VideoLinkCache** (`app/services/video_link_cache.rb`)
-- Caches video links to avoid duplicate downloads
-- Improves performance and reduces API calls
+**XhsExplore** (`app/services/downloader/xhs_explore.rb`)
+- Content exploration and discovery
+
+**XhsUrlParser** (`app/services/downloader/xhs_url_parser.rb`)
+- URL parsing and validation
+- Handles xhslink.com short links and xiaohongshu.com URLs
+
+**TencentAsrService** (`app/services/tencent_asr_service.rb`)
+- Tencent Cloud ASR integration for production transcription
+- Submits tasks and polls for results
+
+**WhisperTranscriptionService** (`app/services/whisper_transcription_service.rb`)
+- Local OpenAI Whisper transcription (development environment)
+- Runs on localhost:8000
 
 ### Background Jobs
 
@@ -215,6 +245,30 @@ This Rails application follows several key architectural patterns:
 - **PasswordsController**: Password reset functionality
 - **PasswordsMailer**: Email delivery for password resets
 
+**RegistrationsController** (`app/controllers/registrations_controller.rb`)
+- User registration workflow with email verification
+- Validates email uniqueness and password strength
+- Triggers verification code email via SendCloud API
+
+**SessionsController** (`app/controllers/sessions_controller.rb`)
+- User login/logout management
+- Creates secure sessions with IP tracking
+
+**PasswordsController** (`app/controllers/passwords_controller.rb`)
+- Password reset functionality
+- Token-based password reset workflow
+
+**EmailVerificationsController** (`app/controllers/email_verifications_controller.rb`)
+- Handles email verification code submission
+- Validates codes and marks verifications as used
+
+**PasswordsMailer** (`app/mailers/passwords_mailer.rb`)
+- Email delivery for password resets
+
+**VerificationMailer** (`app/mailers/verification_mailer.rb`)
+- Sends verification codes via SendCloud HTTP API
+- Used for user registration email verification
+
 **WelcomeController** (`app/controllers/welcome_controller.rb`)
 - Main landing page controller
 - Handles Xiaohongshu video download requests
@@ -223,6 +277,7 @@ This Rails application follows several key architectural patterns:
 **VideosController** (`app/controllers/videos_controller.rb`)
 - RESTful controller for video management
 - CRUD operations (index, show, destroy)
+- Uses Pagy for pagination
 
 **VideoPlayerController** (`app/controllers/video_player_controller.rb`)
 - Manages video playback interface
@@ -230,7 +285,7 @@ This Rails application follows several key architectural patterns:
 
 **WordLookupController** (`app/controllers/word_lookup_controller.rb`)
 - API endpoint for word lookup
-- Returns JSON responses for English words
+- Returns JSON responses for English words from ECDICT
 
 **XhsParseController** (`app/controllers/xhs_parse_controller.rb`)
 - Handles Xiaohongshu URL parsing
@@ -254,20 +309,28 @@ This Rails application follows several key architectural patterns:
 - Uses Active Storage with local disk storage
 - Supports various video formats (mp4, mov, avi, mkv, webm, etc.)
 - Cloud storage via Tencent COS in production
+- Development uses letter_opener gem for email preview
+
+### Email Service
+- SendCloud HTTP API for transactional emails
+- Supports verification codes and password resets
+- Configured via environment variables (SEND_CLOUD_SMTP_USERNAME, SEND_CLOUD_SMTP_PASSWORD, EMAIL_FROM, EMAIL_FROM_NAME)
 
 ## Database Schema
 
-### Primary Database (PostgreSQL)
+### Primary Database (Development/Test: SQLite, Production: PostgreSQL)
 Key tables:
 - `videos` - Video metadata and transcription data
 - `uploads` - File upload management
-- `users`, `sessions` - Authentication
+- `users`, `sessions`, `email_verifications` - Authentication
 - `active_storage_*` - File storage management
 - `solid_queue_*` - Background job processing
+- `rails_pulse_*` - Performance monitoring data
 
 ### Legacy Database (SQLite)
 - `stardict` table - ECDICT English dictionary (107,363 words)
 - Connected via separate `legacy` configuration in database.yml
+- Accessed through EcdictWord abstract model
 
 ## Development Notes
 
@@ -282,19 +345,43 @@ The application supports multiple transcription languages:
 - German (de)
 
 ### Video Processing Flow
-1. User submits Xiaohongshu URL
-2. System checks cache for existing video
-3. Extracts video info via XiaohongshuApiService
-4. Downloads video using XiaohongshuVideoDownloader
-5. Creates Video record and attaches file
-6. Triggers async TranscriptionJob
-7. TranscriptionService processes video via external API
-8. Updates video with transcription segments
+1. User submits Xiaohongshu URL or share text
+2. System validates URL format using Downloader::Xhs
+3. Extracts video info (title, description, video URL) via XhsUrlParser
+4. Downloads video using Downloader::Xhs
+5. Creates Video record with unique download_link (prevents duplicates)
+6. Attaches video file via Active Storage
+7. after_create_commit triggers:
+   - LocalUploadJob (development) or CosUploadJob (production)
+   - TranscriptionJob (async, via Solid Queue)
+8. TranscriptionService processes video:
+   - Development: WhisperTranscriptionService (localhost:8000)
+   - Production: TencentAsrService (polls until completion)
+9. Updates video with transcription segments or marks as failed
+10. Frontend polls for status updates and displays results when complete
 
 ### Caching Strategy
-- VideoLinkCache prevents duplicate downloads
-- Database indexes on transcription status and language
-- Solid Queue for efficient job processing
+- Unique index on `videos.download_link` prevents duplicate video processing
+- Database indexes on transcription status and language for efficient queries
+- Solid Queue for efficient background job processing
+- Pagy for efficient pagination of video lists
+
+### Authentication Flow
+1. User navigates to registration page
+2. Submits email and password
+3. System validates email format and uniqueness
+4. Creates EmailVerification record with 6-digit code (expires in configurable time)
+5. Sends verification code via SendCloud API
+6. User submits code from email
+7. System validates code and marks EmailVerification as used
+8. Creates User record
+9. Creates Session with IP address and user agent
+10. Sets signed cookie for session persistence
+
+### Current Attributes Pattern
+- `Current.session` - Thread-local session storage (ActiveSupport::CurrentAttributes)
+- Used by Authentication concern to track authenticated user per request
+- Accessible via `Current.user` delegate
 
 ## Development Tools & Quality Assurance
 
@@ -315,6 +402,10 @@ The application supports multiple transcription languages:
 # JavaScript dependency audit
 ./bin/rails importmap:audit
 ```
+
+### Ruby Version
+- Ruby 3.4.6 (see .ruby-version)
+- Uses Chinese gem mirror (gems.ruby-china.com) for faster installs in China
 
 ### Performance Monitoring
 - **Rails Pulse**: Detailed performance monitoring with configurable thresholds
@@ -338,13 +429,33 @@ The application supports multiple transcription languages:
 - Exposes port 80
 
 ### Kamal Deployment
-- **Multi-server architecture**: Separate web and job servers
-- **PostgreSQL accessory**: Dedicated database container
-- **Tencent COS accessory**: Cloud storage upload service
-- **SSL certificates**: Automatic Let's Encrypt integration
-- **Container registry**: Tencent Cloud container registry
+- **Multi-server architecture**: Separate web and job servers (currently same host: 101.35.96.142)
+- **PostgreSQL accessory**: Dedicated database container (postgres:17-alpine)
+- **Tencent COS accessory**: Cloud storage upload service (custom container)
+- **SSL certificates**: Automatic Let's Encrypt integration via Thruster proxy
+- **Container registry**: Tencent Cloud container registry (ccr.ccs.tencentyun.com)
 - Production-ready with proper health checks
-- Environment variables and secrets management
+- Environment variables and secrets management via KAMAL_REGISTRY_PASSWORD and other secrets
+- Accessories accessible via local kamal docker network
+- Persistent storage volume for SQLite databases and Active Storage files
+
+### Kamal Commands
+```bash
+# Deploy to production
+bin/kamal deploy
+
+# Run Rails console in production
+bin/kamal console
+
+# View logs
+bin/kamal logs
+
+# Access production database console
+bin/kamal dbc
+
+# Access shell
+bin/kamal shell
+```
 
 ## Security Considerations
 
@@ -353,11 +464,50 @@ The application supports multiple transcription languages:
 - SQL injection protection via ActiveRecord
 - XSS protection via Rails built-in features
 - Regular security scans via Brakeman
+- Secure session management with signed cookies
+- Password encryption via bcrypt
+- Email verification attempt limits and expiration
+- IP address tracking for sessions and email verifications
+
+## Environment Variables
+
+Key environment variables (see .env for local development):
+- `RAILS_MASTER_KEY` - Rails credentials master key
+- `SEND_CLOUD_SMTP_USERNAME` - SendCloud API username
+- `SEND_CLOUD_SMTP_PASSWORD` - SendCloud API password
+- `EMAIL_FROM` - Sender email address
+- `EMAIL_FROM_NAME` - Sender name (default: "LazyLearn")
+- `TENCENTCLOUD_SECRET_ID` - Tencent Cloud API secret ID (production)
+- `TENCENTCLOUD_SECRET_KEY` - Tencent Cloud API secret key (production)
+- `COS_BUCKET_URL` - Tencent COS bucket URL (production)
+- `POSTGRES_PASSWORD` - PostgreSQL password (production)
+- `NEW_WEB_DATABASE_PASSWORD` - Application database password (production)
+- `KAMAL_REGISTRY_PASSWORD` - Container registry password (production)
+- `mission_control_user` - Mission Control Jobs username (production)
+- `mission_control_password` - Mission Control Jobs password (production)
 
 ## Performance Optimization
 
-- Background job processing for transcription
-- Database indexing on frequently queried fields
-- File caching to avoid duplicate downloads
-- Asset precompilation for production
-- Thruster for HTTP request acceleration
+- Background job processing for transcription (Solid Queue)
+- Database indexing on frequently queried fields (download_link, transcription_status, transcription_language, email, expires_at)
+- Unique constraints prevent duplicate video processing
+- Pagy for efficient pagination
+- Asset precompilation for production (Propshaft)
+- Thruster for HTTP request acceleration and SSL termination
+- jemalloc memory allocator in production (reduced memory usage and latency)
+- Bootsnap for reduced boot times through caching
+- Solid Cache for Rails.cache
+- Solid Cable for Action Cable
+
+## Key Integrations
+
+- **Pagy** - Pagination library for video lists
+- **Letter Opener** - Email preview in development (opens automatically)
+- **Down** - File download library for video downloads
+- **Nokogiri** - HTML/XML parsing for Xiaohongshu content extraction
+- **Typhoeus** - Parallel HTTP requests for improved performance
+- **HTTParty** - HTTP client for transcription service communication
+- **Active Storage** - File attachment management
+- **Solid Queue** - Background job processing
+- **Mission Control Jobs** - Web UI for job monitoring
+- **Rails Pulse** - Performance monitoring dashboard
