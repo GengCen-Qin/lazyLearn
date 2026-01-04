@@ -36,9 +36,9 @@ FROM base AS build
 # gem 加速
 RUN bundle config mirror.https://rubygems.org https://gems.ruby-china.com
 
-# Install packages needed to build gems and JavaScript
+# Install packages needed to build gems
 RUN apt-get update -qq && \
-  apt-get install --no-install-recommends -y build-essential git libpq-dev libyaml-dev pkg-config nodejs yarn && \
+  apt-get install --no-install-recommends -y build-essential git libpq-dev libyaml-dev pkg-config && \
   rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
 # Install application gems
@@ -48,11 +48,6 @@ RUN bundle install && \
   rm -rf ~/.bundle/ "${BUNDLE_PATH}"/ruby/*/cache "${BUNDLE_PATH}"/ruby/*/bundler/gems/*/.git && \
   # -j 1 disable parallel compilation to avoid a QEMU bug: https://github.com/rails/bootsnap/issues/495
   bundle exec bootsnap precompile -j 1 --gemfile
-
-# Install JavaScript dependencies
-COPY package.json yarn.lock ./
-RUN yarn install && \
-  yarn cache clean
 
 # Copy application code
 COPY . .

@@ -1,8 +1,8 @@
-import { Controller } from "@hotwired/stimulus"
-import { VideoControls } from "./video_controls"
-import { SubtitleManager } from "./subtitle_manager"
-import { WordLookup } from "./word_lookup"
-import { Utils } from "./utils"
+import { Controller } from "@hotwired/stimulus";
+import { VideoControls } from "controllers/video_controls";
+import { SubtitleManager } from "controllers/subtitle_manager";
+import { WordLookup } from "controllers/word_lookup";
+import { Utils } from "controllers/utils";
 
 /**
  * 视频字幕播放器控制器
