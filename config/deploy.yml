@@ -44,6 +44,11 @@ env:
     - TENCENTCLOUD_SECRET_KEY
     - mission_control_password
     - mission_control_user
+    - SEND_CLOUD_SMTP_USERNAME
+    - SEND_CLOUD_SMTP_PASSWORD
+    - EMAIL_FROM
+    - EMAIL_FROM_NAME
+    - USE_LETTER_OPENER
 
   clear:
     # Run the Solid Queue Supervisor inside the web server's Puma process to do jobs.
