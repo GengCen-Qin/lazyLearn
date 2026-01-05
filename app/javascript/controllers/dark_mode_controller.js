@@ -12,7 +12,6 @@ export default class extends Controller {
   }
 
   disconnect() {
-    console.log('Disconnected');
   }
 
   /**
@@ -36,8 +35,6 @@ export default class extends Controller {
    * 切换暗色模式
    */
   toggleDarkMode() {
-    alert(1)
-    console.log('123123123')
     const isDark = document.documentElement.classList.toggle("dark");
     localStorage.setItem("darkMode", isDark);
 
