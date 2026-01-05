@@ -1,0 +1,25 @@
+<!-- 移动端用户认证状态 -->
+<% if authenticated? %>
+  <div class="flex items-center justify-between">
+    <div class="flex items-center">
+      <div class="h-6 w-6 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white text-xs font-medium">
+        <%= Current.user.email_address.split('@').first.first.upcase %>
+      </div>
+      <div class="ml-2">
+        <div class="text-xs font-medium text-gray-900 dark:text-white truncate max-w-[80px]">
+          <%= Current.user.email_address.split('@').first %>
+        </div>
+      </div>
+    </div>
+    <%= link_to "退出", session_path,
+        data: { turbo_method: "delete", turbo_confirm: "确定要退出登录吗？" },
+        class: "text-xs text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 font-medium" %>
+  </div>
+<% else %>
+  <div class="space-y-1">
+    <%= link_to "登录", new_session_path,
+        class: "w-full text-center text-xs font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 px-3 py-1.5 rounded-lg transition-colors" %>
+    <%= link_to "注册", new_registration_path,
+        class: "w-full text-center bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white font-medium py-1.5 px-3 rounded-lg transition duration-200 text-xs" %>
+  </div>
+<% end %>
