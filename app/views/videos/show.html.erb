@@ -10,7 +10,27 @@
   data-subtitle-merged-video-path-value="<%= @video.video_file.attached? ? url_for(@video.video_file) : '' %>"
   data-subtitle-merged-subtitles-value="<%= (@video.formatted_transcription || []).to_json %>"
 >
-  <%= render 'videos/video_header', video: @video %>
+  <!-- 视频标题和状态区域 - 移除旧的返回按钮，使用统一header导航 -->
+  <div class="bg-white dark:bg-gray-800 p-3 sm:p-4 border-b border-gray-200 dark:border-gray-700">
+    <div class="mx-auto">
+      <div class="flex flex-row items-center sm:items-center sm:justify-between gap-3 sm:gap-4">
+        <h1 class="text-gray-800 dark:text-gray-100 text-lg sm:text-xl md:text-2xl font-semibold truncate">
+          <%= @video.title %>
+        </h1>
+
+        <!-- 显示转录状态 -->
+        <span class="video-status <%= case @video.transcription_status
+                                      when 'pending' then 'text-red-400 dark:text-red-500'
+                                      when 'processing' then 'text-orange-600 dark:text-orange-500'
+                                      when 'completed' then 'text-green-600 dark:text-green-500'
+                                      when 'failed' then 'text-red-900 dark:text-red-400'
+                                      else 'text-red-400 dark:text-red-500'
+                                    end %> text-sm font-medium">
+          <%= @video.transcription_status_text %>
+        </span>
+      </div>
+    </div>
+  </div>
 
   <!-- 主播放器布局 -->
   <div class="flex-1 overflow-hidden flex flex-col">

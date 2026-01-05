@@ -1,0 +1,111 @@
+<!-- 统一导航头部 -->
+<header class="bg-white dark:bg-gray-800 shadow-sm z-10">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between items-center h-16">
+      <!-- Logo/品牌区域 -->
+      <div class="flex-shrink-0 flex items-center">
+        <%= link_to root_path, class: "text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-red-500 via-yellow-500 to-green-500 hover:from-red-600 hover:via-yellow-600 hover:to-green-600 transition-all" do %>
+          Lazy Learn
+        <% end %>
+      </div>
+
+      <!-- 导航链接区域(Web展示) -->
+      <div class="hidden md:block">
+        <div class="ml-10 flex items-baseline space-x-4">
+          <%= link_to "首页", root_path,
+              class: "px-3 py-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors #{current_page?(root_path) ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white' : ''}" %>
+
+          <%= link_to "视频列表", videos_path,
+              class: "px-3 py-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors #{current_page?(videos_path) ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white' : ''}" %>
+        </div>
+      </div>
+
+      <!-- 认证状态和用户菜单 -->
+      <div class="flex items-center">
+        <!-- 移动端菜单按钮 -->
+        <div class="md:hidden ml-4" data-controller="mobile-menu">
+          <button
+            type="button"
+            class="inline-flex items-center justify-center p-2 rounded-md text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500"
+            data-action="click->mobile-menu#toggle"
+          >
+            <!-- 汉堡图标 -->
+            <svg class="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+            <!-- 关闭图标 -->
+            <svg class="hidden h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <% if authenticated? %>
+          <!-- 已登录状态 -->
+          <div class="ml-3 relative hidden md:block">
+            <div class="flex items-center gap-2">
+              <div class="flex items-center gap-1 bg-green-50 dark:bg-green-900/20 px-3 py-1.5 rounded-full border border-green-200 dark:border-green-800">
+                <svg class="h-4 w-4 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <span class="text-xs text-green-700 dark:text-green-300 font-medium truncate max-w-[80px]">
+                  <%= Current.user.email_address.split('@').first %>
+                </span>
+              </div>
+
+              <%= link_to "退出", session_path,
+                  data: { turbo_method: "delete", turbo_confirm: "确定要退出登录吗？" },
+                  class: "ml-2 text-sm text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white" %>
+            </div>
+          </div>
+        <% else %>
+          <!-- 未登录状态 -->
+          <div class="hidden md:flex items-center gap-2">
+            <%= link_to "登录", new_session_path,
+                class: "text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" %>
+
+            <%= link_to "注册", new_registration_path,
+                class: "bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-full transition duration-200 text-sm" %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <!-- 移动端菜单 -->
+  <div class="md:hidden hidden" id="mobile-menu" data-mobile-menu-target="menu">
+    <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+      <%= link_to "首页", root_path,
+          class: "block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors #{current_page?(root_path) ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white' : ''}" %>
+
+      <%= link_to "视频列表", videos_path,
+          class: "block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors #{current_page?(videos_path) ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white' : ''}" %>
+    </div>
+
+    <div class="pt-4 pb-3 border-t border-gray-200 dark:border-gray-700">
+      <div class="flex items-center px-5">
+        <% if authenticated? %>
+          <div class="flex-1 px-2">
+            <div class="text-sm text-gray-700 dark:text-gray-300">
+              <%= Current.user.email_address.split('@').first %>
+            </div>
+            <div class="text-xs font-medium text-gray-500 dark:text-gray-400">
+              已登录
+            </div>
+          </div>
+          <%= link_to "退出", session_path,
+              data: { turbo_method: "delete", turbo_confirm: "确定要退出登录吗？" },
+              class: "ml-auto text-sm text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white" %>
+        <% else %>
+          <div class="flex-1 flex gap-2">
+            <%= link_to "登录", new_session_path,
+                class: "flex-1 text-center text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" %>
+
+            <%= link_to "注册", new_registration_path,
+                class: "flex-1 text-center bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white font-medium py-2 px-3 rounded-full transition duration-200 text-sm" %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</header>
