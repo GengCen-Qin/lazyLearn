@@ -8,7 +8,7 @@ class VideosController < ApplicationController
     if Current.user
       # 登录用户: 自己的视频 + 免费视频
       @pagy, @videos = pagy(
-        Current.user.videos.distinct.order(created_at: :desc),
+        Current.user.videos.order(created_at: :desc),
         limit: 5
       )
     else
