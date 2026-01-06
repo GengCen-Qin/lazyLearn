@@ -49,6 +49,7 @@ env:
     - EMAIL_FROM
     - EMAIL_FROM_NAME
     - USE_LETTER_OPENER
+    - COS_BUCKET_CDN_URL
 
   clear:
     # Run the Solid Queue Supervisor inside the web server's Puma process to do jobs.

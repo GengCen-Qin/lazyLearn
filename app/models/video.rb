@@ -86,7 +86,8 @@ class Video < ApplicationRecord
     )
 
     if response.success?
-      JSON.parse(response.body)["presigned_url"]
+      presigned_url = JSON.parse(response.body)["presigned_url"]
+      "#{ENV['COS_BUCKET_CDN_URL']}/#{presigned_url.split("/")[-1]}"
     else
       Rails.logger.error "OSS 获取链接失败: #{response.code}, #{response.body}"
     end
