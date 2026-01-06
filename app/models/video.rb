@@ -79,18 +79,17 @@ class Video < ApplicationRecord
   def oss_link
     return if ori_video_url.blank? || !Rails.env.production?
 
-    # response = Typhoeus.post(
-    #   "http://new_web-cos:8080/api/v1/presigned-url",
-    #   headers: { "Content-Type" => "application/json" },
-    #   body: { file_path: ori_video_url.split("/")[-1] + ".mp4" }.to_json
-    # )
-    #
-    # if response.success?
-    #   JSON.parse(response.body)["presigned_url"]
-    # else
-    #   Rails.logger.error "OSS 获取链接失败: #{response.code}, #{response.body}"
-    # end
-    "https://cdn.lazylearn.work/#{ori_video_url.split("/")[-1]}.mp4"
+    response = Typhoeus.post(
+      "http://new_web-cos:8080/api/v1/presigned-url",
+      headers: { "Content-Type" => "application/json" },
+      body: { file_path: ori_video_url.split("/")[-1] + ".mp4" }.to_json
+    )
+
+    if response.success?
+      JSON.parse(response.body)["presigned_url"]
+    else
+      Rails.logger.error "OSS 获取链接失败: #{response.code}, #{response.body}"
+    end
   end
 
   # 触发转录（同步，主要用于调试）
