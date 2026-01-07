@@ -206,6 +206,92 @@ body.video-player-page > main {
   margin: 0;
 }
 
+/* 全屏模式下的样式调整 */
+.video-subtitle-app-container:fullscreen {
+  background-color: #000 !important;
+}
+
+.video-subtitle-app-container:fullscreen header {
+  display: none !important;
+}
+
+.video-subtitle-app-container:fullscreen .bg-white {
+  background-color: #000 !important;
+  border: none !important;
+}
+
+.video-subtitle-app-container:fullscreen .grid {
+  grid-template-columns: 1fr !important;
+  height: 100vh !important;
+}
+
+.video-subtitle-app-container:fullscreen #video-player-container {
+  max-height: 100vh !important;
+  height: 100vh !important;
+  width: 100vw !important;
+}
+
+.video-subtitle-app-container:fullscreen #videoPlayer {
+  max-height: 100vh !important;
+  height: 100vh !important;
+  width: 100vw !important;
+  object-fit: contain !important;
+}
+
+.video-subtitle-app-container:fullscreen #subtitle-container {
+  display: none !important;
+}
+
+/* 移动端全屏支持 */
+@supports (-webkit-touch-callout: none) {
+  /* iOS Safari */
+  .video-subtitle-app-container:fullscreen {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  
+  .video-subtitle-app-container:fullscreen #video-player-container {
+    padding-top: env(safe-area-inset-top) !important;
+    padding-bottom: env(safe-area-inset-bottom) !important;
+  }
+}
+
+/* Webkit全屏API支持 */
+.video-subtitle-app-container:-webkit-full-screen {
+  background-color: #000 !important;
+}
+
+.video-subtitle-app-container:-webkit-full-screen header {
+  display: none !important;
+}
+
+.video-subtitle-app-container:-webkit-full-screen .bg-white {
+  background-color: #000 !important;
+  border: none !important;
+}
+
+.video-subtitle-app-container:-webkit-full-screen .grid {
+  grid-template-columns: 1fr !important;
+  height: 100vh !important;
+}
+
+.video-subtitle-app-container:-webkit-full-screen #video-player-container {
+  max-height: 100vh !important;
+  height: 100vh !important;
+  width: 100vw !important;
+}
+
+.video-subtitle-app-container:-webkit-full-screen #videoPlayer {
+  max-height: 100vh !important;
+  height: 100vh !important;
+  width: 100vw !important;
+  object-fit: contain !important;
+}
+
+.video-subtitle-app-container:-webkit-full-screen #subtitle-container {
+  display: none !important;
+}
+
 /* Plyr video player container styles */
 #video-player-container {
   position: relative;

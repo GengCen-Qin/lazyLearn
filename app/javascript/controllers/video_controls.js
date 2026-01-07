@@ -34,7 +34,15 @@ export class VideoControls {
           enterFullscreen: "全屏",
           exitFullscreen: "退出全屏",
         },
+        fullscreen: {
+          enabled: true,
+          fallback: true,
+          iosNative: true, // iOS设备使用原生全屏
+        },
       });
+      
+      // 添加全屏事件监听器
+      this.setupFullscreenListeners();
     } else {
       this.player = this.videoTarget;
     }
@@ -57,6 +65,55 @@ export class VideoControls {
         handler.handleVideoError(e);
       });
     }
+  }
+
+  // 设置全屏事件监听器
+  setupFullscreenListeners() {
+    if (!this.player) return;
+    
+    const handleFullscreenChange = () => {
+      const isFullscreen = document.fullscreenElement || 
+                          document.webkitFullscreenElement || 
+                          document.mozFullScreenElement ||
+                          document.msFullscreenElement;
+      
+      // 全屏状态改变时调整视频样式
+      const videoContainer = document.querySelector('#video-player-container');
+      const videoElement = this.player.media || this.videoTarget;
+      
+      if (isFullscreen) {
+        // 进入全屏模式
+        videoElement.style.width = '100vw';
+        videoElement.style.height = '100vh';
+        videoElement.style.maxHeight = '100vh';
+        videoElement.style.objectFit = 'contain';
+        
+        // 确保容器也是全屏尺寸
+        if (videoContainer) {
+          videoContainer.style.width = '100vw';
+          videoContainer.style.height = '100vh';
+          videoContainer.style.maxHeight = '100vh';
+        }
+      } else {
+        // 退出全屏模式，恢复原始样式
+        videoElement.style.width = '';
+        videoElement.style.height = '';
+        videoElement.style.maxHeight = '';
+        videoElement.style.objectFit = 'contain';
+        
+        if (videoContainer) {
+          videoContainer.style.width = '';
+          videoContainer.style.height = '';
+          videoContainer.style.maxHeight = '';
+        }
+      }
+    };
+    
+    // 监听全屏变化事件
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+    document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+    document.addEventListener('MSFullscreenChange', handleFullscreenChange);
   }
 
   // 异步加载视频文件
