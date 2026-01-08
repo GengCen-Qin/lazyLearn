@@ -13,6 +13,19 @@ export class VideoControls {
   // 初始化视频播放器
   initializePlayer() {
     if (typeof Plyr !== "undefined") {
+      // 检测是否为小米浏览器或其他移动浏览器
+      const isMiBrowser = /MiuiBrowser/i.test(navigator.userAgent);
+      const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      
+      // 设置视频元素属性以防止浏览器覆盖控件
+      this.videoTarget.setAttribute('controlsList', 'nodownload nofullscreen noremoteplayback');
+      this.videoTarget.setAttribute('disablePictureInPicture', 'true');
+      this.videoTarget.setAttribute('x-webkit-airplay', 'deny');
+      this.videoTarget.setAttribute('x5-video-player-type', 'h5');
+      this.videoTarget.setAttribute('x5-video-player-fullscreen', 'false');
+      this.videoTarget.setAttribute('webkit-playsinline', '');
+      this.videoTarget.setAttribute('playsinline', '');
+      
       // 使用Plyr播放器，提供更好的控制界面
       this.player = new Plyr(this.videoTarget, {
         controls: ["play", "progress", "duration", "settings", "fullscreen"], // 播放控制按钮
@@ -37,12 +50,19 @@ export class VideoControls {
         fullscreen: {
           enabled: true,
           fallback: true,
-          iosNative: true, // iOS设备使用原生全屏
+          iosNative: false, // 强制使用 Plyr 的全屏而不是 iOS 原生全屏
         },
+        // 针对小米浏览器的特殊设置
+        hideControls: isMiBrowser, // 在小米浏览器上尝试隐藏原生控件
       });
       
       // 添加全屏事件监听器
       this.setupFullscreenListeners();
+      
+      // 针对小米浏览器的额外处理
+      if (isMiBrowser || isMobile) {
+        this.setupMobileBrowserFixes();
+      }
     } else {
       this.player = this.videoTarget;
     }
@@ -266,5 +286,80 @@ export class VideoControls {
     return `${minutes.toString().padStart(2, "0")}:${secs
       .toString()
       .padStart(2, "0")}`;
+  }
+
+  // 针对移动浏览器的修复方法
+  setupMobileBrowserFixes() {
+    // 尝试禁用原生控件
+    const video = this.videoTarget;
+    
+    // 添加CSS来隐藏原生控件
+    const style = document.createElement('style');
+    style.innerHTML = `
+      /* 隐藏小米浏览器和其他移动浏览器的原生视频控件 */
+      video::-webkit-media-controls {
+        display: none !important;
+      }
+      video::-webkit-media-controls-panel {
+        display: none !important;
+      }
+      video::-webkit-media-controls-play-button {
+        display: none !important;
+      }
+      video::-webkit-media-controls-timeline {
+        display: none !important;
+      }
+      video::-webkit-media-controls-current-time-display {
+        display: none !important;
+      }
+      video::-webkit-media-controls-time-remaining-display {
+        display: none !important;
+      }
+      video::-webkit-media-controls-mute-button {
+        display: none !important;
+      }
+      video::-webkit-media-controls-toggle-closed-captions-button {
+        display: none !important;
+      }
+      video::-webkit-media-controls-volume-slider {
+        display: none !important;
+      }
+      video::-webkit-media-controls-fullscreen-button {
+        display: none !important;
+      }
+      video::-internal-media-controls-download-button {
+        display: none !important;
+      }
+      video::-webkit-media-controls-enclosure {
+        display: none !important;
+      }
+      video::-webkit-media-controls-overflow-button {
+        display: none !important;
+      }
+    `;
+    document.head.appendChild(style);
+    
+    // 尝试通过JavaScript禁用原生控件
+    try {
+      if (video.controls !== undefined) {
+        // 先移除controls属性，然后立即添加回来
+        // 这样可以触发 Plyr 重新初始化控件
+        const hadControls = video.hasAttribute('controls');
+        video.removeAttribute('controls');
+        
+        setTimeout(() => {
+          if (hadControls) {
+            video.setAttribute('controls', '');
+          }
+          
+          // 确保 Plyr 控件可见
+          if (this.player && typeof this.player.rebuild === 'function') {
+            this.player.rebuild();
+          }
+        }, 100);
+      }
+    } catch (e) {
+      console.warn('无法禁用原生视频控件:', e);
+    }
   }
 }
