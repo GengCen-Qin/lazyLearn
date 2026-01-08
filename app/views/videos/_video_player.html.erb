@@ -5,14 +5,6 @@
       id="videoPlayer"
       data-subtitle-merged-target="video"
       controls
-      controlsList="nodownload nofullscreen noremoteplayback"
-      disablePictureInPicture
-      x-webkit-airplay="deny"
-      x5-video-player-type="h5"
-      x5-video-player-fullscreen="false"
-      x5-video-orientation="portrait"
-      webkit-playsinline
-      playsinline
       class="absolute inset-0 w-full h-full object-contain"
       <% if video.oss_link.present? %>
         src="<%= video.oss_link %>"
