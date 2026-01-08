@@ -1,3 +1,5 @@
+import Plyr from "plyr";
+
 /**
  * 视频控制功能
  * 负责视频播放器的初始化、事件监听和播放控制
@@ -10,15 +12,35 @@ export class VideoControls {
 
   // 初始化视频播放器
   initializePlayer() {
-    if (typeof Player !== "undefined") {
-      // 使用xgplayer播放器，提供更好的控制界面
-      this.player = new Player({
-        el: this.videoTarget.parentElement,
-        url: this.videoTarget.src || '',
-        lang: 'zh-cn',
-        download: false,
+    if (typeof Plyr !== "undefined") {
+      // 使用Plyr播放器，提供更好的控制界面
+      this.player = new Plyr(this.videoTarget, {
+        controls: ["play", "progress", "duration", "settings", "fullscreen"], // 播放控制按钮
+        settings: ["speed"],
+        clickToPlay: true,
+        tooltips: {
+          controls: true, // 显示控制按钮提示
+          seek: true, // 显示进度条拖拽提示
+        },
+        i18n: {
+          // 国际化 - 中文界面
+          play: "播放",
+          pause: "暂停",
+          seek: "拖动",
+          mute: "静音",
+          unmute: "取消静音",
+          speed: "变速",
+          settings: "设置",
+          enterFullscreen: "全屏",
+          exitFullscreen: "退出全屏",
+        },
+        fullscreen: {
+          enabled: true,
+          fallback: true,
+          iosNative: true, // iOS设备使用原生全屏
+        },
       });
-
+      
       // 添加全屏事件监听器
       this.setupFullscreenListeners();
     } else {
@@ -29,7 +51,7 @@ export class VideoControls {
   // 设置视频播放器事件监听器
   setupEventListeners(handler) {
     if (this.player) {
-      const videoElement = this.player.video || this.player.media || this.player;
+      const videoElement = this.player.media || this.player;
 
       videoElement.addEventListener("timeupdate", () => {
         handler.handleTimeUpdate();
@@ -48,24 +70,24 @@ export class VideoControls {
   // 设置全屏事件监听器
   setupFullscreenListeners() {
     if (!this.player) return;
-
+    
     const handleFullscreenChange = () => {
-      const isFullscreen = document.fullscreenElement ||
-                          document.webkitFullscreenElement ||
+      const isFullscreen = document.fullscreenElement || 
+                          document.webkitFullscreenElement || 
                           document.mozFullScreenElement ||
                           document.msFullscreenElement;
-
+      
       // 全屏状态改变时调整视频样式
       const videoContainer = document.querySelector('#video-player-container');
       const videoElement = this.player.media || this.videoTarget;
-
+      
       if (isFullscreen) {
         // 进入全屏模式
         videoElement.style.width = '100vw';
         videoElement.style.height = '100vh';
         videoElement.style.maxHeight = '100vh';
         videoElement.style.objectFit = 'contain';
-
+        
         // 确保容器也是全屏尺寸
         if (videoContainer) {
           videoContainer.style.width = '100vw';
@@ -78,7 +100,7 @@ export class VideoControls {
         videoElement.style.height = '';
         videoElement.style.maxHeight = '';
         videoElement.style.objectFit = 'contain';
-
+        
         if (videoContainer) {
           videoContainer.style.width = '';
           videoContainer.style.height = '';
@@ -86,7 +108,7 @@ export class VideoControls {
         }
       }
     };
-
+    
     // 监听全屏变化事件
     document.addEventListener('fullscreenchange', handleFullscreenChange);
     document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
@@ -108,10 +130,32 @@ export class VideoControls {
       // 创建新的视频对象URL
       const newVideoUrl = URL.createObjectURL(file);
 
-      // 设置视频源（兼容xgplayer和原生video）
-      if (this.player.src) {
-        // xgplayer播放器
-        this.player.src = newVideoUrl;
+      // 检测文件类型
+      let detectedType = file.type || this.detectVideoType(file.name);
+
+      // 准备视频源配置
+      const sources = [
+        {
+          src: newVideoUrl,
+          type: detectedType,
+        },
+      ];
+
+      // 为MOV文件添加MP4回退支持（常见兼容性问题）
+      if (file.name.toLowerCase().endsWith(".mov")) {
+        sources.push({
+          src: newVideoUrl,
+          type: "video/mp4",
+        });
+      }
+
+      // 设置视频源（兼容Plyr和原生video）
+      if (this.player.source) {
+        // Plyr播放器
+        this.player.source = {
+          type: "video",
+          sources: sources,
+        };
       } else {
         // 原生视频元素
         this.videoTarget.src = newVideoUrl;
@@ -157,8 +201,9 @@ export class VideoControls {
   togglePlay() {
     if (this.player) {
       if (typeof this.player.togglePlay === "function") {
+        // 使用Plyr的切换方法
         this.player.togglePlay();
-      } else if (typeof this.player.play === "function") {
+      } else {
         // 原生视频元素的手动控制
         if (this.player.paused) {
           this.player.play();
@@ -193,8 +238,6 @@ export class VideoControls {
         this.player.currentTime = time;
       } else if (this.player.media) {
         this.player.media.currentTime = time;
-      } else if (this.player.video) {
-        this.player.video.currentTime = time;
       }
     }
   }
@@ -202,7 +245,7 @@ export class VideoControls {
   // 获取当前播放时间
   getCurrentTime() {
     if (this.player) {
-      return this.player.currentTime || this.player.media?.currentTime || this.player.video?.currentTime || 0;
+      return this.player.currentTime || this.player.media?.currentTime || 0;
     }
     return 0;
   }
@@ -210,7 +253,7 @@ export class VideoControls {
   // 获取视频总时长
   getDuration() {
     if (this.player) {
-      return this.player.duration || this.player.media?.duration || this.player.video?.duration || 0;
+      return this.player.duration || this.player.media?.duration || 0;
     }
     return 0;
   }
