@@ -10,12 +10,8 @@ import { Utils } from "controllers/utils";
  */
 export default class extends Controller {
   static targets = [
-    "video",
-    "videoInput",
     "currentTime",
     "currentSubtitleIndex",
-    "jsonInput",
-    "subtitleList",
     "subtitleCount",
     "message",
   ];
@@ -32,21 +28,8 @@ export default class extends Controller {
     this.wordLookup = new WordLookup();
     this.utils = new Utils();
 
-    this.videoControls.initializePlayer();
-    this.setupEventListeners();
     this.setupKeyboardShortcuts();
     this.wordLookup.setupWordLookup();
-
-    this.isAutoScrolling = false;
-    this.lastScrollTime = 0;
-    this.currentPopupWord = null;
-  }
-
-  /**
-   * 设置视频播放器事件监听器
-   */
-  setupEventListeners() {
-    this.videoControls.setupEventListeners(this);
   }
 
   /** 设置键盘快捷键 */
@@ -74,16 +57,6 @@ export default class extends Controller {
     });
   }
 
-  /**
-   * 处理视频播放错误
-   * 显示用户友好的错误信息
-   */
-  handleVideoError(event) {
-    this.utils.showError(
-      "视频文件播放失败，请检查文件格式是否支持",
-      this.element,
-    );
-  }
 
   /**
    * 切换视频播放/暂停状态
@@ -141,23 +114,6 @@ export default class extends Controller {
     return this.videoControls.getDuration();
   }
 
-  /**
-   * 渲染字幕列表到UI
-   * 为每条字幕创建可点击的行，支持时间跳转和单词查询
-   * 将字幕文本中的英文单词设为可点击
-   */
-  renderSubtitleList() {
-    // 委托给subtitleManager处理
-    this.subtitleManager.renderSubtitleList(
-      this.subtitlesValue,
-      this.subtitleListTarget,
-      this.utils.formatTime.bind(this.utils),
-      this.utils.processSubtitleText.bind(this.utils),
-      this.seekToSubtitle.bind(this),
-      this.utils.escapeHtml.bind(this.utils), // 传递escapeHtml函数
-      this, // handler for word click events
-    );
-  }
   /**
    * 同步字幕到当前播放时间
    * 根据当前时间找到应该显示的字幕并更新UI
@@ -268,30 +224,7 @@ export default class extends Controller {
       },
     );
   }
-  // ========================================
-  // Status Bar Methods
-  // ========================================
-  updateStatusBar() {
-    // this.utils.updateStatusBar(
-    //   this.hasCurrentTimeTarget,
-    //   this.currentTimeTarget,
-    //   this.getCurrentTime.bind(this),
-    //   this.hasCurrentSubtitleIndexTarget,
-    //   this.currentSubtitleIndexTarget,
-    //   this.currentIndexValue,
-    //   this.subtitlesValue,
-    //   this.utils.formatTime.bind(this.utils),
-    // );
-  }
-  // ========================================
-  // Message Methods
-  // ========================================
-  showSuccess(message) {
-    this.utils.showSuccess(message, this.element);
-  }
-  showError(message) {
-    this.utils.showError(message, this.element);
-  }
+
   // ========================================
   // 单词查询相关方法
   // ========================================

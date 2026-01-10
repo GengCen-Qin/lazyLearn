@@ -12,6 +12,10 @@ export default class extends Controller {
     this.utils = new Utils();
     this.isAutoScrolling = false;
     this.render()
+    window.addEventListener('player:updatePlayInfo', e => {
+      this.updateSubtitleByTime(e.detail.currentTime);
+      this.syncSubtitles(e.detail.currentTime);
+    });
   }
 
   // 渲染字幕
@@ -96,7 +100,7 @@ export default class extends Controller {
 
       setTimeout(() => {
         this.isAutoScrolling = false;
-      }, 500);
+      }, 300);
     }
   }
 
@@ -104,5 +108,22 @@ export default class extends Controller {
   updateStatusBar() {
     const subtitle = this.subtitlesValue[this.indexValue];
     window.dispatchEvent(new CustomEvent('video:updatePlayInfo', { detail: { start: subtitle.start, index: this.indexValue, total: this.subtitlesValue.length } }));
+  }
+
+  // 根据视频当前播放时间，更新字幕底部状态栏
+  updateSubtitleByTime(time) {
+    const index = this.subtitlesValue.findIndex((subtitle) => time >= subtitle.start && time < subtitle.end);
+
+    window.dispatchEvent(new CustomEvent('video:updatePlayInfo', { detail: { start: time, index: index, total: this.subtitlesValue.length } }));
+  }
+
+  // 同步字幕到当前播放时间
+  syncSubtitles(time) {
+    // 需要注意第二段的结束时间 和 第一段的开始时间是一样的，计算的时候注意
+    const newSubtitleIndex = this.subtitlesValue.findIndex((subtitle) => time >= subtitle.start && time < subtitle.end)
+
+    if (newSubtitleIndex !== this.indexValue) {
+      this.setCurrentSubtitle(newSubtitleIndex);
+    }
   }
 }

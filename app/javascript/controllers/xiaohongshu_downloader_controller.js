@@ -68,7 +68,6 @@ export default class extends Controller {
   }
 
   setButtonLoading(loading) {
-    console.log("change loading: ", loading);
     if (!this.hasButtonTarget) return;
 
     const isLoading = loading;
