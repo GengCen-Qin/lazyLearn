@@ -30,16 +30,16 @@ export class Utils {
   }
 
   // 处理字幕文本，使英文单词可点击
-  processSubtitleText(text, escapeHtml) {
+  processSubtitleText(text) {
     // 使用改进的词法分析来正确处理标点符号
-    return this.tokenizeText(text)
-      .map((token) => {
-        // 只对长度>=2的英文单词添加点击功能
+    return this.tokenizeText(text).map((token) => {
         if (token.type === "word" && token.value.length >= 2) {
-          return `<span class="word-lookup-popup inline-block px-0.5 rounded hover:bg-blue-100 hover:text-blue-700 dark:hover:bg-blue-900 dark:hover:text-blue-300 cursor-pointer transition-colors duration-150" data-word="${token.value}">${escapeHtml(token.value)}</span>`;
+          return `<span class="word-lookup-popup inline-block px-0.5 rounded hover:bg-blue-100 hover:text-blue-700 dark:hover:bg-blue-900 dark:hover:text-blue-300 cursor-pointer transition-colors duration-150" data-word="${token.value}">
+            <span>${token.value}</span>
+          </span>`;
         }
         // 其他情况（标点、中文字符、数字等）直接显示
-        return escapeHtml(token.value);
+        return `<span>${token.value}</span>`;
       })
       .join("");
   }

@@ -8,54 +8,6 @@ export class SubtitleManager {
     this.lastScrollTime = 0;
   }
 
-  // 渲染字幕列表到UI
-  renderSubtitleList(subtitlesValue, subtitleListTarget, formatTime, processSubtitleText, seekToSubtitle, escapeHtml, handler) {
-    if (!subtitleListTarget) return;
-    const container = subtitleListTarget;
-
-    // 无字幕时显示提示信息
-    if (subtitlesValue.length === 0) {
-      container.innerHTML = '<div class="no-subtitles text-center text-gray-500 dark:text-gray-400 p-6 text-sm">请上传字幕文件</div>';
-      return;
-    }
-
-    // 清空容器
-    container.innerHTML = "";
-
-    // 为每条字幕创建UI元素
-    subtitlesValue.forEach((subtitle, index) => {
-      const item = document.createElement("div");
-      item.className = "subtitle-item p-2 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors duration-150";
-      item.dataset.index = index;
-      item.dataset.start = subtitle.start;
-
-      const time = formatTime(subtitle.start);
-
-      // 将字幕文本中的英文单词可点击
-      const processedText = processSubtitleText(subtitle.text, escapeHtml);
-
-      item.innerHTML = `
-        <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">${time}</div>
-        <div class="text-sm text-gray-800 dark:text-gray-200">${processedText}</div>
-      `;
-
-      // 设置字幕行点击事件（用于时间跳转）
-      item.addEventListener("click", (e) => {
-        // 如果点击的是单词，不触发时间跳转（避免冲突）
-        if (e.target.classList.contains("word-lookup-popup")) {
-          e.stopPropagation();
-          return;
-        }
-        seekToSubtitle(index);
-      });
-
-      container.appendChild(item);
-    });
-
-    // 添加单词点击事件监听
-    this.addWordClickListeners(handler);
-  }
-
   // 同步字幕到当前播放时间
   syncSubtitles(currentTime, subtitlesValue, currentIndexValue, setCurrentIndex) {
     const newSubtitleIndex = this.findCurrentSubtitleIndex(currentTime, subtitlesValue);

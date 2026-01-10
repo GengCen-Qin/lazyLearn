@@ -40,8 +40,6 @@ export default class extends Controller {
     this.isAutoScrolling = false;
     this.lastScrollTime = 0;
     this.currentPopupWord = null;
-
-    this.loadInitialSubtitles();
   }
 
   /**
@@ -270,25 +268,20 @@ export default class extends Controller {
       },
     );
   }
-  updateSubtitleCount() {
-    if (this.hasSubtitleCountTarget) {
-      this.subtitleCountTarget.textContent = `${this.subtitlesValue.length} 条字幕`;
-    }
-  }
   // ========================================
   // Status Bar Methods
   // ========================================
   updateStatusBar() {
-    this.utils.updateStatusBar(
-      this.hasCurrentTimeTarget,
-      this.currentTimeTarget,
-      this.getCurrentTime.bind(this),
-      this.hasCurrentSubtitleIndexTarget,
-      this.currentSubtitleIndexTarget,
-      this.currentIndexValue,
-      this.subtitlesValue,
-      this.utils.formatTime.bind(this.utils),
-    );
+    // this.utils.updateStatusBar(
+    //   this.hasCurrentTimeTarget,
+    //   this.currentTimeTarget,
+    //   this.getCurrentTime.bind(this),
+    //   this.hasCurrentSubtitleIndexTarget,
+    //   this.currentSubtitleIndexTarget,
+    //   this.currentIndexValue,
+    //   this.subtitlesValue,
+    //   this.utils.formatTime.bind(this.utils),
+    // );
   }
   // ========================================
   // Message Methods
@@ -315,10 +308,7 @@ export default class extends Controller {
    * 使用改进的词法分析来正确处理标点符号和其他字符
    */
   processSubtitleText(text) {
-    return this.utils.processSubtitleText(
-      text,
-      this.utils.escapeHtml.bind(this.utils),
-    );
+    return this.utils.processSubtitleText(text);
   }
   /**
    * 添加单词点击事件监听器
@@ -403,17 +393,6 @@ export default class extends Controller {
 
     if (this.player) {
       this.player.destroy();
-    }
-  }
-
-
-  // 加载：字幕，状态栏
-  loadInitialSubtitles() {
-    // 如果有字幕数据，渲染字幕列表
-    if (this.subtitlesValue && this.subtitlesValue.length > 0) {
-      this.currentIndexValue = -1;
-      this.renderSubtitleList();
-      this.updateSubtitleCount();
     }
   }
 }

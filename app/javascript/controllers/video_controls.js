@@ -8,6 +8,7 @@ export class VideoControls {
   constructor(videoTarget) {
     this.videoTarget = videoTarget;
     this.player = null;
+    window.addEventListener('video:seekTo', e => { this.seekTo(e.detail.start) })
   }
 
   // 初始化视频播放器
