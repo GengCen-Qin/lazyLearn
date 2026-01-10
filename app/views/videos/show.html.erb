@@ -5,12 +5,12 @@
 <%= stylesheet_link_tag "word_lookup", "data-turbo-track": "reload" %>
 
 <div
-  class="video-subtitle-app-container h-screen flex flex-col dark:bg-gray-900"
+  class="video-subtitle-app-container flex flex-col dark:bg-gray-900"
   data-controller="subtitle-merged"
   data-subtitle-merged-video-path-value="<%= @video.video_file.attached? ? url_for(@video.video_file) : '' %>"
   data-subtitle-merged-subtitles-value="<%= (@video.formatted_transcription || []).to_json %>"
 >
-  <!-- 视频标题和状态区域 - 移除旧的返回按钮，使用统一header导航 -->
+  <!--header-->
   <div class="dark:bg-gray-800 p-3 sm:p-4 border-b border-gray-200 dark:border-gray-700">
     <div class="mx-auto">
       <div class="flex flex-row items-center sm:items-center sm:justify-between gap-3 sm:gap-4">
@@ -35,7 +35,9 @@
   <!-- 主播放器布局 -->
   <div class="flex-1 overflow-hidden flex flex-col">
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-4 md:gap-5 flex-1 overflow-hidden p-3 sm:p-4">
+      <!--播放器-->
       <%= render 'videos/video_player', video: @video %>
+      <!--字幕列表-->
       <%= render 'videos/subtitle_list', video: @video %>
     </div>
 
