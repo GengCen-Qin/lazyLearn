@@ -23,7 +23,6 @@ export default class extends Controller {
   static values = {
     currentVideoUrl: String,
     subtitles: Array,
-    videoPath: String,
     currentIndex: { type: Number, default: -1 },
   };
 
@@ -408,26 +407,13 @@ export default class extends Controller {
   }
 
 
-  // 加载：视频，字幕，状态栏
+  // 加载：字幕，状态栏
   loadInitialSubtitles() {
-    // 如果有视频路径，设置视频源
-    if (this.videoPathValue && this.hasVideoTarget) {
-      this.loadVideoFromPath(this.videoPathValue);
-    }
     // 如果有字幕数据，渲染字幕列表
     if (this.subtitlesValue && this.subtitlesValue.length > 0) {
       this.currentIndexValue = -1;
       this.renderSubtitleList();
       this.updateSubtitleCount();
-    }
-  }
-
-  // 加载视频
-  loadVideoFromPath() {
-    // 设置视频源
-    if (this.hasVideoTarget) {
-      this.videoTarget.src = this.videoPathValue;
-      this.videoTarget.load(); // 确保重新加载视频
     }
   }
 }
