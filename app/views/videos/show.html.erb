@@ -4,12 +4,7 @@
 <%= stylesheet_link_tag "video_player_tailwind_fix", "data-turbo-track": "reload" %>
 <%= stylesheet_link_tag "word_lookup", "data-turbo-track": "reload" %>
 
-<div
-  class="video-subtitle-app-container flex flex-col dark:bg-gray-900"
-  data-controller="subtitle-merged"
-  data-subtitle-merged-video-path-value="<%= @video.video_file.attached? ? url_for(@video.video_file) : '' %>"
-  data-subtitle-merged-subtitles-value="<%= (@video.formatted_transcription || []).to_json %>"
->
+<div class="video-subtitle-app-container flex flex-col dark:bg-gray-900">
   <!--header-->
   <div class="dark:bg-gray-800 p-3 sm:p-4 border-b border-gray-200 dark:border-gray-700">
     <div class="mx-auto">
@@ -33,7 +28,12 @@
   </div>
 
   <!-- 主播放器布局 -->
-  <div class="flex-1 overflow-hidden flex flex-col">
+  <div
+    class="flex-1 overflow-hidden flex flex-col"
+    data-controller="subtitle-merged"
+    data-subtitle-merged-video-path-value="<%= @video.video_file.attached? ? url_for(@video.video_file) : '' %>"
+    data-subtitle-merged-subtitles-value="<%= (@video.formatted_transcription || []).to_json %>"
+  >
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-4 md:gap-5 flex-1 overflow-hidden p-3 sm:p-4">
       <!--播放器-->
       <%= render 'videos/video_player', video: @video %>
