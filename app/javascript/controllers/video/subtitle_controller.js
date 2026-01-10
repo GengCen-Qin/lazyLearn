@@ -12,10 +12,49 @@ export default class extends Controller {
     this.utils = new Utils();
     this.isAutoScrolling = false;
     this.render()
+    this.setupKeyboardShortcuts();
     window.addEventListener('player:updatePlayInfo', e => {
       this.updateSubtitleByTime(e.detail.currentTime);
       this.syncSubtitles(e.detail.currentTime);
     });
+  }
+
+  // 设置键盘快捷键
+  setupKeyboardShortcuts() {
+    document.addEventListener("keydown", (e) => {
+      if (e.target.tagName === "INPUT") return;
+
+      switch (e.code) {
+        case "ArrowLeft":
+          e.preventDefault();
+          e.stopPropagation();
+          this.jumpToPrevious();
+          break;
+        case "ArrowRight":
+          e.preventDefault();
+          e.stopPropagation();
+          this.jumpToNext();
+          break;
+      }
+    });
+  }
+
+  // 跳转到上一条字幕
+  jumpToPrevious() {
+    if (!(this.hasSubtitlesValue && this.subtitlesValue.length > 0)) return;
+
+    const targetIndex = Math.max(0, this.indexValue - 1);
+    this.seekToSubtitle(targetIndex);
+    this.setCurrentSubtitle(targetIndex);
+  }
+
+  // 跳转到下一条字幕
+  jumpToNext() {
+    if (!(this.hasSubtitlesValue && this.subtitlesValue.length > 0)) return;
+
+    const targetIndex = Math.min(this.subtitlesValue.length - 1, this.indexValue + 1);
+    this.seekToSubtitle(targetIndex);
+    this.setCurrentSubtitle(targetIndex);
   }
 
   // 渲染字幕

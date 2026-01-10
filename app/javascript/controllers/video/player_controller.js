@@ -7,6 +7,7 @@ export default class extends Controller {
     this.player = null;
     this.initialize()
     this.setupEventListeners()
+    this.setupKeyboardShortcuts()
     window.addEventListener('video:seekTo', e => { this.seekTo(e.detail.start) })
   }
 
@@ -123,6 +124,21 @@ export default class extends Controller {
   // 处理视频播放错误
   handleVideoError(event, handler) {
     handler.showError("视频文件播放失败，请检查文件格式是否支持");
+  }
+
+  // 设置键盘快捷键
+  setupKeyboardShortcuts() {
+    document.addEventListener("keydown", (e) => {
+      if (e.target.tagName === "INPUT") return;
+
+      switch (e.code) {
+        case "Space":
+          e.preventDefault();
+          e.stopPropagation();
+          this.togglePlay();
+          break;
+      }
+    });
   }
 
   // 切换视频播放/暂停状态
