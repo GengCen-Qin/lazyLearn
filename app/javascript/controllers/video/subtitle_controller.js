@@ -77,12 +77,11 @@ export default class extends Controller {
       // 设置字幕行点击事件（用于时间跳转）
       item.addEventListener("click", (e) => {
         // 如果点击的是单词，不触发时间跳转（避免冲突）
-        if (e.target.classList.contains("word-lookup-popup")) {
-          e.stopPropagation();
-        } else {
-          this.seekToSubtitle(index);
-          this.setCurrentSubtitle(index)
+        if (e.target.closest(".word-lookup-popup")) {
+          return;
         }
+        this.seekToSubtitle(index);
+        this.setCurrentSubtitle(index)
       });
 
       this.element.appendChild(item);

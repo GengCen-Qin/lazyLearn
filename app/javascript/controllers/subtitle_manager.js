@@ -110,24 +110,4 @@ export class SubtitleManager {
     }
   }
 
-  // 添加单词点击事件监听器
-  addWordClickListeners(handler) {
-    // 移除旧的事件监听器，避免重复绑定
-    document.querySelectorAll(".word-lookup-popup").forEach((element) => {
-      element.replaceWith(element.cloneNode(true));
-    });
-
-    // 重新获取所有单词元素并添加事件监听器
-    const wordElements = document.querySelectorAll(".word-lookup-popup");
-    wordElements.forEach((element, index) => {
-      element.addEventListener("click", (e) => {
-        e.stopPropagation(); // 阻止事件冒泡
-        e.stopImmediatePropagation(); // 阻止其他事件执行
-        // 调用主控制器的lookupWord方法
-        if (handler && typeof handler.lookupWord === 'function') {
-          handler.lookupWord(element.dataset.word);
-        }
-      });
-    });
-  }
 }
