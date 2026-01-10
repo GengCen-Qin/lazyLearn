@@ -77,22 +77,6 @@ export default class extends Controller {
   }
 
   /**
-   * 异步加载用户选择的视频文件
-   * 支持多种视频格式，自动检测文件类型
-   * 创建临时URL并设置视频源
-   */
-  async loadVideo(event) {
-    const newVideoUrl = await this.videoControls.loadVideo(
-      event,
-      this.currentVideoUrlValue,
-      this,
-    );
-    if (newVideoUrl) {
-      this.currentVideoUrlValue = newVideoUrl;
-    }
-  }
-
-  /**
    * 处理视频播放错误
    * 显示用户友好的错误信息
    */

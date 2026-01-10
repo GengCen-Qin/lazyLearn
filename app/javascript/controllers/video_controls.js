@@ -40,7 +40,7 @@ export class VideoControls {
           iosNative: true, // iOS设备使用原生全屏
         },
       });
-      
+
       // 添加全屏事件监听器
       this.setupFullscreenListeners();
     } else {
@@ -70,24 +70,24 @@ export class VideoControls {
   // 设置全屏事件监听器
   setupFullscreenListeners() {
     if (!this.player) return;
-    
+
     const handleFullscreenChange = () => {
-      const isFullscreen = document.fullscreenElement || 
-                          document.webkitFullscreenElement || 
+      const isFullscreen = document.fullscreenElement ||
+                          document.webkitFullscreenElement ||
                           document.mozFullScreenElement ||
                           document.msFullscreenElement;
-      
+
       // 全屏状态改变时调整视频样式
       const videoContainer = document.querySelector('#video-player-container');
       const videoElement = this.player.media || this.videoTarget;
-      
+
       if (isFullscreen) {
         // 进入全屏模式
         videoElement.style.width = '100vw';
         videoElement.style.height = '100vh';
         videoElement.style.maxHeight = '100vh';
         videoElement.style.objectFit = 'contain';
-        
+
         // 确保容器也是全屏尺寸
         if (videoContainer) {
           videoContainer.style.width = '100vw';
@@ -100,7 +100,7 @@ export class VideoControls {
         videoElement.style.height = '';
         videoElement.style.maxHeight = '';
         videoElement.style.objectFit = 'contain';
-        
+
         if (videoContainer) {
           videoContainer.style.width = '';
           videoContainer.style.height = '';
@@ -108,88 +108,12 @@ export class VideoControls {
         }
       }
     };
-    
+
     // 监听全屏变化事件
     document.addEventListener('fullscreenchange', handleFullscreenChange);
     document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
     document.addEventListener('mozfullscreenchange', handleFullscreenChange);
     document.addEventListener('MSFullscreenChange', handleFullscreenChange);
-  }
-
-  // 异步加载视频文件
-  async loadVideo(event, currentVideoUrlValue, handler) {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    try {
-      // 清理之前的视频URL以释放内存
-      if (currentVideoUrlValue) {
-        URL.revokeObjectURL(currentVideoUrlValue);
-      }
-
-      // 创建新的视频对象URL
-      const newVideoUrl = URL.createObjectURL(file);
-
-      // 检测文件类型
-      let detectedType = file.type || this.detectVideoType(file.name);
-
-      // 准备视频源配置
-      const sources = [
-        {
-          src: newVideoUrl,
-          type: detectedType,
-        },
-      ];
-
-      // 为MOV文件添加MP4回退支持（常见兼容性问题）
-      if (file.name.toLowerCase().endsWith(".mov")) {
-        sources.push({
-          src: newVideoUrl,
-          type: "video/mp4",
-        });
-      }
-
-      // 设置视频源（兼容Plyr和原生video）
-      if (this.player.source) {
-        // Plyr播放器
-        this.player.source = {
-          type: "video",
-          sources: sources,
-        };
-      } else {
-        // 原生视频元素
-        this.videoTarget.src = newVideoUrl;
-      }
-
-      // 获取视频时长并显示成功消息
-      const duration = this.player.duration || 0;
-      handler.showSuccess(
-        `视频加载成功: ${file.name} (${this.formatDuration(duration)})`,
-      );
-
-      return newVideoUrl;
-    } catch (error) {
-      handler.showError(`视频文件加载失败: ${error.message}`);
-      return null;
-    }
-  }
-
-  // 根据文件扩展名检测视频MIME类型
-  detectVideoType(filename) {
-    const extension = filename.toLowerCase().split(".").pop();
-    const mimeTypes = {
-      mp4: "video/mp4", // MP4格式
-      webm: "video/webm", // WebM格式
-      ogg: "video/ogg", // OGG视频格式
-      ogv: "video/ogg", // OGG视频格式
-      avi: "video/x-msvideo", // AVI格式
-      mov: "video/quicktime", // QuickTime MOV格式
-      mkv: "video/x-matroska", // MKV格式
-      m4v: "video/mp4", // M4V格式
-      "3gp": "video/3gpp", // 3GP格式
-      flv: "video/x-flv", // Flash视频格式
-    };
-    return mimeTypes[extension] || "video/mp4"; // 默认返回MP4
   }
 
   // 处理视频播放错误
