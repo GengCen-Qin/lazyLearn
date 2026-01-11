@@ -1,5 +1,5 @@
-<link href="https://cdnjs.cloudflare.com/ajax/libs/video.js/8.23.4/video-js.min.css" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/video.js/8.23.4/video.min.js"></script>
+<%= stylesheet_link_tag "video-js.min" %>
+<%= javascript_include_tag "video.min", defer: true %>
 
 <!-- 视频播放器 -->
 <div class="lg:col-span-8 bg-black rounded-lg sm:rounded-xl overflow-hidden flex flex-col md:portrait:h-[55vh]" id="video-player-container">
