@@ -1,11 +1,13 @@
+<link href="https://cdnjs.cloudflare.com/ajax/libs/video.js/8.23.4/video-js.min.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/video.js/8.23.4/video.min.js"></script>
+
 <!-- 视频播放器 -->
 <div class="lg:col-span-8 bg-black rounded-lg sm:rounded-xl overflow-hidden flex flex-col" id="video-player-container">
-  <div class="relative w-full min-h-full">
+  <div class="relative w-full min-h-full" data-controller="video--player">
     <video
       id="videoPlayer"
       playsinline
-      data-controller="video--player"
-      class="absolute inset-0 w-full h-full object-contain"
+      class="video-js vjs-default-skin vjs-big-play-centered absolute inset-0 w-full h-full object-contain"
       <% if video.oss_link.present? %>
         src="<%= video.oss_link %>"
       <% elsif video.video_file.attached? %>

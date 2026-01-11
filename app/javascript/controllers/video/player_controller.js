@@ -1,134 +1,125 @@
 import { Controller } from "@hotwired/stimulus"
 import Plyr from "plyr"
 
-// Connects to data-controller="video--player"
 export default class extends Controller {
   connect() {
     this.player = null;
-    this.initialize()
-    this.setupEventListeners()
-    this.setupKeyboardShortcuts()
-    window.addEventListener('video:seekTo', e => { this.seekTo(e.detail.start) })
+    this.initialized();
+    this.setupKeyboardShortcuts();
+    this.setupSeekToListener();
+  }
+
+  setupSeekToListener() {
+    this.seekToHandler = (e) => { this.seekTo(e.detail.start) };
+    window.addEventListener('video:seekTo', this.seekToHandler);
   }
 
   disconnect() {
-    if (this.player) {
-      this.player.destroy();
+    this.disposePlayer();
+    this.removeEventListeners();
+  }
+
+  disposePlayer() {
+    if (this.player && typeof this.player.isDisposed === 'function' && !this.player.isDisposed()) {
+      this.player.dispose();
+    }
+    this.player = null;
+  }
+
+  removeEventListeners() {
+    this.removeKeyboardListener();
+    this.removeSeekToListener();
+  }
+
+  removeKeyboardListener() {
+    if (this.keyboardShortcutHandler) {
+      document.removeEventListener("keydown", this.keyboardShortcutHandler);
+      this.keyboardShortcutHandler = null;
     }
   }
 
-  initialize() {
-    if (typeof Plyr !== "undefined") {
-      // 使用Plyr播放器，提供更好的控制界面
-      this.player = new Plyr(this.element, {
-        controls: ["play", "progress", "duration", "settings", "fullscreen"], // 播放控制按钮
-        settings: ["speed"],
-        clickToPlay: true,
-        tooltips: {
-          controls: true, // 显示控制按钮提示
-          seek: true, // 显示进度条拖拽提示
-        },
-        i18n: {
-          // 国际化 - 中文界面
-          play: "播放",
-          pause: "暂停",
-          seek: "拖动",
-          mute: "静音",
-          unmute: "取消静音",
-          speed: "变速",
-          settings: "设置",
-          enterFullscreen: "全屏",
-          exitFullscreen: "退出全屏",
-        },
-        fullscreen: {
-          enabled: true,
-          fallback: true,
-          iosNative: true, // iOS设备使用原生全屏
-        },
+  removeSeekToListener() {
+    if (this.seekToHandler) {
+      window.removeEventListener('video:seekTo', this.seekToHandler);
+      this.seekToHandler = null;
+    }
+  }
+
+  initialized() {
+    if (typeof videojs !== "undefined") {
+      requestAnimationFrame(() => {
+        const videoElement = this.findVideoElement();
+        if (!videoElement) {
+          this.player = null;
+          return;
+        }
+
+        const existingPlayer = this.getExistingPlayer();
+        if (existingPlayer) {
+          this.player = existingPlayer;
+          return;
+        }
+
+        this.createPlayer(videoElement);
       });
-      // 添加全屏事件监听器
-      this.setupFullscreenListeners();
     } else {
-      this.player = this.element;
+      this.player = null;
     }
   }
 
-  // 设置视频播放器事件监听器
-  setupEventListeners() {
-    if (this.player) {
-      const videoElement = this.element;
-
-      videoElement.addEventListener("timeupdate", () => {
-        this.updateStatusBar();
-      });
-
-      videoElement.addEventListener("loadedmetadata", () => {
-        this.updateStatusBar();
-      });
-    }
+  findVideoElement() {
+    return this.element.querySelector('#videoPlayer');
   }
 
-  updateStatusBar(currentTime = this.getCurrentTime()) {
-    window.dispatchEvent(new CustomEvent('player:updatePlayInfo', { detail: { currentTime: currentTime }}));
+  getExistingPlayer() {
+    return videojs.getPlayers()['videoPlayer'];
   }
 
-  // 设置全屏事件监听器
-  setupFullscreenListeners() {
-    if (!this.player) return;
-
-    const handleFullscreenChange = () => {
-      const isFullscreen = document.fullscreenElement ||
-                          document.webkitFullscreenElement ||
-                          document.mozFullScreenElement ||
-                          document.msFullscreenElement;
-
-      // 全屏状态改变时调整视频样式
-      const videoContainer = document.querySelector('#video-player-container');
-      const videoElement = this.element;
-
-      if (isFullscreen) {
-        // 进入全屏模式
-        videoElement.style.width = '100vw';
-        videoElement.style.height = '100vh';
-        videoElement.style.maxHeight = '100vh';
-        videoElement.style.objectFit = 'contain';
-
-        // 确保容器也是全屏尺寸
-        if (videoContainer) {
-          videoContainer.style.width = '100vw';
-          videoContainer.style.height = '100vh';
-          videoContainer.style.maxHeight = '100vh';
-        }
-      } else {
-        // 退出全屏模式，恢复原始样式
-        videoElement.style.width = '';
-        videoElement.style.height = '';
-        videoElement.style.maxHeight = '';
-        videoElement.style.objectFit = 'contain';
-
-        if (videoContainer) {
-          videoContainer.style.width = '';
-          videoContainer.style.height = '';
-          videoContainer.style.maxHeight = '';
-        }
-      }
+  getPlayerOptions() {
+    return {
+      autoplay: false,
+      preload: 'auto',
+      controls: true,
+      muted: false,
+      playsinline: true,
+      html5: {
+        vhs: {
+          overrideNative: true
+        },
+        nativeVideoTracks: false,
+        nativeAudioTracks: false,
+        nativeTextTracks: false
+      },
+      playbackRates: [0.5, 0.75, 1, 1.25, 1.5, 2]
     };
-
-    // 监听全屏变化事件
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
-    document.addEventListener('mozfullscreenchange', handleFullscreenChange);
-    document.addEventListener('MSFullscreenChange', handleFullscreenChange);
   }
 
-  // 处理视频播放错误
-  handleVideoError(event, handler) {
-    handler.showError("视频文件播放失败，请检查文件格式是否支持");
+  createPlayer(videoElement) {
+    try {
+      this.player = videojs(videoElement, this.getPlayerOptions(), () => {
+        this.setupPlayerEvents();
+      });
+    } catch (error) {
+      this.player = null;
+    }
   }
 
-  // 设置键盘快捷键
+  setupPlayerEvents() {
+    this.player.on('timeupdate', () => {
+      window.dispatchEvent(new CustomEvent('player:updatePlayInfo', {
+        detail: { currentTime: this.player.currentTime() }
+      }));
+    });
+
+    this.player.on('loadedmetadata', () => {
+      window.dispatchEvent(new CustomEvent('player:updatePlayInfo', {
+        detail: { currentTime: this.player.currentTime() }
+      }));
+    });
+  }
+
   setupKeyboardShortcuts() {
-    document.addEventListener("keydown", (e) => {
+    this.keyboardShortcutHandler = (e) => {
       if (e.target.tagName === "INPUT") return;
 
       switch (e.code) {
@@ -138,62 +129,63 @@ export default class extends Controller {
           this.togglePlay();
           break;
       }
-    });
+    };
+    document.addEventListener("keydown", this.keyboardShortcutHandler);
   }
 
-  // 切换视频播放/暂停状态
   togglePlay() {
-    if (this.player) {
-      if (typeof this.player.togglePlay === "function") {
-        // 使用Plyr的切换方法
-        this.player.togglePlay();
+    if (this.player && typeof this.player.paused === 'function') {
+      if (this.player.paused()) {
+        this.player.play();
       } else {
-        // 原生视频元素的手动控制
-        if (this.player.paused) {
-          this.player.play();
-        } else {
-          this.player.pause();
-        }
+        this.player.pause();
       }
-    } else {
-      console.error("视频控制器未初始化");
     }
   }
 
-  // 播放
   play() {
-    this.player.play();
+    if (this.player && typeof this.player.play === 'function') {
+      this.player.play();
+    }
   }
 
-  // 暂停
   pause() {
-    this.player.pause();
+    if (this.player && typeof this.player.pause === 'function') {
+      this.player.pause();
+    }
   }
 
-  // 跳转到指定时间
   seekTo(time) {
-    if (this.player) {
-      if (this.player.currentTime !== undefined) {
-        this.player.currentTime = time;
-      } else if (this.player.media) {
-        this.player.media.currentTime = time;
-      }
+    if (!this.player) return;
+
+    if (this.isVideoJsPlayer()) {
+      this.player.currentTime(time);
+    } else if (this.player.currentTime !== undefined) {
+      this.player.currentTime = time;
+    } else if (this.player.media) {
+      this.player.media.currentTime = time;
     }
   }
 
-  // 获取当前播放时间
+  isVideoJsPlayer() {
+    return typeof this.player.currentTime === 'function';
+  }
+
   getCurrentTime() {
-    if (this.player) {
-      return this.player.currentTime || this.player.media?.currentTime || 0;
+    if (!this.player) return 0;
+
+    if (this.isVideoJsPlayer()) {
+      return this.player.currentTime();
     }
-    return 0;
+    return this.player.currentTime || this.player.media?.currentTime || 0;
   }
 
-  // 获取视频总时长
   getDuration() {
-    if (this.player) {
-      return this.player.duration || this.player.media?.duration || 0;
+    if (!this.player) return 0;
+
+    if (typeof this.player.duration === 'function') {
+      return this.player.duration();
     }
-    return 0;
+    return this.player.duration || this.player.media?.duration || 0;
   }
 }
