@@ -1,8 +1,13 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
+  static values = {
+    videoUrl: String
+  }
+  
   connect() {
     this.player = null;
+    this.blobUrl = null;
     this.initialized();
     this.setupKeyboardShortcuts();
     this.setupSeekToListener();
@@ -16,6 +21,7 @@ export default class extends Controller {
   disconnect() {
     this.disposePlayer();
     this.removeEventListeners();
+    this.cleanupBlob();
   }
 
   disposePlayer() {
@@ -44,9 +50,9 @@ export default class extends Controller {
     }
   }
 
-  initialized() {
+  async initialized() {
     if (typeof videojs !== "undefined") {
-      this.initPlayer();
+      await this.initPlayer();
     } else {
       // video.js 还未加载，等待加载完成
       this.waitForVideoJs();
@@ -57,12 +63,12 @@ export default class extends Controller {
     let attempts = 0;
     const maxAttempts = 50; // 最多等待 5 秒（50 * 100ms）
 
-    const checkInterval = setInterval(() => {
+    const checkInterval = setInterval(async () => {
       attempts++;
 
       if (typeof videojs !== "undefined") {
         clearInterval(checkInterval);
-        this.initPlayer();
+        await this.initPlayer();
       } else if (attempts >= maxAttempts) {
         clearInterval(checkInterval);
         console.error('video.js failed to load after 5 seconds');
@@ -71,8 +77,8 @@ export default class extends Controller {
     }, 100);
   }
 
-  initPlayer() {
-    requestAnimationFrame(() => {
+  async initPlayer() {
+    requestAnimationFrame(async () => {
       const videoElement = this.findVideoElement();
       if (!videoElement) {
         this.player = null;
@@ -85,7 +91,7 @@ export default class extends Controller {
         return;
       }
 
-      this.createPlayer(videoElement);
+      await this.createPlayer(videoElement);
     });
   }
 
@@ -104,7 +110,6 @@ export default class extends Controller {
       controls: true,
       muted: false,
       playsinline: true,
-      nativeControlsForTouch: true,
       html5: {
         vhs: {
           overrideNative: true
@@ -117,8 +122,11 @@ export default class extends Controller {
     };
   }
 
-  createPlayer(videoElement) {
+  async createPlayer(videoElement) {
     try {
+      // 先设置 blob URL
+      await this.initializeVideoWithBlob();
+      
       this.player = videojs(videoElement, this.getPlayerOptions(), () => {
         this.setupPlayerEvents();
       });
@@ -210,5 +218,41 @@ export default class extends Controller {
       return this.player.duration();
     }
     return this.player.duration || this.player.media?.duration || 0;
+  }
+
+  // Blob URL 相关方法
+  async createBlobUrl() {
+    if (!this.videoUrlValue) return null;
+    
+    try {
+      const response = await fetch(this.videoUrlValue);
+      const blob = await response.blob();
+      this.blobUrl = URL.createObjectURL(blob);
+      return this.blobUrl;
+    } catch (error) {
+      console.error('Failed to create blob URL:', error);
+      return this.videoUrlValue; // 失败时回退到原始 URL
+    }
+  }
+
+  cleanupBlob() {
+    if (this.blobUrl) {
+      URL.revokeObjectURL(this.blobUrl);
+      this.blobUrl = null;
+    }
+  }
+
+  async initializeVideoWithBlob() {
+    const videoElement = this.findVideoElement();
+    if (!videoElement) return;
+
+    // 如果已经有 blob URL，先清理
+    this.cleanupBlob();
+    
+    // 创建新的 blob URL
+    const blobUrl = await this.createBlobUrl();
+    if (blobUrl) {
+      videoElement.src = blobUrl;
+    }
   }
 }

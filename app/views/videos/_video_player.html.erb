@@ -3,19 +3,14 @@
 
 <!-- 视频播放器 -->
 <div class="lg:col-span-8 bg-black rounded-lg sm:rounded-xl overflow-hidden flex flex-col md:portrait:h-[55vh]" id="video-player-container">
-  <div class="relative w-full min-h-full" data-controller="video--player">
+  <div class="relative w-full min-h-full" 
+       data-controller="video--player" 
+       data-video--player-video-url-value="<% if video.oss_link.present? %><%= video.oss_link %><% elsif video.video_file.attached? %><%= url_for(video.video_file) %><% end %>">
     <video
       id="videoPlayer"
       playsinline
-      webkit-playsinline
-      x5-playsinline
-      x5-video-player-type="h5-page"
       class="video-js vjs-default-skin vjs-big-play-centered absolute inset-0 w-full h-full object-contain"
-      <% if video.oss_link.present? %>
-        src="<%= video.oss_link %>"
-      <% elsif video.video_file.attached? %>
-        src="<%= url_for(video.video_file) %>"
-      <% end %>
+      preload="auto"
     >
       您的浏览器不支持 HTML5 视频。
     </video>
