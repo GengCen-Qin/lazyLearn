@@ -7,6 +7,9 @@
     <video
       id="videoPlayer"
       playsinline
+      webkit-playsinline
+      x5-playsinline
+      x5-video-player-type="h5-page"
       class="video-js vjs-default-skin vjs-big-play-centered absolute inset-0 w-full h-full object-contain"
       <% if video.oss_link.present? %>
         src="<%= video.oss_link %>"
