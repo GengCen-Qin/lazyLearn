@@ -8,7 +8,8 @@ export default class extends Controller {
   static targets = [
     "message",
     "backBtn",
-    "closeBtn"
+    "closeBtn",
+    "detail",
   ];
 
   connect() {
@@ -162,9 +163,8 @@ export default class extends Controller {
 
   // 显示加载状态
   showLoadingMessage() {
-    const turboFrame = document.querySelector('turbo-frame#turbo_word_detail');
-    if (turboFrame) {
-      turboFrame.innerHTML = `
+    if (this.hasDetailTarget) {
+      this.detailTarget.innerHTML = `
         <div class="text-center text-gray-500 dark:text-gray-400 py-8">
           <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 dark:border-blue-400"></div>
           <p class="mt-2 text-sm">查询中...</p>
@@ -175,9 +175,8 @@ export default class extends Controller {
 
   // 显示错误信息
   showErrorMessage(message) {
-    const turboFrame = document.querySelector('turbo-frame#turbo_word_detail');
-    if (turboFrame) {
-      turboFrame.innerHTML = `
+    if (this.hasDetailTarget) {
+      this.detailTarget.innerHTML = `
         <div class="text-center text-gray-500 dark:text-gray-400 py-8">
           <svg class="w-12 h-12 mx-auto text-gray-400 dark:text-gray-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
