@@ -1,21 +1,25 @@
-/**
- * 单词查询和弹窗系统功能（精简版）
- * 使用 Turbo Stream 渲染，Stimulus 只负责状态管理和交互
- */
+import { Controller } from "@hotwired/stimulus";
 
- export class WordLookup {
-  constructor() {
+/**
+ * 视频管理控制器
+ * 处理单词查询功能
+ */
+export default class extends Controller {
+  static targets = [
+    "message",
+    "backBtn",
+    "closeBtn"
+  ];
+
+  connect() {
     // 单词查询历史记录系统
-    this.wordDialog = document.getElementById("wordInfo");
-    this.wordBackBtn = document.getElementById("wordBackBtn");
-    this.wordCloseBtn = document.getElementById("wordCloseBtn");
+    this.wordDialog = this.element;
+    this.wordBackBtn = this.backBtnTarget;
+    this.wordCloseBtn = this.closeBtnTarget;
 
     // 初始化历史记录
     this.initWordHistory();
-  }
 
-  // 初始化单词查询功能
-  setupWordLookup() {
     // 设置事件监听
     this.setupWordHistoryEvents();
     this.setupPronunciationListeners();
@@ -23,18 +27,12 @@
 
   // 初始化单词查询历史记录
   initWordHistory() {
-    if (!this.wordDialog) return;
-
-    // 初始化历史记录数据
     this.wordDialog.dataset.wordHistory = JSON.stringify([]);
     this.wordDialog.dataset.currentIndex = "0";
   }
 
   // 设置单词历史记录事件监听
   setupWordHistoryEvents() {
-    if (!this.wordDialog || !this.wordBackBtn || !this.wordCloseBtn) return;
-
-    // 回退按钮事件
     this.wordBackBtn.addEventListener("click", (e) => {
       e.preventDefault();
       e.stopPropagation();
@@ -100,7 +98,10 @@
     }
   }
 
-  // 异步查询单词释义（使用 Turbo Stream）
+  /**
+   * 异步查询单词释义
+   * 发送请求到后端API，创建多层弹窗显示释义
+   */
   async lookupWord(word, addToHistory = true) {
     // 检查是否已经有历史记录
     const history = JSON.parse(this.wordDialog.dataset.wordHistory || "[]");
@@ -120,10 +121,10 @@
     this.showLoadingMessage();
 
     try {
-      const formData = new FormData()
-      formData.append("word", word)
+      // 从 data 属性获取 video ID
+      const videoId = this.element.dataset.videoId;
 
-      const response = await fetch("/word_lookup", {
+      const response = await fetch(`/word_lookup`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -137,7 +138,6 @@
 
       Turbo.renderStreamMessage(turboStream);
     } catch (error) {
-      // console.error('WordLookup: Error during lookup:', error);
       this.showErrorMessage('查询失败，请稍后重试');
     }
   }
@@ -235,7 +235,6 @@
     return meta ? meta.getAttribute("content") : "";
   }
 
-  // 清理函数，关闭弹窗并清理历史记录
   disconnect() {
     if (this.wordDialog && this.wordDialog.open) {
       this.clearWordHistory();

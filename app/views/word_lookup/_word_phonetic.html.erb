@@ -21,7 +21,7 @@
         <div class="flex items-center gap-1">
           <span class="font-medium">UK:</span> [<%= uk_phone %>]
           <% if uk_speech.present? %>
-            <button class="pronunciation-btn ml-1 p-1 hover:bg-blue-100 dark:hover:bg-blue-900 rounded transition-colors"
+            <button class="cursor-pointer pronunciation-btn ml-1 p-1 hover:bg-blue-100 dark:hover:bg-blue-900 rounded transition-colors"
                     data-audio-url="<%= uk_speech %>"
                     data-action="click->word-lookup#playAudio"
                     title="英式发音">
@@ -37,7 +37,7 @@
         <div class="flex items-center gap-1">
           <span class="font-medium">US:</span> [<%= us_phone %>]
           <% if us_speech.present? %>
-            <button class="pronunciation-btn ml-1 p-1 hover:bg-blue-100 dark:hover:bg-blue-900 rounded transition-colors"
+            <button class="cursor-pointer pronunciation-btn ml-1 p-1 hover:bg-blue-100 dark:hover:bg-blue-900 rounded transition-colors"
                     data-audio-url="<%= us_speech %>"
                     data-action="click->word-lookup#playAudio"
                     title="美式发音">
