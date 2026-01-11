@@ -308,8 +308,7 @@ body.video-player-page > main {
 /* 移动端竖屏视频优化 */
 @media (max-width: 768px) and (orientation: portrait) {
   #video-player-container {
-    max-height: 60vh; /* 移动端进一步限制高度，iPad mini 竖屏优化 */
-    min-height: 200px;
+    min-height: 500px;
   }
 
   #videoPlayer {
@@ -500,7 +499,7 @@ video#videoPlayer:not([src]):not([srcset]) {
 @media (max-width: 768px) and (orientation: portrait) {
   #subtitle-container {
     min-height: 200px;
-    max-height: 60vh;
+    max-height: 40vh;
   }
 
   #subtitleList {
