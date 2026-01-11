@@ -104,7 +104,7 @@ export default class extends Controller {
       controls: true,
       muted: false,
       playsinline: true,
-      nativeControlsForTouch: false,
+      nativeControlsForTouch: true,
       html5: {
         vhs: {
           overrideNative: true
