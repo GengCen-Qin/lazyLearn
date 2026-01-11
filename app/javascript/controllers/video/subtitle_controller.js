@@ -151,6 +151,7 @@ export default class extends Controller {
   // 根据视频当前播放时间，更新字幕底部状态栏
   updateSubtitleByTime(time) {
     const index = this.subtitlesValue.findIndex((subtitle) => time >= subtitle.start && time < subtitle.end);
+    if (index === -1) return;
 
     window.dispatchEvent(new CustomEvent('video:updatePlayInfo', { detail: { start: time, index: index, total: this.subtitlesValue.length } }));
   }
@@ -159,6 +160,7 @@ export default class extends Controller {
   syncSubtitles(time) {
     // 需要注意第二段的结束时间 和 第一段的开始时间是一样的，计算的时候注意
     const newSubtitleIndex = this.subtitlesValue.findIndex((subtitle) => time >= subtitle.start && time < subtitle.end)
+    if (newSubtitleIndex === -1) return;
 
     if (newSubtitleIndex !== this.indexValue) {
       this.setCurrentSubtitle(newSubtitleIndex);
