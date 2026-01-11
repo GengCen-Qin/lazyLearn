@@ -7,6 +7,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
+    <meta name="user-authenticated" content="<%= Current.user.present? %>">
 
     <%# 防止暗色模式闪烁 - 在样式加载前立即设置主题 %>
     <script>

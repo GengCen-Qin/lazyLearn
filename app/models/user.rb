@@ -17,6 +17,7 @@ class User < ApplicationRecord
   has_many :sessions, dependent: :destroy
   has_many :user_videos, dependent: :destroy
   has_many :videos, through: :user_videos
+  has_many :favorites, dependent: :destroy
 
   after_create :connect_free_video
 

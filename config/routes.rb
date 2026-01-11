@@ -13,6 +13,12 @@ Rails.application.routes.draw do
   resources :videos, only: [ :index, :show, :destroy ]
   post "word_lookup", to: "word_lookup#create"
 
+  resources :favorites, only: [:index, :create, :destroy] do
+    collection do
+      get :check
+    end
+  end
+
   mount MissionControl::Jobs::Engine, at: "/jobs"
   mount RailsPulse::Engine => "/rails_pulse"
 
