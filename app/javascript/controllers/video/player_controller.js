@@ -46,24 +46,47 @@ export default class extends Controller {
 
   initialized() {
     if (typeof videojs !== "undefined") {
-      requestAnimationFrame(() => {
-        const videoElement = this.findVideoElement();
-        if (!videoElement) {
-          this.player = null;
-          return;
-        }
-
-        const existingPlayer = this.getExistingPlayer();
-        if (existingPlayer) {
-          this.player = existingPlayer;
-          return;
-        }
-
-        this.createPlayer(videoElement);
-      });
+      this.initPlayer();
     } else {
-      this.player = null;
+      // video.js 还未加载，等待加载完成
+      this.waitForVideoJs();
     }
+  }
+
+  waitForVideoJs() {
+    let attempts = 0;
+    const maxAttempts = 50; // 最多等待 5 秒（50 * 100ms）
+
+    const checkInterval = setInterval(() => {
+      attempts++;
+
+      if (typeof videojs !== "undefined") {
+        clearInterval(checkInterval);
+        this.initPlayer();
+      } else if (attempts >= maxAttempts) {
+        clearInterval(checkInterval);
+        console.error('video.js failed to load after 5 seconds');
+        this.player = null;
+      }
+    }, 100);
+  }
+
+  initPlayer() {
+    requestAnimationFrame(() => {
+      const videoElement = this.findVideoElement();
+      if (!videoElement) {
+        this.player = null;
+        return;
+      }
+
+      const existingPlayer = this.getExistingPlayer();
+      if (existingPlayer) {
+        this.player = existingPlayer;
+        return;
+      }
+
+      this.createPlayer(videoElement);
+    });
   }
 
   findVideoElement() {
