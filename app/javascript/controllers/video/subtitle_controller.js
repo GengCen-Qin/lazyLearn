@@ -66,7 +66,7 @@ export default class extends Controller {
     // 为每条字幕创建UI元素
     this.subtitlesValue.forEach((subtitle, index) => {
       const item = document.createElement("div");
-      item.className = "subtitle-item p-2 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors duration-150";
+      item.className = "subtitle-item p-2 border-b border-gray-100 cursor-pointer transition-colors duration-150";
       item.dataset.index = index;
       item.dataset.start = subtitle.start;
       item.innerHTML = `

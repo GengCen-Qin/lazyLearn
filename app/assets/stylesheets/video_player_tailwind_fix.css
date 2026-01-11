@@ -10,7 +10,6 @@
 
 .subtitle-item:hover {
   border-color: #3b82f6;
-  background-color: #eff6ff !important;
   transform: translateY(-0.125rem);
   box-shadow: 0 2px 4px rgba(59, 130, 246, 0.1);
 }
@@ -249,7 +248,7 @@ body.video-player-page > main {
     padding: 0 !important;
     margin: 0 !important;
   }
-  
+
   .video-subtitle-app-container:fullscreen #video-player-container {
     padding-top: env(safe-area-inset-top) !important;
     padding-bottom: env(safe-area-inset-bottom) !important;
