@@ -308,16 +308,32 @@ body.video-player-page > main {
 /* 移动端竖屏视频优化 */
 @media (max-width: 768px) and (orientation: portrait) {
   #video-player-container {
-    max-height: 50vh; /* 移动端进一步限制高度 */
+    max-height: 60vh; /* 移动端进一步限制高度，iPad mini 竖屏优化 */
     min-height: 200px;
   }
 
   #videoPlayer {
-    max-height: 50vh;
+    max-height: 60vh;
   }
 
   .plyr__video-wrapper {
-    max-height: 50vh;
+    max-height: 60vh;
+  }
+}
+
+/* md 断点优化 (768px 及以上，包含 iPad mini 竖屏) */
+@media (min-width: 768px) and (orientation: portrait) {
+  #video-player-container {
+    max-height: none; /* md 断点竖屏调整高度，移除固定高度让 flex 布局控制 */
+    min-height: 250px;
+  }
+
+  #videoPlayer {
+    max-height: none; /* 移除固定高度 */
+  }
+
+  .plyr__video-wrapper {
+    max-height: none; /* 移除固定高度 */
   }
 }
 
@@ -329,7 +345,7 @@ body.video-player-page > main {
   }
 
   #videoPlayer {
-    max-height: 40vh;
+    max-height: 50vh;
   }
 }
 
@@ -389,6 +405,48 @@ video#videoPlayer:not([src]):not([srcset]) {
   align-items: stretch;
 }
 
+/* md 断点竖屏模式下的容器高度控制 */
+@media (min-width: 768px) and (orientation: portrait) {
+  .video-subtitle-app-container .grid {
+    /* 限制网格容器高度，确保视频、字幕和状态栏都能完整展示 */
+    max-height: calc(100vh - 180px); /* 减去头部、状态栏和间距 */
+    min-height: 0;
+  }
+
+  /* 视频播放器容器 - 分配更多空间 */
+  .video-subtitle-app-container .lg\\:col-span-8 {
+    flex: 3; /* 视频占 60% 空间 */
+    min-height: 0;
+    max-height: none;
+  }
+
+  /* 字幕容器 - 分配较少空间 */
+  .video-subtitle-app-container .lg\\:col-span-4 {
+    flex: 2; /* 字幕占 40% 空间 */
+    min-height: 0;
+    max-height: none;
+  }
+
+  /* 视频播放器容器 */
+  #video-player-container {
+    max-height: none;
+    flex: 1;
+  }
+
+  /* 字幕容器 */
+  #subtitle-container {
+    max-height: none;
+    flex: 1;
+  }
+
+  /* 字幕列表内容区域 */
+  #subtitleList {
+    max-height: none;
+    flex: 1;
+    min-height: 0;
+  }
+}
+
 /* 视频播放器和字幕列表容器高度同步 */
 .video-subtitle-app-container .lg\\:col-span-8,
 .video-subtitle-app-container .lg\\:col-span-4 {
@@ -403,7 +461,16 @@ video#videoPlayer:not([src]):not([srcset]) {
   .video-subtitle-app-container .lg\\:col-span-8,
   .video-subtitle-app-container .lg\\:col-span-4 {
     min-height: 200px;
-    max-height: 50vh;
+    max-height: 60vh;
+  }
+}
+
+/* md 断点优化 (768px 及以上，包含 iPad mini 竖屏) */
+@media (min-width: 768px) and (orientation: portrait) {
+  .video-subtitle-app-container .lg\\:col-span-8,
+  .video-subtitle-app-container .lg\\:col-span-4 {
+    min-height: 250px;
+    max-height: none; /* 移除 max-height，让 flex 布局控制 */
   }
 }
 
@@ -411,7 +478,7 @@ video#videoPlayer:not([src]):not([srcset]) {
   .video-subtitle-app-container .lg\\:col-span-8,
   .video-subtitle-app-container .lg\\:col-span-4 {
     min-height: 150px;
-    max-height: 40vh;
+    max-height: 50vh;
   }
 }
 
@@ -433,23 +500,36 @@ video#videoPlayer:not([src]):not([srcset]) {
 @media (max-width: 768px) and (orientation: portrait) {
   #subtitle-container {
     min-height: 200px;
-    max-height: 50vh;
+    max-height: 60vh;
   }
 
   #subtitleList {
     min-height: 140px; /* 200px - 60px */
-    max-height: calc(50vh - 60px);
+    max-height: calc(60vh - 60px);
+  }
+}
+
+/* md 断点优化 (768px 及以上，包含 iPad mini 竖屏) */
+@media (min-width: 768px) and (orientation: portrait) {
+  #subtitle-container {
+    min-height: 250px;
+    max-height: none; /* 移除 max-height，让 flex 布局控制 */
+  }
+
+  #subtitleList {
+    min-height: 190px; /* 250px - 60px */
+    max-height: none; /* 移除 max-height，让 flex 布局控制 */
   }
 }
 
 @media (max-width: 480px) {
   #subtitle-container {
     min-height: 150px;
-    max-height: 40vh;
+    max-height: 50vh;
   }
 
   #subtitleList {
     min-height: 90px; /* 150px - 60px */
-    max-height: calc(40vh - 60px);
+    max-height: calc(50vh - 60px);
   }
 }
