@@ -1,0 +1,21 @@
+<%#
+  单词卡片组件
+  参数:
+    word: EcdictWord 对象
+%>
+
+<div class="word-card group bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-xl hover:scale-105 transition-all duration-200 border border-gray-200 dark:border-gray-700 p-4 flex flex-col items-center justify-center min-h-[100px] relative">
+  <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-1 text-center">
+    <%= word.word %>
+  </h3>
+  <% if word.phonetic.present? %>
+    <p class="text-xs text-indigo-600 dark:text-indigo-400 font-medium text-center">
+      / <%= word.phonetic %> /
+    </p>
+  <% end %>
+
+  <!-- 收藏按钮 - 绝对定位在右上角 -->
+  <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+    <%= render partial: 'components/favorite_button', locals: { word: word, favorited: true } %>
+  </div>
+</div>

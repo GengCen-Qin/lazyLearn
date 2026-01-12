@@ -6,7 +6,7 @@ class FavoritesController < ApplicationController
   def index
     favorite_records = Current.user.favorites.order(created_at: :desc)
     word_ids = favorite_records.pluck(:word_id)
-    @pagy, @favorites = pagy(EcdictWord.where(id: word_ids))
+    @favorites = EcdictWord.where(id: word_ids)
   end
 
   # GET /favorites/check
