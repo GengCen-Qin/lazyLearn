@@ -1,6 +1,9 @@
 <%# 先移除被删除的单词项 %>
 <%= turbo_stream.remove "favorite_word_#{params[:id]}" %>
 
+<%# 更新模态框中的收藏按钮 %>
+<%= turbo_stream.update "favorite_button", partial: 'components/favorite_button', locals: { word: @word, favorited: false } %>
+
 <%# 检查是否还有其他收藏，如果没有则更新显示空状态 %>
 <% if Current.user.favorites.empty? %>
   <%= turbo_stream.update "favorites_content" do %>

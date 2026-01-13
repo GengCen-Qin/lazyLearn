@@ -122,9 +122,6 @@ export default class extends Controller {
     this.showLoadingMessage();
 
     try {
-      // 从 data 属性获取 video ID
-      const videoId = this.element.dataset.videoId;
-
       const response = await fetch(`/word_lookup`, {
         method: "POST",
         headers: {

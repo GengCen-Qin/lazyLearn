@@ -21,12 +21,14 @@ class FavoritesController < ApplicationController
 
     respond_to do |format|
       format.json { render json: { success: true, favorited: true } }
+      format.turbo_stream
     end
   end
 
   # DELETE /favorites/:id
   def destroy
     @favorite = Current.user.favorites.find_by(word_id: params[:id])
+    @word = EcdictWord.find_by(id: params[:id])
 
     if @favorite&.destroy
       respond_to do |format|

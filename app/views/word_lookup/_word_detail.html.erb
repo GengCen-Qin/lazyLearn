@@ -6,7 +6,9 @@
   <div class="text-center border-b border-gray-200 dark:border-gray-700 pb-3">
     <div class="flex items-center justify-center gap-3">
       <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100"><%= word.word %></h2>
-      <%= render partial: 'components/favorite_button', locals: { word: word } %>
+      <%= turbo_frame_tag "favorite_button" do %>
+        <%= render partial: 'components/favorite_button', locals: { word: word, favorited: favorited } %>
+      <% end %>
     </div>
     <%= render "word_phonetic", word: word, external_data: external_data %>
   </div>

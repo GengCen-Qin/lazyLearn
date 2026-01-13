@@ -1,5 +1,6 @@
 class WordLookupController < ApplicationController
   allow_unauthenticated_access only: [ :create ]
+  try_user
 
   # POST /word_lookup
   def create
@@ -26,6 +27,9 @@ class WordLookupController < ApplicationController
 
     # 获取外部 API 数据
     @external_data = fetch_external_word_data(word_param)
+
+    # 是否被当前用户收藏了该单词
+    @favorited = Current.user && Current.user.favorites.exists?(word_id: @word.id)
 
     respond_to do |format|
       format.turbo_stream
