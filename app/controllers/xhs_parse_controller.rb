@@ -1,5 +1,6 @@
 class XhsParseController < ApplicationController
   allow_unauthenticated_access only: [ :create ]
+  try_user
 
   def create
     # 检查用户是否登录
@@ -20,7 +21,12 @@ class XhsParseController < ApplicationController
       return
     end
 
-    result = Downloader::Xhs.new.parse(share_text)
+    begin
+      result = Downloader::Xhs.new.parse(share_text)
+    rescue Downloader::Xhs::NotSupportException => e
+      render json: { success: false, error: "该链接格式暂不支持", not_support: true }, status: :bad_request
+      return
+    end
 
     if result[:success]
       video = Video.create!(

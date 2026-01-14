@@ -6,6 +6,10 @@
 #   downloader = Downloader::Xhs.new
 #   result = downloader.parse("https://www.xiaohongshu.com/explore/abc123")
 class Downloader::Xhs
+
+  class NotSupportException < Exception
+  end
+
   # 解析小红书链接并提取内容信息
   #
   # 创建新的 URL 解析器实例并委托给解析器处理
@@ -20,6 +24,8 @@ class Downloader::Xhs
   def parse(url)
     result = Downloader::XhsUrlParser.new.parse_url(link(url))
     return { success: false } if result.nil?
+
+    raise NotSupportException.new("#{url} Not supported") if result["视频链接"].blank?
 
     {
       success: true,
