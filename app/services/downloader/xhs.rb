@@ -25,7 +25,9 @@ class Downloader::Xhs
     result = Downloader::XhsUrlParser.new.parse_url(link(url))
     return { success: false } if result.nil?
 
-    raise NotSupportException.new("#{url} Not supported") if result["视频链接"].blank?
+    raise NotSupportException.new("暂不支持该格式") if result["视频链接"].blank?
+
+    raise NotSupportException.new("视频时长超过限制") if result["视频时长"].present? && result["视频时长"].to_i > 1.minutes.to_i
 
     {
       success: true,

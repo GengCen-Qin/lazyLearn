@@ -21,12 +21,7 @@ class XhsParseController < ApplicationController
       return
     end
 
-    begin
-      result = Downloader::Xhs.new.parse(share_text)
-    rescue Downloader::Xhs::NotSupportException => e
-      render json: { success: false, error: "该链接格式暂不支持", not_support: true }, status: :bad_request
-      return
-    end
+    result = Downloader::Xhs.new.parse(share_text)
 
     if result[:success]
       video = Video.create!(
@@ -48,5 +43,7 @@ class XhsParseController < ApplicationController
     else
       render json: { success: false, error: "处理异常" }, status: :bad_request
     end
+  rescue Downloader::Xhs::NotSupportException => e
+    render json: { success: false, error: e.message, not_support: true }, status: :bad_request
   end
 end
