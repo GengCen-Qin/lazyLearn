@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_12_30_125617) do
+ActiveRecord::Schema[8.0].define(version: 2026_01_14_132855) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -340,6 +340,34 @@ ActiveRecord::Schema[8.0].define(version: 2025_12_30_125617) do
     t.index ["guest_user_id"], name: "index_usage_limits_on_guest_user_id"
     t.index ["plan_type"], name: "index_usage_limits_on_plan_type"
     t.index ["user_id"], name: "index_usage_limits_on_user_id"
+  end
+
+  create_table "usage_records", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.integer "quota_id", null: false
+    t.string "status", null: false
+    t.text "notes"
+    t.datetime "used_at", null: false
+    t.string "ip_address"
+    t.text "user_agent"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["quota_id"], name: "index_usage_records_on_quota_id"
+    t.index ["status"], name: "index_usage_records_on_status"
+    t.index ["used_at"], name: "index_usage_records_on_used_at"
+    t.index ["user_id"], name: "index_usage_records_on_user_id"
+  end
+
+  create_table "user_quotas", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.string "quota_type", null: false
+    t.integer "total_limit", null: false
+    t.datetime "expires_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["quota_type"], name: "index_user_quotas_on_quota_type"
+    t.index ["user_id", "quota_type"], name: "index_user_quotas_on_user_id_and_quota_type"
+    t.index ["user_id"], name: "index_user_quotas_on_user_id"
   end
 
   create_table "user_videos", force: :cascade do |t|
