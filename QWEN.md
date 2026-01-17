@@ -85,7 +85,7 @@ Manages the video player interface, including displaying videos, handling transc
 ### Video Controller (`app/controllers/videos_controller.rb`)
 Manages video resources including listing, showing details, and deletion functionality.
 
-### Video Subtitle Stimulus Controller (`app/javascript/controllers/video_subtitle_merged_controller.js`)
+### Video Subtitle Stimulus Controller (`app/javascript/controllers/video/subtitle_controller.js`)
 Handles all the interactive functionality:
 - Video file loading and playback
 - Subtitle file parsing and synchronization

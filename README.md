@@ -1,24 +1,137 @@
-# README
+# Lazy English - 懒人英语视频学习系统
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+一个基于 Ruby on Rails 的智能视频播放器应用，专为语言学习者设计。通过自动语音识别技术生成同步字幕，帮助用户高效学习英语。
 
-Things you may want to cover:
+## 核心功能
 
-* Ruby version
+### 📹 视频上传与管理
+- 支持多种视频格式上传（MP4, MOV, WebM, OGG, AVI, MKV, M4V）
+- 用户可以管理和删除自己的视频资源
+- 视频分类（免费/付费）功能
 
-* System dependencies
+### 🎵 智能字幕同步
+- 利用 Whisper 技术自动生成精准时间轴字幕
+- 实时同步视频播放与字幕显示
+- 支持中英文等多种语言转录
 
-* Configuration
+### ⌨️ 便捷操作体验
+- 键盘快捷键控制（空格键播放/暂停，方向键导航）
+- 点击字幕直接跳转到对应时间点
+- 自动滚动到当前播放字幕位置
+- 智能高亮显示当前字幕
 
-* Database creation
+### 🔍 词汇查询功能
+- 内置词典，点击单词即时查询释义
+- 支持生词收藏功能
+- 丰富的词汇详情展示
 
-* Database initialization
+### 📱 响应式设计
+- 适配桌面端和移动端设备
+- 暗黑模式支持
+- 流畅的用户界面交互
 
-* How to run the test suite
+### 🔄 异步处理
+- 视频转录采用后台任务处理
+- 支持腾讯ASR和Whisper等多种转录服务
+- 云端存储（OSS）集成
 
-* Services (job queues, cache servers, search engines, etc.)
+## 技术架构
 
-* Deployment instructions
+- **框架**: Ruby on Rails 8.0.4
+- **前端**: Stimulus.js, TailwindCSS, Video.js
+- **数据库**: SQLite3 (开发环境), PostgreSQL (生产环境)
+- **部署**: Docker 容器化部署
+- **队列**: Solid Queue 后台任务处理
+- **缓存**: Solid Cache 缓存服务
 
-* ...
+## 开发环境配置
+
+### 前提条件
+- Ruby 3.4.6
+- Node.js
+- SQLite3
+
+### 安装步骤
+```bash
+# 1. 安装依赖
+bundle install
+
+# 2. 数据库初始化
+rails db:setup
+
+# 3. 启动开发服务器
+bin/dev
+```
+
+或者分别运行：
+```bash
+# 启动 Rails 服务器
+rails server
+
+# 启动 Tailwind CSS 监听器
+rails tailwindcss:watch
+```
+
+## 项目结构
+
+```
+app/
+├── controllers/     # 控制器
+├── javascript/      # JavaScript 和 Stimulus 控制器
+├── models/          # 数据模型
+├── services/        # 业务逻辑服务
+├── views/           # 视图模板
+└── jobs/            # 后台任务
+```
+
+## 功能模块
+
+### 视频管理
+- `/videos` - 视频列表页面
+- `/videos/:id` - 视频播放页面，带同步字幕
+
+### 用户系统
+- 用户注册/登录
+- 会话管理
+- 密码找回
+
+### 字幕处理
+- 自动语音识别转录
+- 时间轴同步算法
+- 字幕格式化显示
+
+### 词汇学习
+- 单词查询接口
+- 生词收藏功能
+- 词典数据管理
+
+## 部署说明
+
+本项目已配置 Docker 支持，可通过以下方式构建生产镜像：
+
+```bash
+# 构建 Docker 镜像
+docker build -t lazy-english .
+
+# 运行容器（需要配置环境变量）
+docker run -d -p 80:80 -e RAILS_MASTER_KEY=<master_key> --name lazy-english lazy-english
+```
+
+## 特色亮点
+
+1. **智能转录**: 使用先进的语音识别技术，自动生成高质量字幕
+2. **学习友好**: 一键查询单词释义，提升学习效率
+3. **交互流畅**: 优化的用户界面和操作体验
+4. **离线支持**: PWA 技术支持，可安装为独立应用
+5. **云端同步**: 支持云端视频存储，随时随地学习
+
+## 使用场景
+
+- 英语学习者观看原版视频材料
+- 需要精听练习的语言学习
+- 电影、纪录片等娱乐性学习
+- 专业课程视频的学习辅助
+
+## 贡献
+
+欢迎提交 Issue 和 Pull Request 来改进本项目。
