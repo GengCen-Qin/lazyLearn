@@ -10,7 +10,11 @@ Rails.application.routes.draw do
 
   post "xhs_parse" => "xhs_parse#create"
 
-  resources :videos, only: [ :index, :show, :destroy ]
+  resources :videos, only: [ :index, :show, :destroy ] do
+  member do
+    get :read_mode
+  end
+end
   post "word_lookup", to: "word_lookup#create"
 
   resources :favorites, only: [:index, :create, :destroy] do

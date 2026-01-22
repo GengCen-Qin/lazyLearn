@@ -1,7 +1,7 @@
 class VideosController < ApplicationController
-  allow_unauthenticated_access only: [ :index, :show ]
+  allow_unauthenticated_access only: [ :index, :show, :read_mode ]
   try_user
-  before_action :set_video, only: [ :show, :destroy ]
+  before_action :set_video, only: [ :show, :read_mode, :destroy ]
 
   # GET /videos
   def index
@@ -22,6 +22,14 @@ class VideosController < ApplicationController
 
   # GET /videos/:id
   def show
+    # 权限验证: 必须是免费视频，或是用户自己的视频
+    unless @video.free? || (Current.user && Current.user.videos.include?(@video))
+      redirect_to videos_url, alert: "您没有权限访问该视频"
+    end
+  end
+
+  # GET /videos/:id/read_mode
+  def read_mode
     # 权限验证: 必须是免费视频，或是用户自己的视频
     unless @video.free? || (Current.user && Current.user.videos.include?(@video))
       redirect_to videos_url, alert: "您没有权限访问该视频"
