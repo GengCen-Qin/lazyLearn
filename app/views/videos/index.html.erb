@@ -36,6 +36,9 @@
               <% if video.transcription_completed? %>
                 <%= link_to "播放", video_path(video),
                     class: "inline-flex items-center px-4 py-2 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+
+                <%= link_to "阅读", read_mode_video_path(video),
+                    class: "inline-flex items-center px-4 py-2 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 ml-3" %>
               <% else %>
                 <span class="text-sm text-gray-500 dark:text-gray-400 italic">等待转录完成...</span>
               <% end %>
