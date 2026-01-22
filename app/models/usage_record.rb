@@ -15,6 +15,11 @@
 class UsageRecord < ApplicationRecord
   belongs_to :user
   belongs_to :quota, class_name: "UserQuota"
+  
+  STATUS_TYPES = {
+    success: "success",
+    failed: "failed"
+  }.freeze
 
   validates :status, presence: true, inclusion: { in: STATUS_TYPES.values }
   validates :used_at, presence: true
@@ -23,11 +28,6 @@ class UsageRecord < ApplicationRecord
   scope :failed, -> { where(status: STATUS_TYPES[:failed]) }
   scope :for_user, ->(user) { where(user: user) }
   scope :recent, -> { order(used_at: :desc) }
-
-  STATUS_TYPES = {
-    success: "success",
-    failed: "failed"
-  }.freeze
 
   def self.create_success_record(user:, quota:, ip_address: nil, user_agent: nil)
     create!(
