@@ -33,7 +33,7 @@ export default class extends Controller {
 
     subtitles.forEach((subtitle, index) => {
       const item = document.createElement("div")
-      item.className = "read-mode-subtitle-item dark:bg-gray-800 rounded-lg p-4 mb-3"
+      item.className = "dark:bg-gray-800 mb-3"
       item.dataset.index = index
 
       // Read Mode 下不显示时间戳，只显示文本
