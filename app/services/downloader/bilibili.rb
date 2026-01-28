@@ -25,16 +25,12 @@ class Downloader::Bilibili
       raise NotSupportException.new("不支持的Bilibili链接格式")
     end
 
-    # Use the provided bilibili_audio_fetcher.rb logic to get audio info
-    require_relative '../../../bilibili_audio_fetcher'
-
-    fetcher = BilibiliAudioFetcher.new
-    audio_info = fetcher.fetch_audio(url)
+    audio_info = ::Downloader::BilibiliAudioFetcher.new.fetch_audio(url)
 
     raise NotSupportException.new("无法获取Bilibili音频信息") if audio_info.nil?
 
-    # Extract audio URL from audio info
     audio_url = extract_audio_url(audio_info)
+
     raise NotSupportException.new("未找到音频流") if audio_url.blank?
 
     {
@@ -53,12 +49,10 @@ class Downloader::Bilibili
   end
 
   def extract_audio_url(audio_info)
-    # Look for audio streams in the audio info
     if audio_info[:audio_streams].present?
-      # Get the first available audio stream (usually highest quality)
       first_audio_stream = audio_info[:audio_streams].first
       if first_audio_stream
-        return first_audio_stream[1][:base_url] # Return the base URL of the first audio stream
+        return first_audio_stream[1][:base_url]
       end
     end
 
@@ -66,7 +60,6 @@ class Downloader::Bilibili
   end
 
   def sanitize_filename(filename)
-    # Remove or replace invalid characters for filenames
     filename.gsub(/[\/\\:*?"<>|]/, '_').gsub(/\s+/, ' ').strip
   end
 end
