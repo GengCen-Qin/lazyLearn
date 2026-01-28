@@ -9,12 +9,16 @@ Rails.application.routes.draw do
   root "welcome#index"
 
   post "xhs_parse" => "xhs_parse#create"
+  post "bilibili_parse" => "bilibili_parse#create"
 
   resources :videos, only: [ :index, :show, :destroy ] do
-  member do
-    get :read_mode
+    member do
+      get :read_mode
+    end
   end
-end
+
+  resources :audios, only: [ :index, :show, :destroy ]
+
   post "word_lookup", to: "word_lookup#create"
 
   resources :favorites, only: [:index, :create, :destroy] do
