@@ -55,11 +55,11 @@ class Audio < ApplicationRecord
   end
 
   def trigger_transcription_async(language: "en")
-    AudioTranscriptionJob.perform_later(id, language)
+    AudioTranscriptionJob.perform_now(id, language)
   end
 
   def local_upload_async
-    AudioLocalUploadJob.perform_later(id)
+    AudioLocalUploadJob.perform_now(id)
   end
 
   def trigger_transcription(language: "en")
