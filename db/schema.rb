@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_01_14_132855) do
+ActiveRecord::Schema[8.0].define(version: 2026_01_27_125859) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -37,6 +37,24 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_14_132855) do
     t.bigint "blob_id", null: false
     t.string "variation_digest", null: false
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
+
+  create_table "audios", force: :cascade do |t|
+    t.string "title"
+    t.text "description"
+    t.json "transcription_segments", default: []
+    t.string "transcription_language", default: "zh"
+    t.datetime "transcription_time"
+    t.integer "transcription_status", default: 0, null: false
+    t.string "remote_url"
+    t.text "subtitle_content"
+    t.boolean "free", default: false, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["free"], name: "index_audios_on_free"
+    t.index ["remote_url"], name: "index_audios_on_remote_url", unique: true
+    t.index ["transcription_language"], name: "index_audios_on_transcription_language"
+    t.index ["transcription_status"], name: "index_audios_on_transcription_status"
   end
 
   create_table "ecdict_words", force: :cascade do |t|
@@ -358,6 +376,16 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_14_132855) do
     t.index ["user_id"], name: "index_usage_records_on_user_id"
   end
 
+  create_table "user_audios", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.integer "audio_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["audio_id"], name: "index_user_audios_on_audio_id"
+    t.index ["user_id", "audio_id"], name: "index_user_audios_on_user_id_and_audio_id", unique: true
+    t.index ["user_id"], name: "index_user_audios_on_user_id"
+  end
+
   create_table "user_quotas", force: :cascade do |t|
     t.integer "user_id", null: false
     t.string "quota_type", null: false
@@ -421,6 +449,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_14_132855) do
   add_foreign_key "solid_queue_scheduled_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "usage_limits", "guest_users"
   add_foreign_key "usage_limits", "users"
+  add_foreign_key "user_audios", "audios"
+  add_foreign_key "user_audios", "users"
   add_foreign_key "user_videos", "users"
   add_foreign_key "user_videos", "videos"
 end

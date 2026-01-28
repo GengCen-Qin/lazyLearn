@@ -3,14 +3,22 @@
 # Table name: usage_records
 #
 #  id         :integer          not null, primary key
-#  user_id    :integer          not null
-#  quota_id   :integer          not null
-#  status     :string           not null
-#  notes      :text
-#  used_at    :datetime         not null
 #  ip_address :string
+#  notes      :text
+#  status     :string           not null
+#  used_at    :datetime         not null
 #  user_agent :text
 #  created_at :datetime         not null
+#  updated_at :datetime         not null
+#  quota_id   :integer          not null
+#  user_id    :integer          not null
+#
+# Indexes
+#
+#  index_usage_records_on_quota_id  (quota_id)
+#  index_usage_records_on_status    (status)
+#  index_usage_records_on_used_at   (used_at)
+#  index_usage_records_on_user_id   (user_id)
 #
 class UsageRecord < ApplicationRecord
   belongs_to :user

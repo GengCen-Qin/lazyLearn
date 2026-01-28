@@ -14,6 +14,11 @@ class UserQuota < ApplicationRecord
   belongs_to :user
   has_many :usage_records, dependent: :nullify
 
+  QUOTA_TYPES = {
+    free: "free",
+    vip: "vip"
+  }.freeze
+
   validates :quota_type, presence: true, inclusion: { in: QUOTA_TYPES.values }
   validates :total_limit, presence: true, numericality: { greater_than_or_equal_to: 0 }
 
@@ -21,11 +26,6 @@ class UserQuota < ApplicationRecord
   scope :for_user, ->(user) { where(user: user) }
   scope :free, -> { where(quota_type: QUOTA_TYPES[:free]) }
   scope :vip, -> { where(quota_type: QUOTA_TYPES[:vip]) }
-
-  QUOTA_TYPES = {
-    free: "free",
-    vip: "vip"
-  }.freeze
 
   FREE_QUOTA_COUNT = 2
   VIP_DURATION_DAYS = 30

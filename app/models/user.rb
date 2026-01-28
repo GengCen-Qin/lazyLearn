@@ -17,6 +17,8 @@ class User < ApplicationRecord
   has_many :sessions, dependent: :destroy
   has_many :user_videos, dependent: :destroy
   has_many :videos, through: :user_videos
+  has_many :user_audios, dependent: :destroy
+  has_many :audios, through: :user_audios
   has_many :favorites, dependent: :destroy
   has_many :user_quotas, dependent: :destroy
   has_many :usage_records, dependent: :destroy
