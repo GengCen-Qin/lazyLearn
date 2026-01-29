@@ -1,0 +1,85 @@
+<% content_for :title, "音频列表" %>
+
+<div class="p-6 h-screen max-w-7xl mx-auto">
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100">音频列表</h1>
+  </div>
+
+  <div class="dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+    <% if @audios.any? %>
+      <div class="divide-y divide-gray-200 dark:divide-gray-700">
+        <% @audios.each do |audio| %>
+          <div class="p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150 flex justify-between items-center">
+            <div class="flex-1 min-w-0">
+              <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 truncate">
+                <%= audio.title %>
+              </h2>
+
+              <div class="mt-1 flex flex-wrap gap-2 items-center text-sm text-gray-500 dark:text-gray-400">
+                <span>
+                  <%= audio.created_at.strftime("%Y-%m-%d %H:%M") %>
+                </span>
+
+                <span class="audio-status <%= case audio.transcription_status
+                                              when 'pending' then 'text-red-400 dark:text-red-500'
+                                              when 'processing' then 'text-orange-600 dark:text-orange-500'
+                                              when 'completed' then 'text-green-600 dark:text-green-500'
+                                              when 'failed' then 'text-red-900 dark:text-red-400'
+                                              else 'text-red-400 dark:text-red-500'
+                                            end %>">
+                  <%= audio.transcription_status_text %>
+                </span>
+              </div>
+            </div>
+
+            <div class="flex items-center space-x-0 sm:space-x-3">
+              <% if audio.transcription_completed? %>
+                <%= link_to "播放", audio_path(audio),
+                    class: "inline-flex items-center px-4 py-2 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+              <% else %>
+                <span class="text-sm text-gray-500 dark:text-gray-400 italic">等待转录完成...</span>
+              <% end %>
+
+              <%= button_to "删除", audio_path(audio),
+                  method: :delete,
+                  form: {
+                    data: {
+                      turbo_confirm: "确定要删除这个音频吗？此操作无法撤销。",
+                      turbo_frame: "_top"
+                    }
+                  },
+                  class: "cursor-pointer ml-3 inline-flex items-center px-4 py-2 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500" %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+
+      <!-- 分页导航 -->
+      <%= render 'shared/pagination', pagy: @pagy %>
+    <% else %>
+      <div class="text-center py-12">
+        <svg
+          class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
+          />
+        </svg>
+
+        <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">暂无音频</h3>
+
+        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+          前往首页添加 Bilibili 链接来解析音频。
+        </p>
+        <%= link_to "前往首页", root_path,
+            class: "inline-block mt-4 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white py-2 px-6 rounded-md transition-colors duration-200" %>
+      </div>
+    <% end %>
+  </div>
+</div>
