@@ -1,8 +1,8 @@
 Rails.application.routes.draw do
-  resource :session, except: [:show, :edit, :update]
+  resource :session, except: [ :show, :edit, :update ]
   resources :registrations, only: [ :new, :create ]
   resources :passwords, param: :token
-  resources :email_verifications, only: [:create]
+  resources :email_verifications, only: [ :create ]
 
   get "up" => "rails/health#show", as: :rails_health_check
 
@@ -10,6 +10,9 @@ Rails.application.routes.draw do
 
   post "xhs_parse" => "xhs_parse#create"
   post "bilibili_parse" => "bilibili_parse#create"
+
+  # 统一的下载解析接口
+  resources :downloads, only: [ :create ]
 
   resources :videos, only: [ :index, :show, :destroy ] do
     member do
@@ -21,7 +24,7 @@ Rails.application.routes.draw do
 
   post "word_lookup", to: "word_lookup#create"
 
-  resources :favorites, only: [:index, :create, :destroy] do
+  resources :favorites, only: [ :index, :create, :destroy ] do
     collection do
       get :check
     end
