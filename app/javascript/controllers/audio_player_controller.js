@@ -123,9 +123,22 @@ export default class extends Controller {
         this.isAutoScrolling = true;
         this.lastScrollTime = now;
 
-        activeElement.scrollIntoView({
-          behavior: "smooth",
-          block: "center",
+        // 使用容器滚动而不是scrollIntoView，避免触发页面滚动
+        const container = this.subtitleListTarget;
+        
+        // 计算元素相对于容器的位置
+        const elementRect = activeElement.getBoundingClientRect();
+        const containerRect = container.getBoundingClientRect();
+        const elementTopRelative = elementRect.top - containerRect.top + container.scrollTop;
+        const elementHeight = activeElement.offsetHeight;
+        const containerHeight = container.clientHeight;
+        
+        // 计算滚动位置，使元素在容器中间
+        const scrollTop = elementTopRelative - (containerHeight / 2) + (elementHeight / 2);
+        
+        container.scrollTo({
+          top: scrollTop,
+          behavior: "smooth"
         });
 
         setTimeout(() => {
