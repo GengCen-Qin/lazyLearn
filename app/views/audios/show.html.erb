@@ -1,7 +1,11 @@
+<% content_for :title, @audio.title || "音频播放器" %>
+
+<%= stylesheet_link_tag "word_lookup", "data-turbo-track": "reload" %>
+
 <div class="min-h-screen mx-auto px-4 py-8 flex flex-col"
-     data-controller="audio-player"
-     data-audio-player-subtitles-value="<%= (@audio.formatted_transcription || []).to_json %>"
-     data-audio-player-index-value="-1">
+      data-controller="audio-player"
+      data-audio-player-subtitles-value="<%= (@audio.formatted_transcription || []).to_json %>"
+      data-audio-player-index-value="-1">
 
   <!-- 标题区域 -->
   <div class="mb-6 flex-shrink-0">
@@ -34,7 +38,7 @@
                   <%= "#{minutes.to_s.rjust(2, '0')}:#{seconds.to_s.rjust(2, '0')}" %>
                 <% end %>
               </div>
-              <div class="text-sm text-gray-800 dark:text-gray-200"><%= segment[:text] %></div>
+              <div class="text-sm text-gray-800 dark:text-gray-200"><%= render_clickable_words(segment[:text]) %></div>
             </div>
           <% end %>
         <% else %>
@@ -69,3 +73,5 @@
     </div>
   </div>
 </div>
+
+<%= render 'shared/word_lookup_modal' %>

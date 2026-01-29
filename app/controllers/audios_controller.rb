@@ -1,4 +1,6 @@
 class AudiosController < ApplicationController
+  allow_unauthenticated_access only: [ :index, :show ]
+
   def index
     if Current.user
       @pagy, @audios = pagy(
