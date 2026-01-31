@@ -13,7 +13,7 @@
         <div class="flex items-center justify-between gap-1">
           <span class="text-sm text-gray-600 dark:text-gray-400"><%= form[:type] %>:</span>
           <span data-word="<%= form[:form] %>">
-            <%= process_definition_with_clickable_words(form[:form]) %>
+            <%= render_text_with_clickable_words(form[:form]) %>
           </span>
         </div>
       <% end %>

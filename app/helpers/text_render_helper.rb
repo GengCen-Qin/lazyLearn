@@ -1,25 +1,43 @@
-# 单词渲染助手
-# 用于将文本中的英文单词转换为可点击的HTML元素
-module WordRenderHelper
-  # 将文本中的英文单词转换为可点击的HTML
-  # 与app/javascript/controllers/utils.js中的processSubtitleText保持一致的逻辑
-  def render_clickable_words(text)
+# 文本渲染助手
+# 统一的文本处理模块，提供可点击单词功能
+module TextRenderHelper
+  # 渲染可点击单词的文本
+  # @param text [String] 要处理的文本
+  # @param options [Hash] 配置选项
+  # @option options [Integer] :min_word_length 英文单词最小长度 (默认: 2)
+  def render_text_with_clickable_words(text, options = {})
     return "" if text.blank?
 
+    # 默认配置
+    options = {
+      min_word_length: 2
+    }.merge(options)
+
+    # 如果需要分割，按分号分割
+    definitions = text.split(";")
+    processed_texts = definitions.map do |definition|
+      process_single_text(definition, options)
+    end
+    processed_texts.map do |processed|
+      content_tag(:div, "• #{processed}".html_safe, class: "mb-1")
+    end.join.html_safe
+  end
+
+  # 处理单个文本片段（不包含分号分割逻辑）
+  # @param text [String] 要处理的文本
+  # @param options [Hash] 配置选项
+  def process_single_text(text, options)
     tokens = tokenize_text(text)
     tokens.map do |token|
       case token[:type]
       when :word
-        # 英文单词，长度>=2才可点击（与JavaScript逻辑一致）
-        if token[:value].length >= 2
-          # 创建可点击的单词元素
+        if token[:value].length >= options[:min_word_length]
           content_tag(:span,
             content_tag(:span, token[:value]),
             class: "word-lookup-popup inline-block px-0.5 rounded hover:bg-blue-100 hover:text-blue-700 dark:hover:bg-blue-900 dark:hover:text-blue-300 cursor-pointer transition-colors duration-150",
             data: { word: token[:value] }
           )
         else
-          # 长度<2的单词直接显示
           token[:value]
         end
       else
@@ -29,15 +47,15 @@ module WordRenderHelper
     end.join.html_safe
   end
 
-  private
-
-  # 分词文本，与JavaScript Utils.js中的tokenizeText保持一致的逻辑
-  # 正则表达式：英文单词 | 中文字符 | 数字 | 标点符号 | 空白字符
+  # 统一的文本分词器
+  # 与JavaScript Utils.js中的tokenizeText保持一致
+  # @param text [String] 要分词的文本
+  # @return [Array<Hash>] 分词结果数组
   def tokenize_text(text)
     tokens = []
 
     # 使用与JavaScript完全相同的正则表达式
-    # 注意：Ruby的/u标志表示Unicode模式，确保中文匹配正确
+    # Ruby的/u标志表示Unicode模式，确保中文匹配正确
     regex = /([a-zA-Z]+)|([\u4e00-\u9fff]+)|(\d+)|([^\w\s\u4e00-\u9fff])|(\s+)/u
 
     position = 0
@@ -74,5 +92,11 @@ module WordRenderHelper
     end
 
     tokens
+  end
+
+  # 针对中文单词信息展示
+  def process_definition_simple(text)
+    return "" if text.blank?
+    h(text).split(";").map { |defn| content_tag(:div, "• #{defn.strip}".html_safe, class: "mb-1") }.join.html_safe
   end
 end

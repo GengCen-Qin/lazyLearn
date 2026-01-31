@@ -35,7 +35,7 @@
       英文释义
     </h3>
     <div class="text-gray-700 dark:text-gray-300 text-sm leading-relaxed bg-gray-50 dark:bg-gray-700 p-3 rounded">
-      <%= process_definition_with_clickable_words(word.formatted_definition.present? ? word.formatted_definition : word.definition) %>
+      <%= render_text_with_clickable_words(word.formatted_definition.present? ? word.formatted_definition : word.definition) %>
     </div>
   </div>
   <% end %>
