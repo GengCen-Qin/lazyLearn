@@ -207,6 +207,8 @@ export default class extends Controller {
         e.stopPropagation();
         const word = wordElement.dataset.word;
         if (word) {
+          // 触发暂停事件，暂停当前播放的视频/音频
+          window.dispatchEvent(new CustomEvent('media:pause'));
           this.lookupWord(word);
         }
       }

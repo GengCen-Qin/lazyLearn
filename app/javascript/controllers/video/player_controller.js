@@ -11,11 +11,17 @@ export default class extends Controller {
     this.initialized();
     this.setupKeyboardShortcuts();
     this.setupSeekToListener();
+    this.setupMediaPauseListener();
   }
 
   setupSeekToListener() {
     this.seekToHandler = (e) => { this.seekTo(e.detail.start) };
     window.addEventListener('video:seekTo', this.seekToHandler);
+  }
+
+  setupMediaPauseListener() {
+    this.mediaPauseHandler = () => { this.pause() };
+    window.addEventListener('media:pause', this.mediaPauseHandler);
   }
 
   disconnect() {
@@ -34,6 +40,7 @@ export default class extends Controller {
   removeEventListeners() {
     this.removeKeyboardListener();
     this.removeSeekToListener();
+    this.removeMediaPauseListener();
   }
 
   removeKeyboardListener() {
@@ -47,6 +54,13 @@ export default class extends Controller {
     if (this.seekToHandler) {
       window.removeEventListener('video:seekTo', this.seekToHandler);
       this.seekToHandler = null;
+    }
+  }
+
+  removeMediaPauseListener() {
+    if (this.mediaPauseHandler) {
+      window.removeEventListener('media:pause', this.mediaPauseHandler);
+      this.mediaPauseHandler = null;
     }
   }
 

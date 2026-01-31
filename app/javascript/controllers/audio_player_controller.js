@@ -15,6 +15,7 @@ export default class extends Controller {
     this.isAutoScrolling = false;
     this.setupAudioEventListeners();
     this.setupSubtitleClickHandler();
+    this.setupMediaPauseListener();
   }
 
   // 设置音频播放事件监听器
@@ -48,8 +49,22 @@ export default class extends Controller {
     }
   }
 
+  // 设置媒体暂停事件监听器
+  setupMediaPauseListener() {
+    this.mediaPauseHandler = () => {
+      if (this.playerTarget && !this.playerTarget.paused) {
+        this.playerTarget.pause();
+      }
+    };
+    window.addEventListener('media:pause', this.mediaPauseHandler);
+  }
+
   // 清理资源
   disconnect() {
+    if (this.mediaPauseHandler) {
+      window.removeEventListener('media:pause', this.mediaPauseHandler);
+      this.mediaPauseHandler = null;
+    }
   }
 
   // 跳转到指定时间
