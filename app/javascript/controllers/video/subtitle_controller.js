@@ -1,9 +1,9 @@
 import { Controller } from "@hotwired/stimulus"
 
-// Connects to data-controller="video--subtitle"
 export default class extends Controller {
+  static targets = ["subtitle", "wordPopup"];
   static values = {
-    index: Number,
+    index: { type: Number, default: -1 },
   };
 
   connect() {
@@ -35,7 +35,7 @@ export default class extends Controller {
   // 设置点击事件处理
   setupClickHandler() {
     this.element.addEventListener("click", (e) => {
-      const subtitleItem = e.target.closest(".subtitle-item");
+      const subtitleItem = e.target.closest("[data-video--subtitle-target='subtitle']");
       if (subtitleItem && !e.target.closest(".word-lookup-popup")) {
         const index = parseInt(subtitleItem.dataset.index);
         const start = parseFloat(subtitleItem.dataset.start);
@@ -60,15 +60,12 @@ export default class extends Controller {
 
   // 跳转到下一条字幕
   jumpToNext() {
-    const subtitles = this.element.querySelectorAll(".subtitle-item");
-    const currentIndex = this.indexValue;
-    const targetIndex = Math.min(subtitles.length - 1, currentIndex + 1);
-    this.seekToSubtitleByIndex(targetIndex);
+    this.seekToSubtitleByIndex(Math.min(this.subtitleTargets.length - 1, this.indexValue + 1));
   }
 
   // 根据索引跳转到字幕
   seekToSubtitleByIndex(index) {
-    const subtitle = this.element.querySelector(`[data-index="${index}"]`);
+    const subtitle = this.subtitleTargets.find(el => parseInt(el.dataset.index) === index);
     if (subtitle) {
       const start = parseFloat(subtitle.dataset.start);
       if (!isNaN(start)) {
@@ -86,6 +83,10 @@ export default class extends Controller {
   // 设置当前字幕
   setCurrentSubtitle(index) {
     this.indexValue = index;
+  }
+
+  // 当索引值改变时自动调用（Stimulus 回调）
+  indexValueChanged() {
     this.updateActiveSubtitle();
     this.scrollToCurrentSubtitle();
   }
@@ -93,15 +94,13 @@ export default class extends Controller {
   // 更新当前字幕样式
   updateActiveSubtitle() {
     // 移除所有字幕项的激活状态
-    document.querySelectorAll(".subtitle-item").forEach((item) => {
+    this.subtitleTargets.forEach((item) => {
       item.classList.remove("active");
     });
 
     // 为当前字幕添加激活状态
     if (this.indexValue >= 0) {
-      const currentElement = document.querySelector(
-        `[data-index="${this.indexValue}"]`,
-      );
+      const currentElement = this.subtitleTargets.find(el => parseInt(el.dataset.index) === this.indexValue);
       if (currentElement) {
         currentElement.classList.add("active");
       }
@@ -110,7 +109,7 @@ export default class extends Controller {
 
   // 滚动到字幕位置
   scrollToCurrentSubtitle() {
-    const activeElement = document.querySelector(".subtitle-item.active");
+    const activeElement = this.subtitleTargets.find(el => el.classList.contains('active'));
     if (activeElement) {
       activeElement.scrollIntoView({
         behavior: "smooth",
@@ -121,16 +120,16 @@ export default class extends Controller {
 
   // 同步字幕到当前播放时间
   syncSubtitles(time) {
-    const subtitles = this.element.querySelectorAll(".subtitle-item");
-    if (subtitles.length === 0) return;
+    if (this.subtitleTargets.length === 0) return;
 
     // 查找当前时间对应的字幕索引
     let newIndex = -1;
-    for (let i = 0; i < subtitles.length; i++) {
-      const start = parseFloat(subtitles[i].dataset.start);
-      const nextStart = i + 1 < subtitles.length
-        ? parseFloat(subtitles[i + 1].dataset.start)
+    for (let i = 0; i < this.subtitleTargets.length; i++) {
+      const start = parseFloat(this.subtitleTargets[i].dataset.start);
+      const nextStart = i + 1 < this.subtitleTargets.length
+        ? parseFloat(this.subtitleTargets[i + 1].dataset.start)
         : Number.MAX_SAFE_INTEGER;
+
 
       if (time >= start && time < nextStart) {
         newIndex = i;
