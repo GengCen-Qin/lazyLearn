@@ -18,7 +18,11 @@
       "Bash(yarn add:*)",
       "Bash(yarn build:*)",
       "Bash(bundle install:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(ruby:*)",
+      "Bash(ls:*)",
+      "Bash(node -c:*)",
+      "Bash(git add:*)"
     ]
   }
 }

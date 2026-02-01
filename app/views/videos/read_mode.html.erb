@@ -34,11 +34,20 @@
   <main class="max-w-4xl mx-auto px-4 py-6">
     <div class="read-mode-subtitle-list"
          data-controller="video--read-mode"
-         data-video--read-mode-subtitles-value="<%= @video.formatted_transcription.to_json %>"
          data-video--read-mode-video-id-value="<%= @video.id %>">
-      <div class="text-center text-gray-500 dark:text-gray-400 p-8">
-        No subtitles available
-      </div>
+      <% if @video.has_transcription? %>
+        <% @video.formatted_transcription.each do |segment| %>
+          <div class="dark:bg-gray-800 mb-3">
+            <div class="read-mode-text text-base leading-relaxed text-gray-800 dark:text-gray-200">
+              <%= render_text_with_clickable_words(segment[:text]) %>
+            </div>
+          </div>
+        <% end %>
+      <% else %>
+        <div class="text-center text-gray-500 dark:text-gray-400 p-8">
+          No subtitles available
+        </div>
+      <% end %>
     </div>
   </main>
 </div>

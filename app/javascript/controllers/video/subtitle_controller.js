@@ -1,22 +1,15 @@
 import { Controller } from "@hotwired/stimulus"
-import { Utils } from "controllers/utils";
 
 // Connects to data-controller="video--subtitle"
 export default class extends Controller {
   static values = {
-    subtitles: Array,
     index: Number,
   };
 
   connect() {
-    this.utils = new Utils();
-    this.isAutoScrolling = false;
-    this.render()
     this.setupKeyboardShortcuts();
-    window.addEventListener('player:updatePlayInfo', e => {
-      this.updateSubtitleByTime(e.detail.currentTime);
-      this.syncSubtitles(e.detail.currentTime);
-    });
+    this.setupClickHandler();
+    this.setupEventListeners();
   }
 
   // 设置键盘快捷键
@@ -39,71 +32,65 @@ export default class extends Controller {
     });
   }
 
+  // 设置点击事件处理
+  setupClickHandler() {
+    this.element.addEventListener("click", (e) => {
+      const subtitleItem = e.target.closest(".subtitle-item");
+      if (subtitleItem && !e.target.closest(".word-lookup-popup")) {
+        const index = parseInt(subtitleItem.dataset.index);
+        const start = parseFloat(subtitleItem.dataset.start);
+        if (!isNaN(index) && !isNaN(start)) {
+          this.seekToSubtitle(index, start);
+        }
+      }
+    });
+  }
+
+  // 设置播放器事件监听
+  setupEventListeners() {
+    window.addEventListener('player:updatePlayInfo', (e) => {
+      this.syncSubtitles(e.detail.currentTime);
+    });
+  }
+
   // 跳转到上一条字幕
   jumpToPrevious() {
-    if (!(this.hasSubtitlesValue && this.subtitlesValue.length > 0)) return;
-
-    const targetIndex = Math.max(0, this.indexValue - 1);
-    this.seekToSubtitle(targetIndex);
-    this.setCurrentSubtitle(targetIndex);
+    this.seekToSubtitleByIndex(Math.max(0, this.indexValue - 1));
   }
 
   // 跳转到下一条字幕
   jumpToNext() {
-    if (!(this.hasSubtitlesValue && this.subtitlesValue.length > 0)) return;
-
-    const targetIndex = Math.min(this.subtitlesValue.length - 1, this.indexValue + 1);
-    this.seekToSubtitle(targetIndex);
-    this.setCurrentSubtitle(targetIndex);
+    const subtitles = this.element.querySelectorAll(".subtitle-item");
+    const currentIndex = this.indexValue;
+    const targetIndex = Math.min(subtitles.length - 1, currentIndex + 1);
+    this.seekToSubtitleByIndex(targetIndex);
   }
 
-  // 渲染字幕
-  render() {
-    if (!(this.hasSubtitlesValue && this.subtitlesValue.length > 0)) return
-
-    this.element.innerHTML = ''
-
-    // 为每条字幕创建UI元素
-    this.subtitlesValue.forEach((subtitle, index) => {
-      const item = document.createElement("div");
-      item.className = "subtitle-item p-2 border-b border-gray-100 cursor-pointer transition-colors duration-150";
-      item.dataset.index = index;
-      item.dataset.start = subtitle.start;
-      item.innerHTML = `
-        <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">${this.utils.formatTime(subtitle.start)}</div>
-        <div class="text-sm text-gray-800 dark:text-gray-200">${this.utils.processSubtitleText(subtitle.text)}</div>
-      `;
-
-      // 设置字幕行点击事件（用于时间跳转）
-      item.addEventListener("click", (e) => {
-        // 如果点击的是单词，不触发时间跳转（避免冲突）
-        if (e.target.closest(".word-lookup-popup")) {
-          return;
-        }
-        this.seekToSubtitle(index);
-        this.setCurrentSubtitle(index)
-      });
-
-      this.element.appendChild(item);
-    });
+  // 根据索引跳转到字幕
+  seekToSubtitleByIndex(index) {
+    const subtitle = this.element.querySelector(`[data-index="${index}"]`);
+    if (subtitle) {
+      const start = parseFloat(subtitle.dataset.start);
+      if (!isNaN(start)) {
+        this.seekToSubtitle(index, start);
+      }
+    }
   }
 
-  // 视频播放到对应的位置
-  seekToSubtitle(index) {
-    const subtitle = this.subtitlesValue[index];
-    window.dispatchEvent(new CustomEvent('video:seekTo', { detail: { start: subtitle.start } }));
+  // 跳转到指定字幕
+  seekToSubtitle(index, start) {
+    this.setCurrentSubtitle(index);
+    window.dispatchEvent(new CustomEvent('video:seekTo', { detail: { start: start } }));
+  }
+
+  // 设置当前字幕
+  setCurrentSubtitle(index) {
+    this.indexValue = index;
+    this.updateActiveSubtitle();
+    this.scrollToCurrentSubtitle();
   }
 
   // 更新当前字幕样式
-  setCurrentSubtitle(index) {
-    this.indexValue = index;
-
-    this.updateActiveSubtitle(); // 更新当前字幕高亮
-    this.scrollToCurrentSubtitle(); // 滚动到当前字幕
-    this.updateStatusBar(); // 更新状态栏
-  }
-
-  // 样式更新
   updateActiveSubtitle() {
     // 移除所有字幕项的激活状态
     document.querySelectorAll(".subtitle-item").forEach((item) => {
@@ -124,46 +111,35 @@ export default class extends Controller {
   // 滚动到字幕位置
   scrollToCurrentSubtitle() {
     const activeElement = document.querySelector(".subtitle-item.active");
-    if (activeElement && !this.isAutoScrolling) {
-      const now = Date.now();
-      if (now - this.lastScrollTime < 100) return; // 防止频繁滚动
-
-      this.isAutoScrolling = true;
-      this.lastScrollTime = now;
-
+    if (activeElement) {
       activeElement.scrollIntoView({
         behavior: "smooth",
         block: "center",
       });
-
-      setTimeout(() => {
-        this.isAutoScrolling = false;
-      }, 300);
     }
-  }
-
-  // 更新字幕底部状态栏
-  updateStatusBar() {
-    const subtitle = this.subtitlesValue[this.indexValue];
-    window.dispatchEvent(new CustomEvent('video:updatePlayInfo', { detail: { start: subtitle.start, index: this.indexValue, total: this.subtitlesValue.length } }));
-  }
-
-  // 根据视频当前播放时间，更新字幕底部状态栏
-  updateSubtitleByTime(time) {
-    const index = this.subtitlesValue.findIndex((subtitle) => time >= subtitle.start && time < subtitle.end);
-    if (index === -1) return;
-
-    window.dispatchEvent(new CustomEvent('video:updatePlayInfo', { detail: { start: time, index: index, total: this.subtitlesValue.length } }));
   }
 
   // 同步字幕到当前播放时间
   syncSubtitles(time) {
-    // 需要注意第二段的结束时间 和 第一段的开始时间是一样的，计算的时候注意
-    const newSubtitleIndex = this.subtitlesValue.findIndex((subtitle) => time >= subtitle.start && time < subtitle.end)
-    if (newSubtitleIndex === -1) return;
+    const subtitles = this.element.querySelectorAll(".subtitle-item");
+    if (subtitles.length === 0) return;
 
-    if (newSubtitleIndex !== this.indexValue) {
-      this.setCurrentSubtitle(newSubtitleIndex);
+    // 查找当前时间对应的字幕索引
+    let newIndex = -1;
+    for (let i = 0; i < subtitles.length; i++) {
+      const start = parseFloat(subtitles[i].dataset.start);
+      const nextStart = i + 1 < subtitles.length
+        ? parseFloat(subtitles[i + 1].dataset.start)
+        : Number.MAX_SAFE_INTEGER;
+
+      if (time >= start && time < nextStart) {
+        newIndex = i;
+        break;
+      }
+    }
+
+    if (newIndex !== -1 && newIndex !== this.indexValue) {
+      this.setCurrentSubtitle(newIndex);
     }
   }
 }

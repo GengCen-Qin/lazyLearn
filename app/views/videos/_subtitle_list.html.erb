@@ -30,16 +30,34 @@
   <div
     class="flex-1 overflow-y-auto p-2 sm:p-3 bg-white dark:bg-gray-800"
     data-controller="video--subtitle"
-    data-video--subtitle-subtitles-value="<%= (video.formatted_transcription || []).to_json %>"
     data-video--subtitle-index-value="-1"
     id="subtitleList"
   >
-    <div class="no-subtitles text-center text-gray-500 dark:text-gray-400 p-6 text-sm">
-      <% if video.has_transcription? %>
-        正在加载字幕...
-      <% else %>
-        此视频暂无字幕
+    <% if video.has_transcription? %>
+      <% video.formatted_transcription.each_with_index do |segment, index| %>
+        <div
+          class="subtitle-item p-2 border-b border-gray-100 dark:border-gray-700 cursor-pointer transition-colors duration-150 group"
+          data-index="<%= index %>"
+          data-start="<%= segment[:start] %>"
+        >
+          <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">
+            <% if segment[:time_str] %>
+              <%= segment[:time_str] %>
+            <% else %>
+              <% minutes = (segment[:start]/60).to_i %>
+              <% seconds = (segment[:start]%60).to_i %>
+              <%= "#{minutes.to_s.rjust(2, '0')}:#{seconds.to_s.rjust(2, '0')}" %>
+            <% end %>
+          </div>
+          <div class="text-sm text-gray-800 dark:text-gray-200">
+            <%= render_text_with_clickable_words(segment[:text]) %>
+          </div>
+        </div>
       <% end %>
-    </div>
+    <% else %>
+      <div class="no-subtitles text-center text-gray-500 dark:text-gray-400 p-6 text-sm">
+        此视频暂无字幕
+      </div>
+    <% end %>
   </div>
 </div>

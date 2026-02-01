@@ -1,50 +1,12 @@
 import { Controller } from "@hotwired/stimulus"
-import { Utils } from "controllers/utils"
 
 export default class extends Controller {
   static values = {
-    subtitles: Array,
     videoId: Number
   }
 
-  static targets = ["subtitleList"]
-
-  utils = new Utils()
-
   connect() {
-    this.render()
     this.setupWordClickListeners()
-  }
-
-  // 渲染字幕列表（Read Mode 专用）
-  render() {
-    const subtitles = this.subtitlesValue || []
-
-    if (!subtitles || subtitles.length === 0) {
-      this.element.innerHTML = `
-        <div class="text-center text-gray-500 dark:text-gray-400 p-8">
-          No subtitles available
-        </div>
-      `
-      return
-    }
-
-    this.element.innerHTML = ""
-
-    subtitles.forEach((subtitle, index) => {
-      const item = document.createElement("div")
-      item.className = "dark:bg-gray-800 mb-3"
-      item.dataset.index = index
-
-      // Read Mode 下不显示时间戳，只显示文本
-      item.innerHTML = `
-        <div class="read-mode-text text-base leading-relaxed text-gray-800 dark:text-gray-200">
-          ${this.utils.processSubtitleText(subtitle.text)}
-        </div>
-      `
-
-      this.element.appendChild(item)
-    })
   }
 
   // 设置单词点击监听（复用 word-lookup 逻辑）
