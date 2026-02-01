@@ -142,11 +142,4 @@ accessories:
     options:
       cpus: "2.0"
       memory: 5g
-    cmd: >
-      server
-      -m /models/ggml-base.en.bin
-      --host 0.0.0.0
-      --port 8081
-      --convert
-      --threads 2
-      --max-context 0
+    cmd: whisper-server -m /models/ggml-base.en.bin --host 0.0.0.0 --port 8081 --convert --threads 2
