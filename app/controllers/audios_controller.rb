@@ -1,5 +1,6 @@
 class AudiosController < ApplicationController
   allow_unauthenticated_access only: [ :index, :show ]
+  try_user
 
   def index
     if Current.user
