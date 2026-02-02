@@ -4,9 +4,7 @@ class FavoritesController < ApplicationController
 
   # GET /favorites
   def index
-    favorite_records = Current.user.favorites.order(created_at: :desc)
-    word_ids = favorite_records.pluck(:word_id)
-    @favorites = EcdictWord.where(id: word_ids)
+    @favorites = Current.user.favorites.includes(:word).order(created_at: :desc).map(&:word)
   end
 
   # GET /favorites/check
