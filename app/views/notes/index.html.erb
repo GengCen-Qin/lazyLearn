@@ -1,0 +1,78 @@
+<% content_for :title, "我的学习笔记" %>
+
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900">
+  <div class="max-w-4xl mx-auto px-4 py-6">
+    <div class="flex justify-between items-center mb-6">
+      <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100">我的学习笔记</h1>
+      <%= link_to "新建笔记", new_note_path,
+          class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+    </div>
+
+    <% if @notes.any? %>
+      <div class="space-y-4">
+        <% @notes.each do |note| %>
+          <div class="bg-white dark:bg-gray-800 rounded-lg shadow hover:shadow-md transition-shadow duration-200">
+            <%= link_to note_path(note), class: "block p-6" do %>
+              <div class="flex items-start justify-between">
+                <div class="flex-1 min-w-0">
+                  <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
+                    <%= note.question %>
+                  </h2>
+
+                  <div class="flex flex-wrap gap-2 items-center text-sm text-gray-500 dark:text-gray-400">
+                    <span>
+                      <%= note.created_at.strftime("%Y-%m-%d %H:%M") %>
+                    </span>
+
+                    <% if note.last_review_time %>
+                      <span class="text-green-600 dark:text-green-400">
+                        已复习
+                      </span>
+                    <% else %>
+                      <span class="text-orange-600 dark:text-orange-400">
+                        未复习
+                      </span>
+                    <% end %>
+                  </div>
+                </div>
+
+                <div class="ml-4 flex-shrink-0">
+                  <svg class="w-5 h-5 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                  </svg>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+
+      <!-- 分页导航 -->
+      <%= render 'shared/pagination', pagy: @pagy %>
+    <% else %>
+      <div class="text-center py-12">
+        <svg
+          class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+          />
+        </svg>
+
+        <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">暂无笔记</h3>
+
+        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+          开始记录你的学习内容吧！
+        </p>
+        <%= link_to "新建笔记", new_note_path,
+            class: "inline-block mt-4 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white py-2 px-6 rounded-md transition-colors duration-200" %>
+      </div>
+    <% end %>
+  </div>
+</div>

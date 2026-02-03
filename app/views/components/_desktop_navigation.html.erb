@@ -10,6 +10,8 @@
         class: "px-3 py-2 rounded-md font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors #{current_page?(audios_path) ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white' : ''}" %>
 
     <% if Current.user %>
+      <%= link_to "学习笔记", notes_path,
+          class: "px-3 py-2 rounded-md font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors #{current_page?(notes_path) ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white' : ''}" %>
       <%= link_to "单词本", favorites_path,
           class: "px-3 py-2 rounded-md font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors #{current_page?(favorites_path) ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white' : ''}" %>
     <% end %>

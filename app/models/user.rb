@@ -22,6 +22,7 @@ class User < ApplicationRecord
   has_many :favorites, dependent: :destroy
   has_many :user_quotas, dependent: :destroy
   has_many :usage_records, dependent: :destroy
+  has_many :notes, dependent: :destroy
 
   after_create :connect_free_video, :create_free_quota
 

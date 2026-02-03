@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  resources :notes
   resource :session, except: [ :show, :edit, :update ]
   resources :registrations, only: [ :new, :create ]
   resources :passwords, param: :token
