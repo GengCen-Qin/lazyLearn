@@ -16,7 +16,7 @@
         class: "text-xs text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 font-medium" %>
   </div>
 <% else %>
-  <div class="space-y-1">
+  <div class="space-y-1 flex justify-around gap-5">
     <%= link_to "登录", new_session_path,
         class: "w-full text-center text-xs font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 px-3 py-1.5 rounded-lg transition-colors" %>
     <%= link_to "注册", new_registration_path,
