@@ -6,24 +6,32 @@ export default class extends Controller {
   connect() {
   }
 
-  async download(event) {
+  async process(event) {
     event.preventDefault();
 
-    const url = this.inputTarget.value.trim();
-    if (!url) {
-      this.showError("请输入要处理的网址");
+    const input = this.inputTarget.value.trim();
+    if (!input) {
+      this.showError("请输入要处理的网址或单词");
       return;
     }
 
-    // 检测URL类型
-    const platform = this.detectPlatform(url);
-    if (!platform) {
-      this.showError("不支持的链接格式。请提供小红书(xhslink.com/xiaohongshu.com)或Bilibili(bilibili.com)链接");
-      return;
-    }
+    // 检测输入类型
+    const inputType = this.detectInputType(input);
 
-    // 根据平台显示不同的确认消息
-    const platformName = platform === 'xhs' ? '小红书' : 'Bilibili';
+    if (inputType === 'word') {
+      // 处理单词查询
+      await this.lookupWord(input);
+    } else if (inputType === 'url') {
+      // 处理视频下载
+      await this.processVideoDownload(input);
+    } else {
+      this.showError("不支持的输入格式。请输入单词（英文）或有效的视频链接");
+    }
+  }
+
+  // 处理视频下载
+  async processVideoDownload(url) {
+    const platformName = this.detectPlatform(input) === 'xhs' ? '小红书' : 'Bilibili';
     if (!confirm(`确定要解析这个${platformName}内容吗？`)) {
       return;
     }
@@ -73,6 +81,57 @@ export default class extends Controller {
     }
   }
 
+  // 查询单词
+  async lookupWord(word) {
+    try {
+      this.showWordModal();
+
+      const response = await fetch(`/word_lookup`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRF-Token": document.querySelector('[name="csrf-token"]').content,
+        },
+        body: JSON.stringify({ word: word }),
+      });
+
+      const turboStream = await response.text()
+      Turbo.renderStreamMessage(turboStream)
+    } catch (error) {
+      this.showError(`查询失败: ${error.message}`);
+    }
+  }
+
+  // 显示单词弹窗
+  showWordModal() {
+    const modal = document.getElementById('wordInfo');
+    if (modal) {
+      modal.showModal();
+    }
+  }
+
+  // 检测输入类型（单词或URL）
+  detectInputType(input) {
+    // 首先检测是否为单词
+    if (this.isWord(input)) {
+      return 'word';
+    }
+
+    // 然后检测是否为URL
+    const platform = this.detectPlatform(input);
+    if (platform) {
+      return 'url';
+    }
+
+    return null;
+  }
+
+  // 检测是否为英文单词
+  isWord(input) {
+    const wordPattern = /^[a-zA-Z]{1,50}$/;
+    return wordPattern.test(input.trim());
+  }
+
   // 检测URL平台类型
   detectPlatform(url) {
     const xhsPatterns = [/xhslink\.com/, /xiaohongshu\.com/];
@@ -83,7 +142,7 @@ export default class extends Controller {
     } else if (bilibiliPatterns.some(pattern => pattern.test(url))) {
       return 'bilibili';
     }
-    
+
     return null;
   }
 

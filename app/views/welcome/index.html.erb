@@ -25,7 +25,7 @@
     <div class="w-full max-w-2xl mb-6">
       <%= form_with url: downloads_path, method: :post, local: true,
                     data: { unified_downloader_target: "form",
-                            action: "submit->unified-downloader#download" } do |form| %>
+                            action: "submit->unified-downloader#process" } do |form| %>
         <div
           class="
             flex items-center border border-gray-300 dark:border-gray-600 rounded-full px-4 py-2
@@ -34,7 +34,7 @@
           "
         >
           <%= form.text_field :url,
-                              placeholder: "请输入要处理的网址",
+                              placeholder: "请输入网址或英文单词",
                               class: "flex-grow outline-none text-xl bg-transparent text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400",
                               data: { unified_downloader_target: "input" } %>
 
@@ -77,7 +77,16 @@
           </svg>
           <span>Bilibili视频链接</span>
         </div>
+        <div class="flex items-center">
+          <svg class="w-5 h-5 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+          </svg>
+          <span>英文单词查询</span>
+        </div>
       </div>
     </div>
+
+    <!-- 单词查询弹窗 -->
+    <%= render 'shared/word_lookup_modal' %>
   </div>
 </div>
