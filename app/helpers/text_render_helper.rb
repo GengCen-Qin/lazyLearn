@@ -5,22 +5,19 @@ module TextRenderHelper
   # @param text [String] 要处理的文本
   # @param options [Hash] 配置选项
   # @option options [Integer] :min_word_length 英文单词最小长度 (默认: 2)
+  # @option options [String] :join 标签
+  # @option options [String] :split 分割符
   def render_text_with_clickable_words(text, options = {})
     return "" if text.blank?
 
     # 默认配置
     options = {
-      min_word_length: 2
+      min_word_length: 2,
+      join: "-",
+      split: ";"
     }.merge(options)
-
-    # 如果需要分割，按分号分割
-    definitions = text.split(";")
-    processed_texts = definitions.map do |definition|
-      process_single_text(definition, options)
-    end
-    processed_texts.map do |processed|
-      content_tag(:div, "• #{processed}".html_safe, class: "mb-1")
-    end.join.html_safe
+    processed_texts = text.split(options[:split]).map { |definition| process_single_text(definition.strip, options) }
+    processed_texts.map { |processed| content_tag(:div, "#{options[:join]} #{processed}".html_safe, class: "mb-1") }.join.html_safe
   end
 
   # 处理单个文本片段（不包含分号分割逻辑）
