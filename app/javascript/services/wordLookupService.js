@@ -8,7 +8,7 @@
  * @param {string} word - 要查询的单词
  * @param {boolean} addToHistory - 是否添加到历史记录
  */
-function lookupWord(word, addToHistory = true) {
+function lookupWord(word, addToHistory = false) {
   if (!word || typeof word !== 'string') {
     console.warn('无效的单词:', word);
     return;
@@ -25,16 +25,8 @@ function lookupWord(word, addToHistory = true) {
   }
 }
 
-/**
- * 通过快捷键查询单词（可选，如果需要的话）
- */
-function lookupWordByShortcut(word) {
-  lookupWord(word, true);
-}
-
 // 挂载到全局
 window.lookupWord = lookupWord;
-window.lookupWordByShortcut = lookupWordByShortcut;
 
 // 如果需要模块导出（可选）
-export { lookupWord, lookupWordByShortcut };
+export { lookupWord };
