@@ -10,20 +10,7 @@ export default class extends Controller {
   };
 
   showWordDetail(event) {
-    // 查找页面上的单词查询模态框
-    const wordInfoDialog = document.getElementById("wordInfo");
-
-    if (wordInfoDialog) {
-      const wordLookupController = this.application.getControllerForElementAndIdentifier(
-        wordInfoDialog,
-        "word-lookup"
-      );
-
-      if (wordLookupController) {
-        // 调用 word-lookup 控制器的 lookupWord 方法
-        wordLookupController.lookupWord(this.wordValue);
-      }
-    }
+    window.lookupWord(this.wordValue);
   }
 
   stopPropagation(event) {

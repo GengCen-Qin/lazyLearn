@@ -20,7 +20,7 @@ export default class extends Controller {
 
     if (inputType === 'word') {
       // 处理单词查询
-      await this.lookupWord(input);
+      window.lookupWord(word);
     } else if (inputType === 'url') {
       // 处理视频下载
       await this.processVideoDownload(input);
@@ -78,27 +78,6 @@ export default class extends Controller {
       this.showError(`网络错误: ${error.message}`);
     } finally {
       this.setButtonLoading(false);
-    }
-  }
-
-  // 查询单词
-  async lookupWord(word) {
-    try {
-      this.showWordModal();
-
-      const response = await fetch(`/word_lookup`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-CSRF-Token": document.querySelector('[name="csrf-token"]').content,
-        },
-        body: JSON.stringify({ word: word }),
-      });
-
-      const turboStream = await response.text()
-      Turbo.renderStreamMessage(turboStream)
-    } catch (error) {
-      this.showError(`查询失败: ${error.message}`);
     }
   }
 

@@ -24,6 +24,7 @@ export default class extends Controller {
     // 设置事件监听
     this.setupWordHistoryEvents();
     this.setupPronunciationListeners();
+    this.setupGlobalWordLookupEvents();
   }
 
   // 初始化单词查询历史记录
@@ -71,7 +72,7 @@ export default class extends Controller {
 
   // 添加单词到历史记录
   addToWordHistory(word) {
-    const history = JSON.parse(this.wordDialog.dataset.wordHistory || "[]");
+    const history = this.getHistory()
 
     history.push(word);
 
@@ -83,7 +84,7 @@ export default class extends Controller {
 
   // 回退到上一个单词
   async goBackToPreviousWord() {
-    const history = JSON.parse(this.wordDialog.dataset.wordHistory || "[]");
+    const history = this.getHistory()
     const currentIndex = parseInt(this.wordDialog.dataset.currentIndex || "0");
 
     if (currentIndex > 0) {
@@ -104,10 +105,7 @@ export default class extends Controller {
    * 发送请求到后端API，创建多层弹窗显示释义
    */
   async lookupWord(word, addToHistory = true) {
-    // 检查是否已经有历史记录
-    const history = JSON.parse(this.wordDialog.dataset.wordHistory || "[]");
-
-    if (history.length === 0) {
+    if (this.getHistory().length === 0) {
       this.clearWordHistory();
     }
 
@@ -115,10 +113,8 @@ export default class extends Controller {
       this.addToWordHistory(word);
     }
 
-    // 立即显示弹窗和加载状态
-    if (!this.wordDialog.open) {
-      this.wordDialog.showModal();
-    }
+    this.wordDialog.showModal();
+
     this.showLoadingMessage();
 
     try {
@@ -138,6 +134,11 @@ export default class extends Controller {
     } catch (error) {
       this.showErrorMessage('查询失败，请稍后重试');
     }
+  }
+
+  // 获取历史单词记录
+  getHistory() {
+    return JSON.parse(this.wordDialog.dataset.wordHistory || "[]")
   }
 
   // 更新回退按钮可见性
@@ -231,6 +232,20 @@ export default class extends Controller {
   getCSRFToken() {
     const meta = document.querySelector('meta[name="csrf-token"]');
     return meta ? meta.getAttribute("content") : "";
+  }
+
+  // 设置全局单词查询事件监听
+  setupGlobalWordLookupEvents() {
+    // 监听来自 wordLookupService 的事件
+    document.addEventListener('word-lookup:query', (event) => {
+      const { word, addToHistory = true } = event.detail;
+      if (word && typeof word === 'string') {
+        // 触发暂停事件
+        window.dispatchEvent(new CustomEvent('media:pause'));
+        // 调用现有的查询方法
+        this.lookupWord(word, addToHistory);
+      }
+    });
   }
 
   disconnect() {
