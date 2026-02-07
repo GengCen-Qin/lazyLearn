@@ -28,6 +28,7 @@ Rails.application.routes.draw do
   end
 
   post "word_lookup", to: "word_lookup#create"
+  post "phrase_explain", to: "phrase_explains#create"
 
   resources :favorites, only: [ :index, :create, :destroy ] do
     collection do
