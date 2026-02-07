@@ -1,4 +1,17 @@
-<% content_for :title, "#{@video.title} - Read Mode" %>
+<% # 通用 read_mode 页面，支持视频和音频 %>
+
+<% # 确定当前资源类型和对象 %>
+<% if controller_name == 'videos' %>
+  <% content_for :title, "#{@video.title} - Read Mode" %>
+  <% resource = @video %>
+  <% resource_type = 'video' %>
+  <% back_path = video_path(resource) %>
+<% else %>
+  <% content_for :title, "#{@audio.title} - Read Mode" %>
+  <% resource = @audio %>
+  <% resource_type = 'audio' %>
+  <% back_path = audio_path(resource) %>
+<% end %>
 
 <%= stylesheet_link_tag "word_lookup", "data-turbo-track": "reload" %>
 
@@ -8,7 +21,7 @@
     <div class="max-w-4xl mx-auto px-4 py-3">
       <div class="flex items-center justify-between gap-3">
         <div class="flex items-center gap-2 flex-1 min-w-0">
-          <%= link_to video_path(@video),
+          <%= link_to back_path,
               class: "flex items-center gap-1 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 flex-shrink-0" do %>
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
@@ -19,12 +32,12 @@
           <span class="text-gray-300 dark:text-gray-600">|</span>
 
           <h1 class="text-base font-semibold text-gray-800 dark:text-gray-100 truncate">
-            <%= @video.title %>
+            <%= resource.title %>
           </h1>
         </div>
 
         <div class="text-sm text-gray-600 dark:text-gray-300">
-          <%= @video.transcription_segments.size %> subtitles
+          <%= resource.transcription_segments.size %> subtitles
         </div>
       </div>
     </div>
@@ -34,9 +47,9 @@
   <main class="max-w-4xl mx-auto px-4 py-6">
     <div class="read-mode-subtitle-list"
          data-controller="video--read-mode"
-         data-video--read-mode-video-id-value="<%= @video.id %>">
-      <% if @video.has_transcription? %>
-        <% @video.formatted_transcription.each do |segment| %>
+         data-video--read-mode-<%= resource_type %>-id-value="<%= resource.id %>">
+      <% if resource.has_transcription? %>
+        <% resource.formatted_transcription.each do |segment| %>
           <div class="mb-3">
             <div class="text-base leading-relaxed text-gray-800 dark:text-gray-200">
               <%= render_text_with_clickable_words(segment[:text]) %>

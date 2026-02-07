@@ -36,19 +36,25 @@
               <% if audio.transcription_completed? %>
                 <%= link_to "播放", audio_path(audio),
                     class: "inline-flex items-center px-4 py-2 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+
+                <%= link_to "阅读", read_mode_audio_path(audio),
+                    class: "inline-flex items-center px-4 py-2 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 ml-3" %>
               <% else %>
                 <span class="text-sm text-gray-500 dark:text-gray-400 italic">等待转录完成...</span>
               <% end %>
 
-              <%= button_to "删除", audio_path(audio),
-                  method: :delete,
-                  form: {
-                    data: {
-                      turbo_confirm: "确定要删除这个音频吗？此操作无法撤销。",
-                      turbo_frame: "_top"
-                    }
-                  },
-                  class: "cursor-pointer ml-3 inline-flex items-center px-4 py-2 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500" %>
+              <!-- 只对拥有该音频的登录用户显示删除按钮 -->
+              <% if Current.user && Current.user.audios.include?(audio) %>
+                <%= button_to "删除", audio_path(audio),
+                    method: :delete,
+                    form: {
+                      data: {
+                        turbo_confirm: "确定要删除这个音频吗？此操作无法撤销。",
+                        turbo_frame: "_top"
+                      }
+                    },
+                    class: "cursor-pointer ml-3 inline-flex items-center px-4 py-2 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500" %>
+              <% end %>
             </div>
           </div>
         <% end %>

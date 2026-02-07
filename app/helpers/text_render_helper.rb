@@ -13,7 +13,7 @@ module TextRenderHelper
     # 默认配置
     options = {
       min_word_length: 2,
-      join: "-",
+      join: "",
       split: ";"
     }.merge(options)
     processed_texts = text.split(options[:split]).map { |definition| process_single_text(definition.strip, options) }

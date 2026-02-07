@@ -34,6 +34,9 @@ class VideosController < ApplicationController
     unless @video.free? || (Current.user && Current.user.videos.include?(@video))
       redirect_to videos_url, alert: "您没有权限访问该视频"
     end
+
+    # 渲染通用模板
+    render 'shared/read_mode'
   end
 
   # DELETE /videos/:id

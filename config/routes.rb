@@ -21,7 +21,11 @@ Rails.application.routes.draw do
     end
   end
 
-  resources :audios, only: [ :index, :show, :destroy ]
+  resources :audios, only: [ :index, :show, :destroy ] do
+    member do
+      get :read_mode
+    end
+  end
 
   post "word_lookup", to: "word_lookup#create"
 
