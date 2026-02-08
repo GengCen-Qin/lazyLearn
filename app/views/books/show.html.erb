@@ -2,7 +2,7 @@
 
 <div
   class="p-6 h-screen max-w-7xl mx-auto"
-  data-controller="book-reader"
+  data-controller="book-reader text-selection-explain"
   data-book-reader-book-id-value="<%= @book.id %>"
   data-book-reader-total-lines-value="<%= @book.total_lines %>"
   data-book-reader-start-line-value="<%= @book.reading_progress&.start_line %>"
@@ -34,8 +34,8 @@
     <%= turbo_frame_tag "loading-container" do %>
     <% end %>
 
-    <%= turbo_frame_tag "book-content", 
-        id: "book-content-frame", 
+    <%= turbo_frame_tag "book-content",
+        id: "book-content-frame",
         data: { book_reader_target: "turboFrame" } do %>
       <div class="text-gray-900 dark:text-gray-100 leading-10">
         <p class="text-center text-gray-600 dark:text-gray-400 py-8">
@@ -43,8 +43,11 @@
         </p>
       </div>
     <% end %>
-    
+
     <!-- 存储加载状态的隐藏元素 -->
     <div id="loading-status" class="hidden"></div>
   </div>
+
+  <!-- 短语解释模态框 -->
+  <%= render "shared/phrase_explain_modal" %>
 </div>

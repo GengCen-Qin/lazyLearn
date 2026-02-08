@@ -47,7 +47,7 @@
   <main class="max-w-4xl mx-auto px-4 py-6">
     <div id="read-mode-content"
          class="read-mode-subtitle-list"
-         data-controller="video--read-mode video--phrase-explain"
+         data-controller="video--read-mode text-selection-explain"
          data-video--read-mode-<%= resource_type %>-id-value="<%= resource.id %>">
       <% if resource.has_transcription? %>
         <% resource.formatted_transcription.each do |segment| %>
