@@ -71,8 +71,8 @@ export default class extends Controller {
 
     this.floatingIcon = document.createElement("div")
     this.floatingIcon.className = "absolute w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center cursor-pointer shadow-blue-500/40 z-50 transition-all text-white hover:scale-110 hover:shadow-blue-500/50"
-    this.floatingIcon.style.left = `${rect.left + scrollX + rect.width / 2 - 16}px`
-    this.floatingIcon.style.top = `${rect.top + scrollY - 40}px`
+    this.floatingIcon.style.left = `${rect.left + scrollX}px`
+    this.floatingIcon.style.top = `${rect.bottom + scrollY + 10}px`
     this.floatingIcon.innerHTML = `
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-5 h-5">
         <circle cx="12" cy="12" r="10"></circle>
