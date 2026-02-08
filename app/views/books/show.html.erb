@@ -16,12 +16,7 @@
 
   <!-- 书籍信息 -->
   <div class="dark:bg-gray-800 rounded-lg shadow p-6 mb-4">
-    <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-      <%= @book.title %>
-    </h1>
-
-    <div class="flex flex-wrap gap-4 text-sm text-gray-500 dark:text-gray-400">
-      <span>创建时间：<%= @book.created_at.strftime("%Y-%m-%d %H:%M") %></span>
+    <div class="flex flex-col sm:flex-row sm:items-center sm:gap-4 text-sm text-gray-500 dark:text-gray-400">
       <span>阅读进度：<span id="progress-display" data-book-reader-target="progress">--</span></span>
     </div>
   </div>
