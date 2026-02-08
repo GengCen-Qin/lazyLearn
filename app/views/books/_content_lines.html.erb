@@ -1,0 +1,9 @@
+<% if contents.any? %>
+  <% contents.each do |content| %>
+    <%= render "books/content_line", line_number: content.line_number, content: content.content %>
+  <% end %>
+<% else %>
+  <div class="text-center text-gray-500 dark:text-gray-400 py-8">
+    没有更多内容
+  </div>
+<% end %>

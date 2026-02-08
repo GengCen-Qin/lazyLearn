@@ -1,0 +1,2 @@
+<%# 更新进度显示，显示百分比和行号 %>
+<%= turbo_stream.replace "progress-display", "#{@progress_percent}% (第 #{@start_line}-#{@end_line} 行)" %>

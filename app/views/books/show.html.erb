@@ -1,6 +1,13 @@
 <% content_for :title, @book.title || "电子书阅读" %>
 
-<div class="p-6 h-screen max-w-7xl mx-auto">
+<div
+  class="p-6 h-screen max-w-7xl mx-auto"
+  data-controller="book-reader"
+  data-book-reader-book-id-value="<%= @book.id %>"
+  data-book-reader-total-lines-value="<%= @book.total_lines %>"
+  data-book-reader-start-line-value="<%= @book.reading_progress&.start_line %>"
+  data-book-reader-end-line-value="<%= @book.reading_progress&.end_line %>"
+>
   <!-- 返回按钮 -->
   <div class="mb-4">
     <%= link_to "← 返回书籍列表", books_path,
@@ -8,38 +15,36 @@
   </div>
 
   <!-- 书籍信息 -->
-  <div class="dark:bg-gray-800 rounded-lg shadow p-6 mb-6">
+  <div class="dark:bg-gray-800 rounded-lg shadow p-6 mb-4">
     <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
       <%= @book.title %>
     </h1>
 
     <div class="flex flex-wrap gap-4 text-sm text-gray-500 dark:text-gray-400">
       <span>创建时间：<%= @book.created_at.strftime("%Y-%m-%d %H:%M") %></span>
-      <span>总行数：<%= @book.total_lines %> 行</span>
-      <span>编码格式：<%= @book.encoding %></span>
+      <span>阅读进度：<span id="progress-display" data-book-reader-target="progress">--</span></span>
     </div>
   </div>
 
-  <!-- 阅读内容区域（暂时显示占位信息） -->
-  <div class="dark:bg-gray-800 rounded-lg shadow p-8 text-center">
-    <div class="mb-4">
-      <svg class="mx-auto h-16 w-16 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-      </svg>
-    </div>
+  <!-- 阅读内容区域 -->
+  <div
+    class="dark:bg-gray-800 rounded-lg shadow p-6 h-[calc(100vh-280px)] overflow-y-auto scroll-smooth"
+    data-book-reader-target="contentArea"
+  >
+    <%= turbo_frame_tag "loading-container" do %>
+    <% end %>
 
-    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
-      阅读功能开发中...
-    </h3>
-
-    <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">
-      正在开发电子书阅读功能，敬请期待。
-    </p>
-
-    <div class="flex justify-center">
-      <span class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 cursor-not-allowed">
-        即将推出
-      </span>
-    </div>
+    <%= turbo_frame_tag "book-content", 
+        id: "book-content-frame", 
+        data: { book_reader_target: "turboFrame" } do %>
+      <div class="text-gray-900 dark:text-gray-100 leading-10">
+        <p class="text-center text-gray-600 dark:text-gray-400 py-8">
+          正在加载阅读内容...
+        </p>
+      </div>
+    <% end %>
+    
+    <!-- 存储加载状态的隐藏元素 -->
+    <div id="loading-status" class="hidden"></div>
   </div>
 </div>

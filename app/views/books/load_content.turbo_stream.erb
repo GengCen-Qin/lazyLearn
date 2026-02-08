@@ -1,0 +1,21 @@
+<% if @initial_load %>
+  <%= turbo_stream.update "book-content", partial: "books/content_lines", locals: { contents: @contents } %>
+<% else %>
+  <% if @prepend %>
+    <%= turbo_stream.prepend "book-content", partial: "books/content_lines", locals: { contents: @contents } %>
+  <% else %>
+    <%= turbo_stream.append "book-content", partial: "books/content_lines", locals: { contents: @contents } %>
+  <% end %>
+<% end %>
+
+<%# 更新进度显示，显示百分比和行号 %>
+<% if @contents&.any? %>
+  <%= turbo_stream.update "progress-display", "#{@progress_percent}% (第 #{@first_line}-#{@last_line} 行)" %>
+<% end %>
+
+<%# 更新控制器的 hasMoreBefore 和 hasMoreAfter 值 %>
+<%= turbo_stream.update "loading-status", 
+    "<script type='application/json' id='book-status-data'>" +
+    { has_more_before: (@contents.present? && @first_line && @first_line > 1), 
+      has_more_after: (@contents.present? && @contents.size == 50) }.to_json +
+    "</script>" %>

@@ -27,7 +27,12 @@ Rails.application.routes.draw do
     end
   end
 
-  resources :books, only: [ :index, :show, :create ]
+  resources :books, only: [ :index, :show, :create ] do
+    member do
+      post :load_content
+    end
+    resources :reading_progresses, only: [ :create ]
+  end
 
   post "word_lookup", to: "word_lookup#create"
   post "phrase_explain", to: "phrase_explains#create"
