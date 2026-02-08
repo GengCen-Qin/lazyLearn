@@ -14,8 +14,8 @@
 <% end %>
 
 <%# 更新控制器的 hasMoreBefore 和 hasMoreAfter 值 %>
-<%= turbo_stream.update "loading-status", 
+<%= turbo_stream.update "loading-status",
     "<script type='application/json' id='book-status-data'>" +
-    { has_more_before: (@contents.present? && @first_line && @first_line > 1), 
+    { has_more_before: (@contents.present? && @first_line && @first_line > 1),
       has_more_after: (@contents.present? && @contents.size == 50) }.to_json +
     "</script>" %>
