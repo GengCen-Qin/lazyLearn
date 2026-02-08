@@ -1,7 +1,7 @@
 <!-- 桌面端用户认证状态 -->
 <% if authenticated? %>
   <!-- 已登录状态 -->
-  <div class="ml-3 relative hidden md:block">
+  <div class="ml-3 relative hidden lg:block">
     <div class="flex items-center gap-2">
       <div class="flex items-center gap-1 bg-green-50 dark:bg-green-900/20 px-3 py-1.5 rounded-full border border-green-200 dark:border-green-800">
         <svg class="h-4 w-4 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -19,7 +19,7 @@
   </div>
 <% else %>
   <!-- 未登录状态 -->
-  <div class="hidden md:flex items-center gap-2">
+  <div class="hidden lg:flex items-center gap-2">
     <%= link_to "登录", new_session_path,
         class: "font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" %>
 
