@@ -5,7 +5,7 @@ module TxtBookParsable
 
   class_methods do
     def parse_from_io(io, user_id, title)
-      lines = io.read.force_encoding("UTF-8").split(/\r?\n/)
+      lines = io.read.force_encoding("UTF-8").split(/\r?\n/).reject(&:empty?)
 
       book_title = title.presence || lines.first&.strip.presence || "未命名书籍"
 

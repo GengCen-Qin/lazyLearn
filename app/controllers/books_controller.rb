@@ -26,7 +26,7 @@ class BooksController < ApplicationController
     limit = params[:limit].to_i.positive? ? params[:limit].to_i : 50
 
     @contents = load_book_contents(before_line, after_line, limit)
-    
+
     @prepend = before_line.positive?
     @initial_load = !before_line.positive? && !after_line.positive?
 
@@ -41,8 +41,6 @@ class BooksController < ApplicationController
   rescue => e
     handle_load_content_error(e)
   end
-
-  private
 
   def load_book_contents(before_line, after_line, limit)
     if before_line.positive?
