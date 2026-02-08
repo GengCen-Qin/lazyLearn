@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_02_03_121944) do
+ActiveRecord::Schema[8.0].define(version: 2026_02_08_043136) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -55,6 +55,26 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_03_121944) do
     t.index ["remote_url"], name: "index_audios_on_remote_url", unique: true
     t.index ["transcription_language"], name: "index_audios_on_transcription_language"
     t.index ["transcription_status"], name: "index_audios_on_transcription_status"
+  end
+
+  create_table "book_contents", force: :cascade do |t|
+    t.text "content", null: false
+    t.integer "line_number", null: false
+    t.integer "book_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["book_id", "line_number"], name: "index_book_contents_on_book_id_and_line_number", unique: true
+    t.index ["book_id"], name: "index_book_contents_on_book_id"
+  end
+
+  create_table "books", force: :cascade do |t|
+    t.string "title", null: false
+    t.integer "total_lines", null: false
+    t.string "encoding", default: "utf-8"
+    t.integer "user_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_books_on_user_id"
   end
 
   create_table "ecdict_words", force: :cascade do |t|
@@ -221,6 +241,18 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_03_121944) do
     t.index ["period_type", "period_start"], name: "index_rails_pulse_summaries_on_period"
     t.index ["summarizable_type", "summarizable_id", "period_type", "period_start"], name: "idx_pulse_summaries_unique", unique: true
     t.index ["summarizable_type", "summarizable_id"], name: "index_rails_pulse_summaries_on_summarizable"
+  end
+
+  create_table "reading_progresses", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.integer "book_id", null: false
+    t.integer "start_line", null: false
+    t.integer "end_line", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["book_id"], name: "index_reading_progresses_on_book_id"
+    t.index ["user_id", "book_id"], name: "index_reading_progresses_on_user_id_and_book_id", unique: true
+    t.index ["user_id"], name: "index_reading_progresses_on_user_id"
   end
 
   create_table "sessions", force: :cascade do |t|
@@ -449,11 +481,15 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_03_121944) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "book_contents", "books"
+  add_foreign_key "books", "users"
   add_foreign_key "favorites", "users"
   add_foreign_key "notes", "users", on_delete: :cascade
   add_foreign_key "rails_pulse_operations", "rails_pulse_queries", column: "query_id"
   add_foreign_key "rails_pulse_operations", "rails_pulse_requests", column: "request_id"
   add_foreign_key "rails_pulse_requests", "rails_pulse_routes", column: "route_id"
+  add_foreign_key "reading_progresses", "books"
+  add_foreign_key "reading_progresses", "users"
   add_foreign_key "sessions", "users"
   add_foreign_key "solid_queue_blocked_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_claimed_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
