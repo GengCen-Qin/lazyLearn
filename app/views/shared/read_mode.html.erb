@@ -51,7 +51,7 @@
          data-video--read-mode-<%= resource_type %>-id-value="<%= resource.id %>">
       <% if resource.has_transcription? %>
         <% resource.formatted_transcription.each do |segment| %>
-          <div class="mb-3">
+          <div class="my-3 mx-3">
             <div class="text-base leading-relaxed text-gray-800 dark:text-gray-200">
               <%= render_text_with_clickable_words(segment[:text]) %>
             </div>
