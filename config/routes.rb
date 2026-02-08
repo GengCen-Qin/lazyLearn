@@ -27,6 +27,8 @@ Rails.application.routes.draw do
     end
   end
 
+  resources :books, only: [ :index, :show, :create ]
+
   post "word_lookup", to: "word_lookup#create"
   post "phrase_explain", to: "phrase_explains#create"
 

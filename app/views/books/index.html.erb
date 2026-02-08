@@ -1,0 +1,86 @@
+<% content_for :title, "电子书列表" %>
+
+<div class="p-6 h-screen max-w-7xl mx-auto">
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100">电子书列表</h1>
+
+    <% if Current.user %>
+      <form action="<%= books_path %>" method="post" enctype="multipart/form-data" class="inline" data-controller="book-upload">
+        <%= tag.input(type: "hidden", name: "authenticity_token", value: form_authenticity_token) %>
+        <input
+          type="hidden"
+          name="title"
+          data-book-upload-target="titleInput"
+          id="book_title_hidden"
+>
+        <input
+          type="file"
+          name="book_file"
+          id="book_file_input"
+          accept=".txt,text/plain"
+          class="hidden"
+          data-book-upload-target="fileInput"
+>
+        <label for="book_file_input" class="btn bg-indigo-600 hover:bg-indigo-700 text-white border-none cursor-pointer">
+          添加电子书
+        </label>
+      </form>
+    <% end %>
+  </div>
+
+  <div class="dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+    <% if @books.any? %>
+      <div class="divide-y divide-gray-200 dark:divide-gray-700">
+        <% @books.each do |book| %>
+          <div class="p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150 flex justify-between items-center">
+            <div class="flex-1 min-w-0">
+              <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 truncate">
+                <%= link_to book.title, book_path(book), class: "hover:text-indigo-600 dark:hover:text-indigo-400" %>
+              </h2>
+
+              <div class="mt-1 flex flex-wrap gap-2 items-center text-sm text-gray-500 dark:text-gray-400">
+                <span>
+                  <%= book.created_at.strftime("%Y-%m-%d %H:%M") %>
+                </span>
+
+                <span>
+                  共 <%= book.total_lines %> 行
+                </span>
+              </div>
+            </div>
+
+            <div class="flex items-center space-x-3">
+              <%= link_to "阅读", book_path(book),
+                  class: "btn btn-sm bg-green-600 hover:bg-green-700 text-white border-none" %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+
+      <!-- 分页导航 -->
+      <%= render 'shared/pagination', pagy: @pagy %>
+    <% else %>
+      <div class="text-center py-12">
+        <svg
+          class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+          />
+        </svg>
+
+        <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">暂无电子书</h3>
+
+        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+          上传TXT文件开始阅读体验。
+        </p>
+      </div>
+    <% end %>
+  </div>
+</div>

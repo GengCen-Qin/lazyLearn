@@ -21,6 +21,8 @@
 #  user_id  (user_id => users.id)
 #
 class Book < ApplicationRecord
+  include ::TxtBookParsable
+
   belongs_to :user
   has_many :book_contents, dependent: :destroy
   has_one :reading_progress, dependent: :destroy
