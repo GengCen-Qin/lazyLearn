@@ -32,24 +32,14 @@ export default class extends Controller {
 
   // 检查文本选择
   checkTextSelection() {
-    const selection = window.getSelection()
-    const selectedText = selection.toString().trim()
+    const selectedText = this.getSelectedText()
 
-    if (selectedText.length < 3) {
+    if (!this.isValidSelectedText(selectedText)) {
       this.removeFloatingIcon()
       return
     }
 
-    // 检查选中文本是否在当前控制器元素（read mode内容）内
-    const range = selection.rangeCount > 0 ? selection.getRangeAt(0) : null
-    if (!range) return
-
-    const selectedElement = range.commonAncestorContainer.nodeType === 3
-      ? range.commonAncestorContainer.parentElement
-      : range.commonAncestorContainer
-
-    // 检查是否在当前控制器元素内
-    if (!this.element.contains(selectedElement)) {
+    if (!this.isElementInControllerScope()) {
       this.removeFloatingIcon()
       return
     }
@@ -57,46 +47,138 @@ export default class extends Controller {
     this.showFloatingIcon()
   }
 
+  /**
+   * 获取当前选中的文本内容
+   * @returns {string} 选中的文本内容
+   */
+  getSelectedText() {
+    const selection = window.getSelection()
+    return selection.toString().trim()
+  }
+
+  /**
+   * 判断选中的文本是否有效（长度不少于3个字符）
+   * @param {string} text - 待验证的文本
+   * @returns {boolean} 是否为有效文本
+   */
+  isValidSelectedText(text) {
+    return text.length >= 3
+  }
+
+  /**
+   * 获取选中文本所在的DOM元素
+   * @returns {Element|null} 选中文本所在的DOM元素，如果不存在则返回null
+   */
+  getSelectedElement() {
+    const selection = window.getSelection()
+    if (selection.rangeCount === 0) return null
+
+    const range = selection.getRangeAt(0)
+    return this.getElementFromRange(range)
+  }
+
+  /**
+   * 从Range对象中获取对应的DOM元素
+   * @param {Range} range - Range对象
+   * @returns {Element|null} 对应的DOM元素
+   */
+  getElementFromRange(range) {
+    const container = range.commonAncestorContainer
+
+    // 如果容器是文本节点(nodeType === 3)，返回其父元素
+    // 如果容器是元素节点(nodeType === 1)，直接返回该元素
+    if (container.nodeType === Node.TEXT_NODE) {
+      return container.parentElement
+    } else if (container.nodeType === Node.ELEMENT_NODE) {
+      return container
+    }
+
+    return null
+  }
+
+  /**
+   * 判断指定元素是否在当前控制器的作用范围内
+   * @returns {boolean} 元素是否在当前控制器范围内
+   */
+  isElementInControllerScope() {
+    let element = this.getSelectedElement()
+    if (!element) return false
+    return this.element.contains(element)
+  }
+
   // 显示悬浮图标
   showFloatingIcon() {
     this.removeFloatingIcon()
 
-    // 保存选中的文本，避免点击图标时丢失选择
-    const selection = window.getSelection()
-    this.selectedText = selection.toString().trim()
+    this.selectedText = this.getSelectedText()
 
-    this.floatingIcon = document.createElement("div")
+    this.floatingIcon = this.createFloatingIconElement()
 
-    this.floatingIcon.className = "fixed p-2 rounded-lg bg-blue-500 dark:bg-blue-600 hover:bg-blue-600 dark:hover:bg-blue-700 transition-colors duration-200 cursor-pointer shadow-lg z-40"
-    this.floatingIcon.style.minWidth = "36px"
-    this.floatingIcon.style.minHeight = "36px"
+    document.body.appendChild(this.floatingIcon)
 
-    const darkModeButtonHeight = 36
-    const spacing = 10
-    const margin = 16
-    const bottomPosition = margin + darkModeButtonHeight + spacing
+    setTimeout(() => {
+      this.removeFloatingIcon()
+    }, 10000)
+  }
 
-    this.floatingIcon.style.right = `${margin}px`
-    this.floatingIcon.style.bottom = `${bottomPosition}px`
+  /**
+   * 创建悬浮图标元素
+   * @returns {HTMLDivElement} 悬浮图标DOM元素
+   */
+  createFloatingIconElement() {
+    const icon = document.createElement("div")
 
-    this.floatingIcon.innerHTML = `
+    // 设置样式类名
+    icon.className = "fixed p-2 rounded-lg bg-blue-500 dark:bg-blue-600 hover:bg-blue-600 dark:hover:bg-blue-700 transition-colors duration-200 cursor-pointer shadow-lg z-40"
+
+    // 设置最小尺寸
+    icon.style.minWidth = "36px"
+    icon.style.minHeight = "36px"
+
+    // 设置位置（固定在右下角）
+    this.setPosition(icon)
+
+    // 设置图标内容
+    icon.innerHTML = this.getIconSVG()
+
+    // 添加点击事件处理器
+    icon.addEventListener("click", this.handleIconClick.bind(this))
+
+    return icon
+  }
+
+  /**
+   * 设置悬浮图标的定位
+   * @param {HTMLElement} element - 悬浮图标元素
+   */
+  setPosition(element) {
+    const DARK_MODE_BUTTON_HEIGHT = 36 // 暗色模式按钮高度
+    const SPACING = 10                 // 间距
+    const MARGIN = 16                  // 边距
+
+    const bottomPosition = MARGIN + DARK_MODE_BUTTON_HEIGHT + SPACING
+
+    element.style.right = `${MARGIN}px`
+    element.style.bottom = `${bottomPosition}px`
+  }
+
+  /**
+   * 获取图标SVG内容
+   * @returns {string} 图标SVG字符串
+   */
+  getIconSVG() {
+    return `
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-5 h-5 text-white">
         <circle cx="12" cy="12" r="10"></circle>
         <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
         <line x1="12" y1="17" x2="12.01" y2="17"></line>
       </svg>
     `
-
-    this.floatingIcon.addEventListener("click", this.handleIconClick.bind(this))
-
-    document.body.appendChild(this.floatingIcon)
-
-    setTimeout(() => {
-      this.removeFloatingIcon()
-    }, 5000)
   }
 
-  // 移除悬浮图标
+  /**
+   * 移除悬浮图标
+   */
   removeFloatingIcon() {
     if (this.floatingIcon) {
       this.floatingIcon.remove()
@@ -109,7 +191,7 @@ export default class extends Controller {
   async handleIconClick() {
     const selectedText = this.selectedText
 
-    if (!selectedText || selectedText.length < 3) {
+    if (!this.isValidSelectedText(selectedText)) {
       alert("请选择至少3个字符的文本来获得解释")
       return
     }
