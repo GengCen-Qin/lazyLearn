@@ -54,27 +54,33 @@ export default class extends Controller {
       return
     }
 
-    this.showFloatingIcon(range)
+    this.showFloatingIcon()
   }
 
   // 显示悬浮图标
-  showFloatingIcon(range) {
+  showFloatingIcon() {
     this.removeFloatingIcon()
-
-    const rect = range.getBoundingClientRect()
-    const scrollX = window.pageXOffset || document.documentElement.scrollLeft
-    const scrollY = window.pageYOffset || document.documentElement.scrollTop
 
     // 保存选中的文本，避免点击图标时丢失选择
     const selection = window.getSelection()
     this.selectedText = selection.toString().trim()
 
     this.floatingIcon = document.createElement("div")
-    this.floatingIcon.className = "absolute w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center cursor-pointer shadow-blue-500/40 z-50 transition-all text-white hover:scale-110 hover:shadow-blue-500/50"
-    this.floatingIcon.style.left = `${rect.left + scrollX}px`
-    this.floatingIcon.style.top = `${rect.bottom + scrollY + 10}px`
+
+    this.floatingIcon.className = "fixed p-2 rounded-lg bg-blue-500 dark:bg-blue-600 hover:bg-blue-600 dark:hover:bg-blue-700 transition-colors duration-200 cursor-pointer shadow-lg z-40"
+    this.floatingIcon.style.minWidth = "36px"
+    this.floatingIcon.style.minHeight = "36px"
+
+    const darkModeButtonHeight = 36
+    const spacing = 10
+    const margin = 16
+    const bottomPosition = margin + darkModeButtonHeight + spacing
+
+    this.floatingIcon.style.right = `${margin}px`
+    this.floatingIcon.style.bottom = `${bottomPosition}px`
+
     this.floatingIcon.innerHTML = `
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-5 h-5">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-5 h-5 text-white">
         <circle cx="12" cy="12" r="10"></circle>
         <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
         <line x1="12" y1="17" x2="12.01" y2="17"></line>
@@ -85,10 +91,9 @@ export default class extends Controller {
 
     document.body.appendChild(this.floatingIcon)
 
-    // 3秒后自动消失
     setTimeout(() => {
       this.removeFloatingIcon()
-    }, 3000)
+    }, 5000)
   }
 
   // 移除悬浮图标
