@@ -311,6 +311,8 @@ GEM
       io-console (~> 0.5)
     request_store (1.7.0)
       rack (>= 1.4)
+    requestjs-rails (0.0.14)
+      railties (>= 7.1.0)
     reverse_markdown (3.0.1)
       nokogiri
     rexml (3.4.4)
@@ -474,6 +476,7 @@ DEPENDENCIES
   puma (>= 5.0)
   rails (~> 8.0.4)
   rails_pulse
+  requestjs-rails
   rubocop-rails-omakase
   selenium-webdriver
   solargraph

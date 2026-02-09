@@ -46,7 +46,6 @@ gem "thruster", require: false
 # gem "image_processing", "~> 1.2"
 
 group :development, :test do
-
   gem "sqlite3", ">= 2.1"
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"
@@ -89,8 +88,10 @@ gem "pg", "~> 1.6"
 # 请求底层
 gem "openssl", "~> 3.3"
 # 性能监控
-gem 'rails_pulse'
+gem "rails_pulse"
 
 gem "pagy", "~> 43.2"
 
 gem "letter_opener", "~> 1.10"
+
+gem "requestjs-rails"
