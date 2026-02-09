@@ -10,24 +10,13 @@ export default class extends Controller {
 
   disconnect() {
     this.removeFloatingIcon()
-    document.removeEventListener("mouseup", this.handleSelectionEnd.bind(this))
-    document.removeEventListener("touchend", this.handleSelectionEnd.bind(this))
+    document.removeEventListener("selectionchange", this.handleSelectionEnd.bind(this))
     this.selectedText = ""
   }
 
   // 设置文本选择监听
   setupTextSelectionListener() {
-    this.handleSelectionEnd = this.debounce(this.handleSelectionEnd.bind(this), 300)
-    document.addEventListener("mouseup", this.handleSelectionEnd)
-    document.addEventListener("touchend", this.handleSelectionEnd)
-  }
-
-  // 处理文本选择结束
-  handleSelectionEnd() {
-    clearTimeout(this.selectionTimeout)
-    this.selectionTimeout = setTimeout(() => {
-      this.checkTextSelection()
-    }, 100)
+    document.addEventListener("selectionchange", this.debounce(this.checkTextSelection.bind(this), 100))
   }
 
   // 检查文本选择
@@ -115,10 +104,6 @@ export default class extends Controller {
     this.floatingIcon = this.createFloatingIconElement()
 
     document.body.appendChild(this.floatingIcon)
-
-    setTimeout(() => {
-      this.removeFloatingIcon()
-    }, 10000)
   }
 
   /**
