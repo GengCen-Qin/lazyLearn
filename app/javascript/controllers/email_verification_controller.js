@@ -1,4 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
+import { post } from "@rails/request.js"
 
 export default class extends Controller {
   static targets = ["email", "code", "button", "countdown"]
@@ -43,16 +44,12 @@ export default class extends Controller {
     this.buttonTarget.textContent = "发送中..."
 
     try {
-      const response = await fetch("/email_verifications", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-CSRF-Token": this.csrfToken()
-        },
-        body: JSON.stringify({ email })
+      const response = await post("/email_verifications", {
+        body: { email },
+        responseKind: 'json'
       })
 
-      const data = await response.json()
+      const data = await response.json
 
       if (data.success) {
         this.startCountdown()
@@ -96,10 +93,5 @@ export default class extends Controller {
   // 工具方法
   emailRegex() {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  }
-
-  csrfToken() {
-    const meta = document.querySelector('meta[name="csrf-token"]')
-    return meta ? meta.getAttribute("content") : ""
   }
 }

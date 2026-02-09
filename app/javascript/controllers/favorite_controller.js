@@ -1,4 +1,5 @@
 import { Controller } from "@hotwired/stimulus";
+import { get, post, destroy } from "@rails/request.js";
 
 /**
  * 单词收藏控制器
@@ -28,16 +29,12 @@ export default class extends Controller {
     }
 
     try {
-      const response = await fetch(this.checkUrlValue, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-Token': this.getCSRFToken()
-        }
+      const response = await get(this.checkUrlValue, {
+        responseKind: 'json'
       });
 
       if (response.ok) {
-        const data = await response.json();
+        const data = await response.json;
         this.favoritedValue = data.favorited;
         this.updateButtonState(data.favorited);
       }
@@ -58,24 +55,32 @@ export default class extends Controller {
     }
 
     try {
-      const url = this.favoritedValue ? this.destroyUrlValue : this.createUrlValue;
-      const method = this.favoritedValue ? 'DELETE' : 'POST';
+      if (this.favoritedValue) {
+        const response = await destroy(this.destroyUrlValue, {
+          responseKind: 'json'
+        });
 
-      const response = await fetch(url, {
-        method: method,
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-Token': this.getCSRFToken()
-        },
-        body: this.favoritedValue ? null : JSON.stringify({ word_id: this.wordIdValue })
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        this.favoritedValue = data.favorited;
-        this.updateButtonState(data.favorited);
+        if (response.ok) {
+          const data = await response.json;
+          this.favoritedValue = data.favorited;
+          this.updateButtonState(data.favorited);
+        } else {
+          alert('操作失败，请稍后重试');
+        }
       } else {
-        alert('操作失败，请稍后重试');
+        // 添加收藏
+        const response = await post(this.createUrlValue, {
+          body: { word_id: this.wordIdValue },
+          responseKind: 'json'
+        });
+
+        if (response.ok) {
+          const data = await response.json;
+          this.favoritedValue = data.favorited;
+          this.updateButtonState(data.favorited);
+        } else {
+          alert('操作失败，请稍后重试');
+        }
       }
     } catch (error) {
       console.error('切换收藏状态失败:', error);
@@ -98,11 +103,5 @@ export default class extends Controller {
   isAuthenticated() {
     const meta = document.querySelector('meta[name="user-authenticated"]');
     return meta && meta.getAttribute('content') === 'true';
-  }
-
-  // 获取 CSRF Token
-  getCSRFToken() {
-    const meta = document.querySelector('meta[name="csrf-token"]');
-    return meta ? meta.getAttribute("content") : "";
   }
 }

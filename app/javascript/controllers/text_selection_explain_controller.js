@@ -1,4 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
+import { post } from "@rails/request.js"
 
 export default class extends Controller {
   connect() {
@@ -185,18 +186,12 @@ export default class extends Controller {
     this.showModal(selectedText)
 
     try {
-      const response = await fetch("/phrase_explain", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').content
-        },
-        body: JSON.stringify({
-          text: selectedText
-        })
+      const response = await post("/phrase_explain", {
+        body: { text: selectedText },
+        responseKind: 'json'
       })
 
-      const data = await response.json()
+      const data = await response.json
 
       if (data.success) {
         this.updateModal(data.explanation)

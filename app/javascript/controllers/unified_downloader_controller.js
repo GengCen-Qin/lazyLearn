@@ -1,4 +1,5 @@
 import { Controller } from "@hotwired/stimulus";
+import { post } from "@rails/request.js";
 
 export default class extends Controller {
   static targets = ["input", "form", "resultArea", "button"];
@@ -31,7 +32,7 @@ export default class extends Controller {
 
   // 处理视频下载
   async processVideoDownload(url) {
-    const platformName = this.detectPlatform(input) === 'xhs' ? '小红书' : 'Bilibili';
+    const platformName = this.detectPlatform(url) === 'xhs' ? '小红书' : 'Bilibili';
     if (!confirm(`确定要解析这个${platformName}内容吗？`)) {
       return;
     }
@@ -39,17 +40,12 @@ export default class extends Controller {
     this.setButtonLoading(true);
 
     try {
-      const response = await fetch("/downloads", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Requested-With": "XMLHttpRequest",
-          "X-CSRF-Token": document.querySelector('[name="csrf-token"]').content,
-        },
-        body: JSON.stringify({ url: url }),
+      const response = await post("/downloads", {
+        body: { url },
+        responseKind: 'json'
       });
 
-      const data = await response.json();
+      const data = await response.json;
 
       // 处理需要登录的情况
       if (data.need_login) {

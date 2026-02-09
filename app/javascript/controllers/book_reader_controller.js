@@ -1,4 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
+import { post } from "@rails/request.js"
 
 // 图书阅读器控制器
 // 实现功能：
@@ -48,10 +49,10 @@ export default class extends Controller {
     // 上次保存的进度位置
     this.lastSavedStartLine = this.currentStartLine
     this.lastSavedEndLine = this.currentEndLine
-    
+
     // Intersection Observer 实例
     this.intersectionObserver = null
-    
+
     // DOM 变化监听器实例
     this.mutationObserver = null
   }
@@ -116,15 +117,15 @@ export default class extends Controller {
    */
   updateLoadingStatus() {
     const statusDataElement = document.getElementById('book-status-data')
-    
+
     if (statusDataElement) {
       try {
         const statusData = JSON.parse(statusDataElement.textContent)
-        
+
         if (typeof statusData.has_more_before !== 'undefined') {
           this.hasMoreBefore = statusData.has_more_before
         }
-        
+
         if (typeof statusData.has_more_after !== 'undefined') {
           this.hasMoreAfter = statusData.has_more_after
         }
@@ -141,7 +142,7 @@ export default class extends Controller {
   handleIntersection(entries) {
     // 获取当前可见的行号
     const visibleLines = []
-    
+
     entries.forEach(entry => {
       if (entry.isIntersecting) {
         // 获取元素的行号
@@ -166,16 +167,16 @@ export default class extends Controller {
     try {
       // 初始化 DOM 变化监听器
       this.initMutationObserver()
-      
+
       // 根据上次阅读位置加载内容
       await this.loadInitialContent()
-      
+
       // 添加滚动监听
       this.contentAreaTarget.addEventListener('scroll', this.handleScrollBound)
-      
+
       // 开始监控内容行的可见性
       this.observeContentLines()
-      
+
       // 初始化后立即更新加载状态
       this.updateLoadingStatus()
     } catch (error) {
@@ -212,20 +213,11 @@ export default class extends Controller {
       const requestUrl = this.buildRequestUrl(params)
 
       // 发送请求获取内容
-      const response = await fetch(requestUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-Token': this.getCSRFToken()
-        }
+      const response = await post(requestUrl, {
+        responseKind: 'turbo-stream'
       })
 
       if (response.ok) {
-        // 解析并渲染 Turbo Stream 响应
-        const turboStream = await response.text()
-        Turbo.renderStreamMessage(turboStream)
-
-        // 新内容加载完成后，监控新增的行元素并更新状态
         setTimeout(() => {
           this.observeContentLines()
           this.updateLoadingStatus()
@@ -378,16 +370,12 @@ export default class extends Controller {
     }
 
     try {
-      const response = await fetch(`/books/${this.bookIdValue}/reading_progresses`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-Token': this.getCSRFToken()
-        },
-        body: JSON.stringify({
+      const response = await post(`/books/${this.bookIdValue}/reading_progresses`, {
+        body: {
           start_line: this.currentStartLine,
           end_line: this.currentEndLine
-        })
+        },
+        responseKind: 'json'
       })
 
       if (response.ok) {
@@ -413,15 +401,6 @@ export default class extends Controller {
   }
 
   /**
-   * 获取 CSRF Token
-   * @returns {string} CSRF Token
-   */
-  getCSRFToken() {
-    const meta = document.querySelector('meta[name="csrf-token"]')
-    return meta ? meta.getAttribute('content') : ''
-  }
-
-  /**
    * 断开连接时清理资源
    */
   disconnect() {
@@ -429,17 +408,17 @@ export default class extends Controller {
     if (this.debounceTimer) {
       clearTimeout(this.debounceTimer)
     }
-    
+
     // 移除事件监听器
     if (this.contentAreaTarget && this.handleScrollBound) {
       this.contentAreaTarget.removeEventListener('scroll', this.handleScrollBound)
     }
-    
+
     // 断开 Intersection Observer
     if (this.intersectionObserver) {
       this.intersectionObserver.disconnect()
     }
-    
+
     // 断开 Mutation Observer
     if (this.mutationObserver) {
       this.mutationObserver.disconnect()

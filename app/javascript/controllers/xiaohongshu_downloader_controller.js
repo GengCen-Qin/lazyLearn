@@ -1,4 +1,5 @@
 import { Controller } from "@hotwired/stimulus";
+import { post } from "@rails/request.js";
 
 export default class extends Controller {
   static targets = ["input", "form", "resultArea", "button"];
@@ -22,17 +23,12 @@ export default class extends Controller {
     this.setButtonLoading(true);
 
     try {
-      const response = await fetch("/xhs_parse", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Requested-With": "XMLHttpRequest",
-          "X-CSRF-Token": document.querySelector('[name="csrf-token"]').content,
-        },
-        body: JSON.stringify({ url: shareText }),
+      const response = await post("/xhs_parse", {
+        body: { url: shareText },
+        responseKind: 'json'
       });
 
-      const data = await response.json();
+      const data = await response.json;
 
       // 处理需要登录的情况
       if (data.need_login) {

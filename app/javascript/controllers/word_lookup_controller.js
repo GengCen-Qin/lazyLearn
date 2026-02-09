@@ -1,4 +1,5 @@
 import { Controller } from "@hotwired/stimulus";
+import { post } from "@rails/request.js";
 
 /**
  * 视频管理控制器
@@ -118,19 +119,10 @@ export default class extends Controller {
     this.showLoadingMessage();
 
     try {
-      const response = await fetch(`/word_lookup`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-CSRF-Token": this.getCSRFToken(),
-          "Accept": "text/vnd.turbo-stream.html"
-        },
-        body: JSON.stringify({ word: word }),
+      await post('/word_lookup', {
+        body: { word },
+        responseKind: 'turbo-stream'
       });
-
-      const turboStream = await response.text();
-
-      Turbo.renderStreamMessage(turboStream);
     } catch (error) {
       this.showErrorMessage('查询失败，请稍后重试');
     }
@@ -226,12 +218,6 @@ export default class extends Controller {
     } catch (error) {
       console.warn('Failed to create audio element:', error);
     }
-  }
-
-  // 获取CSRF令牌
-  getCSRFToken() {
-    const meta = document.querySelector('meta[name="csrf-token"]');
-    return meta ? meta.getAttribute("content") : "";
   }
 
   // 设置全局单词查询事件监听
