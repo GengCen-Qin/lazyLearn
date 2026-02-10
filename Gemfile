@@ -25,6 +25,9 @@ gem "bcrypt", "~> 3.1.7"
 # HTTP client for transcription service communication
 gem "httparty"
 
+# OpenAI client for AI-powered features
+gem "ruby-openai"
+
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem "tzinfo-data", platforms: %i[ windows jruby ]
 
