@@ -36,6 +36,7 @@ Rails.application.routes.draw do
 
   post "word_lookup", to: "word_lookup#create"
   post "phrase_explain", to: "phrase_explains#create"
+  get "phrase_explain/stream", to: "phrase_explains#stream"
 
   resources :favorites, only: [ :index, :create, :destroy ] do
     collection do
