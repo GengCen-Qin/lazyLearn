@@ -21,7 +21,7 @@ export default class extends Controller {
 
     if (inputType === 'word') {
       // 处理单词查询
-      window.lookupWord(input);
+      window.lookupWord(input, true);
     } else if (inputType === 'url') {
       // 处理视频下载
       await this.processVideoDownload(input);
