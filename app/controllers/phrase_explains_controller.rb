@@ -101,10 +101,9 @@ class PhraseExplainsController < ApplicationController
 
       请直接输出HTML格式内容，包含以下结构：
       1. <h4>简短的中文解释（5-10个汉字）</h4>
-      2. <p>详细解释（包含含义、用法、固定搭配、语境等）</p>
-      3. <h5>例句</h5>
-      4. <div class="bg-base-200 p-4 rounded-lg"><div class="text-sm text-primary mb-2">英文例句</div><div class="text-sm text-base-content/70">中文翻译</div></div>
-      5. <p>使用注意事项或额外说明（可选）</p>
+      2. <p>梳理该文本中的重要信息（包含含义、用法、固定短语或搭配等）</p>
+      3. <div class="bg-base-200 p-4 rounded-lg"><div class="text-sm text-primary mb-2">英文例句</div><div class="text-sm text-base-content/70">中文翻译</div></div>
+      4. <p>使用注意事项或额外说明（可选）</p>
 
       请确保输出完整的HTML内容，不要包含Markdown语法标记。
     PROMPT

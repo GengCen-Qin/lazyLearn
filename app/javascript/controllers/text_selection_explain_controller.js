@@ -185,48 +185,27 @@ export default class extends Controller {
     this.removeFloatingIcon()
     this.showModal(selectedText)
 
-    // 使用流式输出
     this.streamExplanation(selectedText)
   }
 
-  // 流式输出处理
+  /**
+   * 流式输出处理
+   * @param {string} text 选中的文案信息
+   */
   async streamExplanation(text) {
-    const loadingEl = document.getElementById("phrase-explain-loading")
-    const contentEl = document.getElementById("phrase-explain-content")
-
-    if (loadingEl) loadingEl.classList.remove("hidden")
-    if (contentEl) contentEl.classList.add("hidden")
-
     try {
       const eventSource = new EventSource(`/phrase_explain/stream?text=${encodeURIComponent(text)}`)
 
-      let firstContentReceived = false
+      let firstContentReceived = true
 
       let content = ''
       eventSource.onmessage = (event) => {
-        if (!firstContentReceived) {
-          // 第一次接收到内容时，清空并显示
-          if (loadingEl) loadingEl.classList.add("hidden")
-          if (contentEl) contentEl.classList.remove("hidden")
-
-          // 清空现有内容
-          const titleEl = document.getElementById("phrase-explain-title")
-          const textEl = document.getElementById("phrase-explain-text")
-          const examplesEl = document.getElementById("phrase-explain-examples")
-          const examplesListEl = document.getElementById("phrase-explain-examples-list")
-          const usageEl = document.getElementById("phrase-explain-usage")
-
-          if (titleEl) titleEl.textContent = ''
-          if (textEl) textEl.textContent = ''
-          if (examplesEl) examplesEl.classList.add("hidden")
-          if (examplesListEl) examplesListEl.innerHTML = ''
-          if (usageEl) usageEl.classList.add("hidden")
-
-          firstContentReceived = true
+        if (firstContentReceived) {
+          this.hiddenContent()
+          firstContentReceived = false
         }
+
         content = content.concat(event.data)
-        console.log('html:', content)
-        // 根据HTML内容类型分别渲染到对应区域
         this.renderHtmlContent(content)
       }
 
@@ -234,13 +213,38 @@ export default class extends Controller {
         eventSource.close()
       }
     } catch (error) {
-      console.log('抛出异常：', error)
+      console.error('抛出异常：', error)
     }
   }
 
-  // 渲染HTML内容到对应区域
+  /**
+   * 第一次渲染文案的时候先清空文案信息
+   */
+  hiddenContent() {
+    const loadingEl = document.getElementById("phrase-explain-loading")
+    const contentEl = document.getElementById("phrase-explain-content")
+
+    if (loadingEl) loadingEl.classList.add("hidden")
+    if (contentEl) contentEl.classList.remove("hidden")
+
+    const titleEl = document.getElementById("phrase-explain-title")
+    const textEl = document.getElementById("phrase-explain-text")
+    const examplesEl = document.getElementById("phrase-explain-examples")
+    const examplesListEl = document.getElementById("phrase-explain-examples-list")
+    const usageEl = document.getElementById("phrase-explain-usage")
+
+    if (titleEl) titleEl.textContent = ''
+    if (textEl) textEl.textContent = ''
+    if (examplesEl) examplesEl.classList.add("hidden")
+    if (examplesListEl) examplesListEl.innerHTML = ''
+    if (usageEl) usageEl.classList.add("hidden")
+  }
+
+  /**
+   * 渲染 AI 查询信息
+   * @param {string} htmlContent 接口返回的要被渲染的信息，这里约定使用html格式返回，这样能一边渲染一边解析，并能获取到对应信息
+   */
   renderHtmlContent(htmlContent) {
-    // 创建临时容器来解析HTML
     const tempDiv = document.createElement('div')
     tempDiv.innerHTML = htmlContent
 
@@ -267,7 +271,7 @@ export default class extends Controller {
     }
 
     // 渲染例句
-    if (exampleDivs.length > 0 || h5Element) {
+    if (exampleDivs.length > 0) {
       const examplesEl = document.getElementById("phrase-explain-examples")
       const examplesListEl = document.getElementById("phrase-explain-examples-list")
 
@@ -276,11 +280,6 @@ export default class extends Controller {
 
         // 先清空再渲染
         examplesListEl.innerHTML = ''
-
-        // 添加h5标题
-        if (h5Element) {
-          examplesListEl.innerHTML = h5Element.outerHTML
-        }
 
         // 添加例句
         exampleDivs.forEach(exampleDiv => {
