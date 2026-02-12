@@ -1,0 +1,90 @@
+<% content_for :title, "#{@book.title} - #{@chapter.title}" %>
+
+<div
+  class="p-6 h-screen max-w-7xl mx-auto flex flex-col"
+  data-controller="chapter-reader"
+>
+  <!-- 顶部导航 -->
+  <div class="mb-4 flex items-center justify-between">
+    <div class="flex items-center gap-4">
+      <%= link_to "← 返回书籍", book_path(@book),
+          class: "inline-flex items-center text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100" %>
+      <h1 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+        <%= @book.title %>
+      </h1>
+    </div>
+    <button
+      type="button"
+      data-action="chapter-reader#toggleToc"
+      class="px-3 py-1.5 text-sm bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600"
+    >
+      目录
+    </button>
+  </div>
+
+  <!-- 章节标题 -->
+  <div class="text-center mb-4">
+    <h2 class="text-xl font-medium text-gray-800 dark:text-gray-200">
+      <%= @chapter.title %>
+    </h2>
+  </div>
+
+  <!-- 阅读内容区域 -->
+  <div class="flex-1 overflow-y-auto dark:bg-gray-800 rounded-lg shadow p-6">
+    <div class="prose dark:prose-invert max-w-none whitespace-pre-wrap leading-8">
+      <%== @chapter.content %>
+    </div>
+  </div>
+
+  <!-- 底部导航 -->
+  <div class="mt-4 flex items-center justify-between">
+    <% if @chapter.order_index > 1 %>
+      <%= link_to "← 上一章", prev_book_chapter_path(@book, @chapter),
+          class: "px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600" %>
+    <% else %>
+      <div></div>
+    <% end %>
+
+    <% if @chapter.order_index < @book.chapters.last.order_index %>
+      <%= link_to "下一章 →", next_book_chapter_path(@book, @chapter),
+          class: "px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600" %>
+    <% end %>
+  </div>
+
+  <!-- 目录侧边栏 -->
+  <div
+    id="toc-sidebar"
+    class="fixed inset-y-0 right-0 w-64 bg-white dark:bg-gray-800 shadow-lg transform translate-x-full transition-transform duration-300 z-50"
+    data-chapter-reader-target="tocSidebar"
+  >
+    <div class="p-4">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-semibold">目录</h3>
+        <button
+          type="button"
+          data-action="chapter-reader#closeToc"
+          class="text-gray-500 hover:text-gray-700"
+        >
+          ✕
+        </button>
+      </div>
+      <ul class="space-y-2">
+        <% @book.chapters.each do |chapter| %>
+          <li>
+            <%= link_to chapter.title,
+                book_chapter_path(@book, chapter),
+                class: "block px-3 py-2 rounded-lg #{chapter.id == @chapter.id ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300' : 'hover:bg-gray-100 dark:hover:bg-gray-700'}" %>
+          </li>
+        <% end %>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 遮罩层 -->
+  <div
+    id="toc-overlay"
+    class="fixed inset-0 bg-black/50 hidden z-40"
+    data-chapter-reader-target="tocOverlay"
+    data-action="click->chapter-reader#closeToc"
+  ></div>
+</div>

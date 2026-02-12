@@ -3,14 +3,21 @@
 # Table name: user_quotas
 #
 #  id          :integer          not null, primary key
-#  user_id     :integer          not null
+#  expires_at  :datetime
 #  quota_type  :string           not null
 #  total_limit :integer          not null
-#  expires_at  :datetime
 #  created_at  :datetime         not null
 #  updated_at  :datetime         not null
+#  user_id     :integer          not null
+#
+# Indexes
+#
+#  index_user_quotas_on_quota_type              (quota_type)
+#  index_user_quotas_on_user_id                 (user_id)
+#  index_user_quotas_on_user_id_and_quota_type  (user_id,quota_type)
 #
 class UserQuota < ApplicationRecord
+  self.table_name = "user_quotas"
   belongs_to :user
   has_many :usage_records, dependent: :nullify
 

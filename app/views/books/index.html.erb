@@ -17,7 +17,7 @@
           type="file"
           name="book_file"
           id="book_file_input"
-          accept=".txt,text/plain"
+          accept=".epub,application/epub+zip"
           class="hidden"
           data-book-upload-target="fileInput"
 >
@@ -44,13 +44,13 @@
                 </span>
 
                 <span>
-                  共 <%= book.total_lines %> 行
+                  共 <%= book.chapters.count %> 章
                 </span>
               </div>
             </div>
 
             <div class="flex items-center space-x-3">
-              <%= link_to "阅读", book_path(book),
+              <%= link_to "阅读", book_chapter_path(book, book.chapters.first),
                   class: "btn btn-sm bg-green-600 hover:bg-green-700 text-white border-none" %>
             </div>
           </div>
@@ -78,7 +78,7 @@
         <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">暂无电子书</h3>
 
         <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-          上传TXT文件开始阅读体验。
+          上传EPUB文件开始阅读体验。
         </p>
       </div>
     <% end %>

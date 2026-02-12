@@ -31,6 +31,12 @@ Rails.application.routes.draw do
     member do
       post :load_content
     end
+    resources :chapters, only: [ :index, :show ] do
+      member do
+        get :prev
+        get :next
+      end
+    end
     resources :reading_progresses, only: [ :create ]
   end
 

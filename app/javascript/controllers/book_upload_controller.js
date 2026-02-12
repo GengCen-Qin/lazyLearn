@@ -18,15 +18,15 @@ export default class extends Controller {
     if (!file) return
 
     // 验证文件类型
-    if (file.type !== 'text/plain') {
-      alert('只支持上传 TXT 格式的文件')
+    if (file.type !== 'application/epub+zip') {
+      alert('只支持上传 EPUB 格式的文件')
       fileInput.value = ''
       return
     }
 
-    // 验证文件大小 (10MB)
-    if (file.size > 10 * 1024 * 1024) {
-      alert('文件大小不能超过 10MB')
+    // 验证文件大小 (50MB)
+    if (file.size > 50 * 1024 * 1024) {
+      alert('文件大小不能超过 50MB')
       fileInput.value = ''
       return
     }

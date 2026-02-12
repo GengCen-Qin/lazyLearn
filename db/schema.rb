@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_02_08_043136) do
+ActiveRecord::Schema[8.0].define(version: 2026_02_11_000001) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -69,12 +69,24 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_08_043136) do
 
   create_table "books", force: :cascade do |t|
     t.string "title", null: false
-    t.integer "total_lines", null: false
-    t.string "encoding", default: "utf-8"
     t.integer "user_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "author"
+    t.string "language"
+    t.string "publisher"
     t.index ["user_id"], name: "index_books_on_user_id"
+  end
+
+  create_table "chapters", force: :cascade do |t|
+    t.integer "book_id", null: false
+    t.string "title", null: false
+    t.text "content"
+    t.integer "order_index", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["book_id", "order_index"], name: "index_chapters_on_book_id_and_order_index"
+    t.index ["book_id"], name: "index_chapters_on_book_id"
   end
 
   create_table "ecdict_words", force: :cascade do |t|
@@ -120,18 +132,6 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_08_043136) do
     t.index ["user_id", "word_id"], name: "index_favorites_on_user_id_and_word_id", unique: true
     t.index ["user_id"], name: "index_favorites_on_user_id"
     t.index ["word_id"], name: "index_favorites_on_word_id"
-  end
-
-  create_table "guest_users", force: :cascade do |t|
-    t.string "fingerprint", null: false
-    t.string "ip_address"
-    t.text "user_agent"
-    t.datetime "last_active_at"
-    t.integer "converted_to_user_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["converted_to_user_id"], name: "index_guest_users_on_converted_to_user_id"
-    t.index ["fingerprint"], name: "index_guest_users_on_fingerprint", unique: true
   end
 
   create_table "notes", force: :cascade do |t|
@@ -391,20 +391,6 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_08_043136) do
     t.datetime "updated_at", null: false
   end
 
-  create_table "usage_limits", force: :cascade do |t|
-    t.integer "user_id"
-    t.integer "guest_user_id"
-    t.string "plan_type", null: false
-    t.integer "total_limit", null: false
-    t.integer "used_count", default: 0
-    t.datetime "expires_at"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["guest_user_id"], name: "index_usage_limits_on_guest_user_id"
-    t.index ["plan_type"], name: "index_usage_limits_on_plan_type"
-    t.index ["user_id"], name: "index_usage_limits_on_user_id"
-  end
-
   create_table "usage_records", force: :cascade do |t|
     t.integer "user_id", null: false
     t.integer "quota_id", null: false
@@ -479,10 +465,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_08_043136) do
     t.index ["transcription_status"], name: "index_videos_on_transcription_status"
   end
 
-  add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
-  add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
-  add_foreign_key "book_contents", "books"
   add_foreign_key "books", "users"
+  add_foreign_key "chapters", "books"
   add_foreign_key "favorites", "users"
   add_foreign_key "notes", "users", on_delete: :cascade
   add_foreign_key "rails_pulse_operations", "rails_pulse_queries", column: "query_id"
@@ -497,8 +481,6 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_08_043136) do
   add_foreign_key "solid_queue_ready_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_recurring_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_scheduled_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
-  add_foreign_key "usage_limits", "guest_users"
-  add_foreign_key "usage_limits", "users"
   add_foreign_key "user_audios", "audios"
   add_foreign_key "user_audios", "users"
   add_foreign_key "user_videos", "users"

@@ -102,22 +102,19 @@ class BooksController < ApplicationController
 
     uploaded_file = params[:book_file]
 
-    # 检查文件类型
-    unless uploaded_file.content_type == "text/plain"
-      redirect_to books_url, alert: "只支持上传 TXT 格式的文件"
+    unless uploaded_file.content_type == "application/epub+zip"
+      redirect_to books_url, alert: "只支持 EPUB 格式的文件"
       return
     end
 
-    # 检查文件大小（限制为 10MB）
-    if uploaded_file.size > 10.megabytes
-      redirect_to books_url, alert: "文件大小不能超过 10MB"
+    if uploaded_file.size > 50.megabytes
+      redirect_to books_url, alert: "文件大小不能超过 50MB"
       return
     end
 
     begin
-      # 使用 TxtBookParsable 解析文件
-      book = Book.parse_from_io(uploaded_file, Current.user.id, params[:title])
-      redirect_to book_path(book), notice: "电子书上传成功！"
+      book = Book.parse_from_io(uploaded_file, Current.user.id)
+      redirect_to book_chapter_path(book, book.chapters.first), notice: "电子书上传成功！"
     rescue => e
       Rails.logger.error "电子书上传失败: #{e.message}"
       redirect_to books_url, alert: "文件解析失败：#{e.message}"
