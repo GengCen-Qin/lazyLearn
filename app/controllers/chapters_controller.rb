@@ -12,6 +12,15 @@ class ChaptersController < ApplicationController
   # GET /books/:book_id/chapters/:id
   def show
     @chapters = @book.chapters.order(:order_index)
+
+    # 更新阅读进度
+    update_reading_progress
+  end
+
+  def update_reading_progress
+    progress = @book.reading_progress || @book.build_reading_progress(user: Current.user)
+    progress.chapter = @chapter
+    progress.save!
   end
 
   # GET /books/:book_id/chapters/:id/prev

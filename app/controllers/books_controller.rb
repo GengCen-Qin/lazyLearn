@@ -1,7 +1,7 @@
 class BooksController < ApplicationController
-  allow_unauthenticated_access only: [ :index, :show ]
+  allow_unauthenticated_access only: [ :index ]
   try_user
-  before_action :set_book, only: [ :show, :load_content ]
+  before_action :set_book, only: [ :load_content ]
 
   # GET /books
   def index
@@ -13,10 +13,6 @@ class BooksController < ApplicationController
     else
       redirect_to new_session_path, alert: "请先登录"
     end
-  end
-
-  # GET /books/:id
-  def show
   end
 
   # POST /books/:id/content

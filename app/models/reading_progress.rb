@@ -10,6 +10,7 @@
 #  created_at :datetime         not null
 #  updated_at :datetime         not null
 #  book_id    :integer          not null
+#  chapter_id :integer
 #  user_id    :integer          not null
 #
 # Indexes
@@ -26,4 +27,5 @@
 class ReadingProgress < ApplicationRecord
   belongs_to :user
   belongs_to :book
+  belongs_to :chapter, optional: true
 end

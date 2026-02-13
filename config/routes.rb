@@ -27,7 +27,7 @@ Rails.application.routes.draw do
     end
   end
 
-  resources :books, only: [ :index, :show, :create ] do
+  resources :books, only: [ :index, :create ] do
     member do
       post :load_content
     end

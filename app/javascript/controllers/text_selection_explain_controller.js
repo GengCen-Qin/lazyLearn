@@ -6,18 +6,22 @@ export default class extends Controller {
     this.selectedText = ""
     this.floatingIcon = null
     this.selectionTimeout = null
+    this.selectionBound = null
     this.setupTextSelectionListener()
   }
 
   disconnect() {
     this.removeFloatingIcon()
-    document.removeEventListener("selectionchange", this.handleSelectionEnd.bind(this))
+    if (this.selectionBound) {
+      document.removeEventListener("selectionchange", this.selectionBound)
+    }
     this.selectedText = ""
   }
 
   // 设置文本选择监听
   setupTextSelectionListener() {
-    document.addEventListener("selectionchange", this.debounce(this.checkTextSelection.bind(this), 100))
+    this.selectionBound = this.debounce(this.checkTextSelection.bind(this), 100)
+    document.addEventListener("selectionchange", this.selectionBound)
   }
 
   // 检查文本选择

@@ -2,12 +2,12 @@
 
 <div
   class="p-6 h-screen max-w-7xl mx-auto flex flex-col"
-  data-controller="chapter-reader"
+  data-controller="chapter-reader text-selection-explain"
 >
   <!-- 顶部导航 -->
   <div class="mb-4 flex items-center justify-between">
     <div class="flex items-center gap-4">
-      <%= link_to "← 返回书籍", book_path(@book),
+      <%= link_to "← 返回书籍", books_path,
           class: "inline-flex items-center text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100" %>
       <h1 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
         <%= @book.title %>
@@ -99,4 +99,7 @@
     data-chapter-reader-target="tocOverlay"
     data-action="click->chapter-reader#closeToc"
   ></div>
+
+  <!-- 短语解释模态框 -->
+  <%= render "shared/phrase_explain_modal" %>
 </div>

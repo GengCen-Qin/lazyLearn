@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_02_13_132133) do
+ActiveRecord::Schema[8.0].define(version: 2026_02_13_141149) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -250,6 +250,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_13_132133) do
     t.integer "end_line", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "chapter_id"
     t.index ["book_id"], name: "index_reading_progresses_on_book_id"
     t.index ["user_id", "book_id"], name: "index_reading_progresses_on_user_id_and_book_id", unique: true
     t.index ["user_id"], name: "index_reading_progresses_on_user_id"
