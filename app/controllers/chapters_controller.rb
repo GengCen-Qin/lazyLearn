@@ -20,6 +20,8 @@ class ChaptersController < ApplicationController
   def update_reading_progress
     progress = @book.reading_progress || @book.build_reading_progress(user: Current.user)
     progress.chapter = @chapter
+    progress.start_line ||= 0
+    progress.end_line ||= 0
     progress.save!
   end
 

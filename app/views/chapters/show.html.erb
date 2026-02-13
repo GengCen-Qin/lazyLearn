@@ -78,7 +78,7 @@
   <!-- 目录侧边栏 -->
   <div
     id="toc-sidebar"
-    class="fixed inset-y-0 right-0 w-64 bg-white dark:bg-gray-800 shadow-lg transform translate-x-full transition-transform duration-300 z-50"
+    class="fixed inset-y-0 right-0 w-64 bg-white dark:bg-gray-800 shadow-lg transform translate-x-full transition-transform duration-300 z-50 flex flex-col"
     data-chapter-reader-target="tocSidebar"
   >
     <div class="p-4">
@@ -92,16 +92,16 @@
           ✕
         </button>
       </div>
-      <ul class="space-y-2">
-        <% @book.chapters.each do |chapter| %>
-          <li>
-            <%= link_to chapter.title,
-                book_chapter_path(@book, chapter),
-                class: "block px-3 py-2 rounded-lg #{chapter.id == @chapter.id ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300' : 'hover:bg-gray-100 dark:hover:bg-gray-700'}" %>
-          </li>
-        <% end %>
-      </ul>
     </div>
+    <ul class="flex-1 overflow-y-auto px-4 pb-4 space-y-2">
+      <% @book.chapters.each do |chapter| %>
+        <li>
+          <%= link_to chapter.title,
+              book_chapter_path(@book, chapter),
+              class: "block px-3 py-2 rounded-lg #{chapter.id == @chapter.id ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300' : 'hover:bg-gray-100 dark:hover:bg-gray-700'}" %>
+        </li>
+      <% end %>
+    </ul>
   </div>
 
   <!-- 遮罩层 -->
