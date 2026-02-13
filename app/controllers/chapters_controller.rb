@@ -2,7 +2,7 @@
 
 class ChaptersController < ApplicationController
   before_action :set_book
-  before_action :set_chapter, only: [:show, :prev, :next]
+  before_action :set_chapter, only: [ :show, :prev, :next ]
 
   # GET /books/:book_id/chapters
   def index

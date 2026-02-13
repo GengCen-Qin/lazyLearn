@@ -95,7 +95,7 @@ module EpubParsable
 
     # 从文件名提取标题
     def extract_title(md_path)
-      File.basename(md_path).gsub(/^\d+-/, "").gsub(/\.md$/, "")
+      File.basename(md_path).gsub(/\.md$/, "")
     end
 
     # 规范化内容（去掉多余空行 和 #）
@@ -105,8 +105,6 @@ module EpubParsable
 
     # 处理章节中的图片，上传到ActiveStorage并替换路径
     def process_images(chapter, content, image_map)
-      return content if image_map.empty?
-
       new_content = content.gsub(MARKDOWN_IMAGE_PATTERN) do
         alt_text = $1
         image_path = $2
@@ -118,8 +116,19 @@ module EpubParsable
         url = image_url(chapter, image_full_path)
         img_tag(alt_text, url)
       end
+      chapter.update(content: format_content(new_content))
+    end
 
-      chapter.update!(content: new_content) if new_content != content
+    def format_content(new_content)
+      new_content.split("\n").map do |line|
+        if match = line.match(/\[.*?\]\(\.\/(.*?)\.md\)/)
+          { type: :link, content: match[1] }
+        elsif line.start_with?("<img")
+          { type: :image, content: line }
+        else
+          { type: :txt, content: line }
+        end
+      end
     end
 
     # 判断是否为外部URL
@@ -135,7 +144,7 @@ module EpubParsable
 
     # 生成img标签
     def img_tag(alt_text, url)
-      "<img style=\"margin: auto;\" src=\"#{url}\" alt=\"#{alt_text}\">"
+      "<img class=\"my-3\" src=\"#{url}\" alt=\"#{alt_text}\">"
     end
 
     # 上传图片到章节，返回attachment

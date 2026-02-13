@@ -5,7 +5,7 @@
 # Table name: chapters
 #
 #  id          :integer          not null, primary key
-#  content     :text
+#  content     :json
 #  order_index :integer          not null
 #  title       :string           not null
 #  created_at  :datetime         not null
