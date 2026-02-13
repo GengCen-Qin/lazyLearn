@@ -1,10 +1,20 @@
 /*
  * This is a manifest file that'll be compiled into application.css.
  *
- * With Propshaft, assets are served efficiently without preprocessing steps. You can still include
+ * With Propshaft, assets are served efficiently without preprocessing steps. You can include
  * application-wide styles in this file, but keep in mind that CSS precedence will follow the standard
  * cascading order, meaning styles declared later in the document or manifest will override earlier ones,
  * depending on specificity.
  *
  * Consider organizing styles into separate files for maintainability.
  */
+
+/* 阅读模式：隐藏 header */
+body.reading-mode > header {
+  display: none;
+}
+
+/* 阅读模式：隐藏特定元素（保持占位） */
+body.reading-mode .reading-hide {
+  visibility: hidden;
+}
