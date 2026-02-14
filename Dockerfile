@@ -59,7 +59,19 @@ RUN bundle exec bootsnap precompile -j 1 app/ lib/
 # Precompiling assets for production without requiring secret RAILS_MASTER_KEY
 RUN SECRET_KEY_BASE_DUMMY=1 ./bin/rails assets:precompile
 
-# Final stage for app image
+# ── Node stage just for epub2md ──
+FROM docker.1panel.live/library/node:20-slim AS node-build
+
+WORKDIR /app
+
+# 加速（可选，根据你网络情况）
+# RUN npm config set registry https://registry.npmmirror.com
+
+RUN npm install -g epub2md && \
+    npm cache clean --force && \
+    rm -rf /root/.npm
+
+# Final stage
 FROM base
 
 # Run and own only the runtime files as a non-root user for security
@@ -71,9 +83,24 @@ USER 1000:1000
 COPY --chown=rails:rails --from=build "${BUNDLE_PATH}" "${BUNDLE_PATH}"
 COPY --chown=rails:rails --from=build /rails /rails
 
-# Entrypoint prepares the database.
-ENTRYPOINT ["/rails/bin/docker-entrypoint"]
+# Copy epub2md + minimal node runtime
+# 这一步是体积关键：只复制真正需要的部分
+COPY --from=node-build --chown=rails:rails \
+    /usr/local/bin/node \
+    /usr/local/bin/npm \
+    /usr/local/bin/npx \
+    /usr/local/bin/epub2md \
+    /usr/local/bin/
 
-# Start server via Thruster by default, this can be overwritten at runtime
+COPY --from=node-build --chown=rails:rails \
+    /usr/local/lib/node_modules/epub2md \
+    /usr/local/lib/node_modules/epub2md/
+
+# 为了让全局 bin 脚本能找到 node（最简单方式）
+ENV PATH="/usr/local/bin:${PATH}"
+
+# 如果你以后要支持 --localize 远程图片下载，确保容器能联网即可（Node >=18 已满足）
+
+ENTRYPOINT ["/rails/bin/docker-entrypoint"]
 EXPOSE 80
 CMD ["./bin/thrust", "./bin/rails", "server"]
