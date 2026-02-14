@@ -8,7 +8,7 @@ class CreateChapters < ActiveRecord::Migration[8.0]
       t.text :content, comment: '章节内容'
       t.integer :order_index, null: false, comment: '章节顺序'
       t.timestamps
-    end
+    end unless table_exists?(:chapters)
 
     add_index :chapters, [:book_id, :order_index] unless index_exists?(:chapters, [:book_id, :order_index])
   end
