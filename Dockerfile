@@ -99,7 +99,9 @@ COPY --from=node-build --chown=rails:rails \
 # 为了让全局 bin 脚本能找到 node（最简单方式）
 ENV PATH="/usr/local/bin:${PATH}"
 
-# 如果你以后要支持 --localize 远程图片下载，确保容器能联网即可（Node >=18 已满足）
+RUN echo '#!/bin/sh' > /usr/local/bin/epub2md && \
+    echo 'exec node /usr/local/lib/node_modules/epub2md/lib/bin/cli.cjs "$@"' >> /usr/local/bin/epub2md && \
+    chmod +x /usr/local/bin/epub2md
 
 ENTRYPOINT ["/rails/bin/docker-entrypoint"]
 EXPOSE 80
