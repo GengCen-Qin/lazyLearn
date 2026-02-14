@@ -2,7 +2,7 @@
 
 <div
   class="p-6 h-screen max-w-7xl mx-auto flex flex-col"
-  data-controller="chapter-reader text-selection-explain"
+  data-controller="chapter-reader text-selection-explain font-size"
 >
   <!-- 顶部导航 -->
   <div class="mb-4 flex items-center justify-between">
@@ -20,6 +20,22 @@
         <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
         </svg>
+      </button>
+      <button
+        type="button"
+        data-action="font-size#decrease"
+        class="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 cursor-pointer reading-hide"
+        title="减小字体"
+      >
+        <span class="text-sm font-medium">A-</span>
+      </button>
+      <button
+        type="button"
+        data-action="font-size#increase"
+        class="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 cursor-pointer reading-hide"
+        title="增大字体"
+      >
+        <span class="text-sm font-medium">A+</span>
       </button>
       <button
         type="button"
@@ -43,7 +59,7 @@
 
   <!-- 阅读内容区域 -->
   <div class="overflow-y-auto p-3">
-    <div class="prose dark:prose-invert max-w-none leading-8">
+    <div class="prose dark:prose-invert max-w-none leading-8" style="font-size: var(--font-size, 18px);">
       <% @chapter.content.each do |line| %>
         <% if line['type'] == "img" %>
           <%== line['content'] %>
