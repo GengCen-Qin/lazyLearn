@@ -57,16 +57,6 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_13_141149) do
     t.index ["transcription_status"], name: "index_audios_on_transcription_status"
   end
 
-  create_table "book_contents", force: :cascade do |t|
-    t.text "content", null: false
-    t.integer "line_number", null: false
-    t.integer "book_id", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["book_id", "line_number"], name: "index_book_contents_on_book_id_and_line_number", unique: true
-    t.index ["book_id"], name: "index_book_contents_on_book_id"
-  end
-
   create_table "books", force: :cascade do |t|
     t.string "title", null: false
     t.integer "user_id", null: false
@@ -466,6 +456,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_13_141149) do
     t.index ["transcription_status"], name: "index_videos_on_transcription_status"
   end
 
+  add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "books", "users"
   add_foreign_key "chapters", "books"
   add_foreign_key "favorites", "users"
