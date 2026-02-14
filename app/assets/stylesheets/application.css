@@ -14,7 +14,18 @@ body.reading-mode > header {
   display: none;
 }
 
-/* 阅读模式：隐藏特定元素（保持占位） */
+/* 阅读模式：隐藏特定元素（完全不占空间） */
 body.reading-mode .reading-hide {
-  visibility: hidden;
+  display: none;
+}
+
+/* 非阅读模式：隐藏仅阅读模式显示的元素 */
+body:not(.reading-mode) .reading-mode-only {
+  display: none;
+}
+
+/* 阅读模式下章节标题行样式 */
+body.reading-mode .reading-mode-title {
+  padding: 0.5rem 0;
+  margin-bottom: 0.5rem;
 }
