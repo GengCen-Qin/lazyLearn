@@ -67,7 +67,7 @@ WORKDIR /app
 # 加速（可选，根据你网络情况）
 # RUN npm config set registry https://registry.npmmirror.com
 
-RUN npm install -g epub2md && \
+RUN npm install -g epub2md --registry=https://registry.npmmirror.com && \
     npm cache clean --force && \
     rm -rf /root/.npm
 
