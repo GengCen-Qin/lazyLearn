@@ -30,6 +30,7 @@ test:
 production:
   primary: &primary_production
     <<: *default
+    adapter: postgresql
     database: new_web_production
     username: new_web
     password: <%= ENV["NEW_WEB_DATABASE_PASSWORD"] %>
