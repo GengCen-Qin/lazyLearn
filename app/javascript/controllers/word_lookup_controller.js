@@ -26,6 +26,18 @@ export default class extends Controller {
     this.setupWordHistoryEvents();
     this.setupPronunciationListeners();
     this.setupGlobalWordLookupEvents();
+
+    // 当前播放的 Audio 对象
+    this.currentAudio = null;
+  }
+
+  // 停止当前播放的音频
+  stopCurrentAudio() {
+    if (this.currentAudio) {
+      this.currentAudio.pause();
+      this.currentAudio.currentTime = 0;
+      this.currentAudio = null;
+    }
   }
 
   // 初始化单词查询历史记录
@@ -47,22 +59,25 @@ export default class extends Controller {
       e.preventDefault();
       e.stopPropagation();
       this.clearWordHistory();
+      this.stopCurrentAudio();
       this.wordDialog.close();
     });
 
     // ESC键清空历史记录并关闭
-    document.addEventListener("keydown", (e) => {
+    document.addEventListener("keydown", this._handleEscapeKey = (e) => {
       if (e.key === "Escape" && this.wordDialog.open) {
         e.preventDefault();
         this.clearWordHistory();
+        this.stopCurrentAudio();
         this.wordDialog.close();
       }
     });
 
     // 点击dialog外部清空历史记录并关闭
-    this.wordDialog.addEventListener("click", (e) => {
+    this.wordDialog.addEventListener("click", this._handleDialogClick = (e) => {
       if (e.target === this.wordDialog) {
         this.clearWordHistory();
+        this.stopCurrentAudio();
         this.wordDialog.close();
       }
     });
@@ -179,7 +194,8 @@ export default class extends Controller {
 
   // 添加发音监听器（使用事件委托，不需要每次更新后重新绑定）
   setupPronunciationListeners() {
-    document.addEventListener("click", (e) => {
+    // 保存事件处理函数引用，以便在 disconnect 时移除
+    this._handlePronunciationClick = (e) => {
       const button = e.target.closest(".pronunciation-btn");
       if (button) {
         e.stopPropagation();
@@ -188,12 +204,14 @@ export default class extends Controller {
           this.playAudio(audioUrl);
         }
       }
-    });
+    };
+    document.addEventListener("click", this._handlePronunciationClick);
   }
 
   // 添加单词点击监听器（使用事件委托处理Turbo Stream更新后的内容）
   setupWordClickListeners() {
-    document.addEventListener("click", (e) => {
+    // 保存事件处理函数引用，以便在 disconnect 时移除
+    this._handleWordClick = (e) => {
       const wordElement = e.target.closest(".word-lookup-popup");
       if (wordElement) {
         e.preventDefault();
@@ -202,18 +220,26 @@ export default class extends Controller {
         if (word) {
           // 触发暂停事件，暂停当前播放的视频/音频
           window.dispatchEvent(new CustomEvent('media:pause'));
+          this.stopCurrentAudio();
           this.lookupWord(word);
         }
       }
-    });
+    };
+    document.addEventListener("click", this._handleWordClick);
   }
 
-  // 播放音频
+  // 播放音频（停止之前的音频）
   playAudio(audioUrl) {
     try {
+      // 先停止当前正在播放的音频
+      this.stopCurrentAudio();
+
       const audio = new Audio(audioUrl);
+      this.currentAudio = audio;
+
       audio.play().catch(error => {
         console.warn('Failed to play pronunciation audio:', error);
+        this.currentAudio = null;
       });
     } catch (error) {
       console.warn('Failed to create audio element:', error);
@@ -222,19 +248,42 @@ export default class extends Controller {
 
   // 设置全局单词查询事件监听
   setupGlobalWordLookupEvents() {
-    // 监听来自 wordLookupService 的事件
-    document.addEventListener('word-lookup:query', (event) => {
+    // 保存事件处理函数引用，以便在 disconnect 时移除
+    this._handleWordLookupQuery = (event) => {
       const { word, addToHistory = true } = event.detail;
       if (word && typeof word === 'string') {
         // 触发暂停事件
         window.dispatchEvent(new CustomEvent('media:pause'));
+        // 停止当前音频
+        this.stopCurrentAudio();
         // 调用现有的查询方法
         this.lookupWord(word, addToHistory);
       }
-    });
+    };
+    document.addEventListener('word-lookup:query', this._handleWordLookupQuery);
   }
 
   disconnect() {
+    // 移除事件监听器，防止重复添加
+    if (this._handleEscapeKey) {
+      document.removeEventListener("keydown", this._handleEscapeKey);
+    }
+    if (this._handleDialogClick) {
+      this.wordDialog?.removeEventListener("click", this._handleDialogClick);
+    }
+    if (this._handlePronunciationClick) {
+      document.removeEventListener("click", this._handlePronunciationClick);
+    }
+    if (this._handleWordClick) {
+      document.removeEventListener("click", this._handleWordClick);
+    }
+    if (this._handleWordLookupQuery) {
+      document.removeEventListener('word-lookup:query', this._handleWordLookupQuery);
+    }
+
+    // 停止当前播放的音频
+    this.stopCurrentAudio();
+
     if (this.wordDialog && this.wordDialog.open) {
       this.clearWordHistory();
       this.wordDialog.close();
