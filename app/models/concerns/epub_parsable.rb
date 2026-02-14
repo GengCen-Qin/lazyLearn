@@ -144,7 +144,7 @@ module EpubParsable
 
     # 生成img标签
     def img_tag(alt_text, url)
-      "<img class=\"my-3\" src=\"#{url}\" alt=\"#{alt_text}\">"
+      "<img class=\"my-3 mx-auto\" src=\"#{url}\" alt=\"#{alt_text}\">"
     end
 
     # 上传图片到章节，返回attachment
