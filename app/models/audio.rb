@@ -23,7 +23,7 @@
 #  index_audios_on_transcription_status    (transcription_status)
 #
 class Audio < ApplicationRecord
-  has_one_attached :audio_file
+  has_one_attached :audio_file, dependent: :purge
   has_many :user_audios, dependent: :destroy
   has_many :users, through: :user_audios
 

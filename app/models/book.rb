@@ -26,6 +26,6 @@ class Book < ApplicationRecord
 
   belongs_to :user
   has_many :chapters, dependent: :destroy
-  has_one_attached :cover_image
+  has_one_attached :cover_image, dependent: :purge
   has_one :reading_progress, dependent: :destroy
 end

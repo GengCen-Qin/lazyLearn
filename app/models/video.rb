@@ -23,7 +23,7 @@
 #  index_videos_on_transcription_status    (transcription_status)
 #
 class Video < ApplicationRecord
-  has_one_attached :video_file
+  has_one_attached :video_file, dependent: :purge
   has_many :user_videos, dependent: :destroy
   has_many :users, through: :user_videos
 

@@ -8,5 +8,5 @@
 #  updated_at :datetime         not null
 #
 class Upload < ApplicationRecord
-  has_one_attached :file
+  has_one_attached :file, dependent: :purge
 end

@@ -23,5 +23,5 @@
 #
 class Chapter < ApplicationRecord
   belongs_to :book
-  has_many_attached :images
+  has_many_attached :images, dependent: :purge
 end
