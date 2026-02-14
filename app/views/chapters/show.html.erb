@@ -70,7 +70,7 @@
   </div>
 
   <!-- 阅读内容区域 -->
-  <div class="overflow-y-auto p-3">
+  <div class="overflow-y-auto p-3 flex-1">
     <div class="prose dark:prose-invert max-w-none leading-8" style="font-size: var(--font-size, 18px);">
       <% @chapter.content.each do |line| %>
         <% if line['type'] == "img" %>
