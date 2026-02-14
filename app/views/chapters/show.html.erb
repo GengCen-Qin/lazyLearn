@@ -89,17 +89,25 @@
   </div>
 
   <!-- 底部导航 -->
-  <div class="mt-4 flex items-center justify-between">
+  <div class="mt-4 flex items-center justify-center gap-8">
     <% if @chapter.order_index > 1 %>
-      <%= link_to "← 上一章", prev_book_chapter_path(@book, @chapter),
-          class: "px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600" %>
-    <% else %>
-      <div></div>
+      <%= link_to prev_book_chapter_path(@book, @chapter),
+          class: "p-3 rounded-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300",
+          title: "上一章" do %>
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+      <% end %>
     <% end %>
 
     <% if @chapter.order_index < @book.chapters.last.order_index %>
-      <%= link_to "下一章 →", next_book_chapter_path(@book, @chapter),
-          class: "px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600" %>
+      <%= link_to next_book_chapter_path(@book, @chapter),
+          class: "p-3 rounded-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300",
+          title: "下一章" do %>
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>
+      <% end %>
     <% end %>
   </div>
 
