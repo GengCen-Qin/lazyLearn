@@ -93,8 +93,8 @@ COPY --from=node-build --chown=rails:rails \
     /usr/local/bin/
 
 COPY --from=node-build --chown=rails:rails \
-    /usr/local/lib/node_modules/epub2md \
-    /usr/local/lib/node_modules/epub2md/
+    /usr/local/lib/node_modules \
+    /usr/local/lib/node_modules/
 
 # 为了让全局 bin 脚本能找到 node（最简单方式）
 ENV PATH="/usr/local/bin:${PATH}"
