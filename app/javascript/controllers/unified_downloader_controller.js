@@ -12,7 +12,7 @@ export default class extends Controller {
 
     const input = this.inputTarget.value.trim();
     if (!input) {
-      this.showError("请输入要处理的网址或单词");
+      window.showNotification("请输入要处理的网址或单词", "error");
       return;
     }
 
@@ -26,7 +26,7 @@ export default class extends Controller {
       // 处理视频下载
       await this.processVideoDownload(input);
     } else {
-      this.showError("输入格式无法识别");
+      window.showNotification("输入格式无法识别", "error");
     }
   }
 
@@ -49,7 +49,7 @@ export default class extends Controller {
 
       // 处理需要登录的情况
       if (data.need_login) {
-        this.showError(data.error || "请先登录");
+        window.showNotification(data.error || "请先登录", "error");
         setTimeout(() => {
           window.location.href = data.redirect_to || "/session/new";
         }, 500);
@@ -60,18 +60,19 @@ export default class extends Controller {
         if (data.redirect_to) {
           const platformName = data.platform === 'xhs' ? '视频' : '音频';
           const message = data.message || `${platformName}正在解析，正在跳转...`;
-          this.showRedirectMessage(message);
+          window.showNotification(message, "success");
           setTimeout(() => {
             window.location.href = data.redirect_to;
           }, 500);
         } else {
-          this.showSuccess(data);
+          const platformName = data.platform === 'xhs' ? '视频' : '音频';
+          window.showNotification(`${platformName}下载成功！`, "success");
         }
       } else {
-        this.showError(data.error || "下载失败");
+        window.showNotification(data.error || "下载失败", "error");
       }
     } catch (error) {
-      this.showError(`网络错误: ${error.message}`);
+      window.showNotification(`网络错误: ${error.message}`, "error");
     } finally {
       this.setButtonLoading(false);
     }
@@ -168,82 +169,4 @@ export default class extends Controller {
     </svg>`;
   }
 
-  showResult(content) {
-    if (!this.hasResultAreaTarget) {
-      return;
-    }
-
-    this.resultAreaTarget.innerHTML = content;
-
-    // Enable pointer events for user interaction
-    this.resultAreaTarget.classList.remove("pointer-events-none");
-
-    // Auto-hide result after 3 seconds with fade-out animation
-    setTimeout(() => {
-      if (this.resultAreaTarget && this.resultAreaTarget.innerHTML) {
-        this.resultAreaTarget.style.transition = "opacity 0.5s ease-out";
-        this.resultAreaTarget.style.opacity = "0";
-
-        setTimeout(() => {
-          if (this.resultAreaTarget) {
-            this.resultAreaTarget.innerHTML = "";
-            this.resultAreaTarget.style.opacity = "1";
-            this.resultAreaTarget.classList.add("pointer-events-none");
-          }
-        }, 500);
-      }
-    }, 1000);
-  }
-
-  showRedirectMessage(message) {
-    const content = `
-      <div class="bg-green-50 border border-green-200 rounded-lg p-4 pointer-events-auto shadow-lg">
-        <div class="flex items-center">
-          ${this.getSuccessIcon()}
-          <div class="flex-1">
-            <h3 class="text-green-800 font-semibold">下载成功！</h3>
-            <p class="text-green-700 text-sm mt-1">${message}</p>
-          </div>
-          <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-green-600"></div>
-        </div>
-      </div>
-    `;
-    this.showResult(content);
-  }
-
-  showSuccess(data) {
-    const platformName = data.platform === 'xhs' ? '视频' : '音频';
-    const title = data.title || `${platformName}内容`;
-    const content = `
-      <div class="bg-green-50 border border-green-200 rounded-lg p-4 pointer-events-auto shadow-lg">
-        <div class="flex items-center mb-3">
-          ${this.getSuccessIcon()}
-          <h3 class="text-green-800 font-semibold">下载成功！</h3>
-        </div>
-        <p class="text-green-700 font-medium mb-2">${title}</p>
-        <p class="text-xs text-gray-500 mt-2">${platformName}已保存并开始转录处理</p>
-      </div>
-    `;
-    this.showResult(content);
-  }
-
-  showError(message) {
-    const content = `
-      <div class="bg-red-50 border border-red-200 rounded-lg p-4 pointer-events-auto shadow-lg">
-        <div class="flex items-center">
-          <svg class="h-6 w-6 text-red-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <p class="text-red-700 font-medium">${message}</p>
-        </div>
-      </div>
-    `;
-    this.showResult(content);
-  }
-
-  getSuccessIcon() {
-    return `<svg class="h-6 w-6 text-green-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-    </svg>`;
-  }
 }
