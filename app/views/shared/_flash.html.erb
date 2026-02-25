@@ -1,0 +1,29 @@
+<div id="flash" class="fixed top-20 left-1/2 transform -translate-x-1/2 z-50">
+  <% flash.each do |type, message| %>
+    <div class="flash-message flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg mb-2 min-w-[300px] max-w-md"
+         role="alert"
+         data-controller="flash"
+         data-type="<%= type %>">
+      <%# 图标 %>
+      <% if type == "notice" || type == "success" %>
+        <svg class="w-5 h-5 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+        </svg>
+        <span class="text-green-700 dark:text-green-400"><%= message %></span>
+      <% else %>
+        <svg class="w-5 h-5 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+        </svg>
+        <span class="text-red-700 dark:text-red-400"><%= message %></span>
+      <% end %>
+
+      <%# 关闭按钮 %>
+      <button data-action="flash#remove"
+              class="ml-auto text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors cursor-pointer">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+  <% end %>
+</div>

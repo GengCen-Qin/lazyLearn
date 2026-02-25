@@ -26,7 +26,7 @@ export default class extends Controller {
       // 处理视频下载
       await this.processVideoDownload(input);
     } else {
-      this.showError("不支持的输入格式。请输入单词（英文）或有效的视频链接");
+      this.showError("输入格式无法识别");
     }
   }
 

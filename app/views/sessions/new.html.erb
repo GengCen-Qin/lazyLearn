@@ -10,19 +10,6 @@
     <div class="card bg-base-100 border border-base-300 shadow-lg">
       <div class="card-body p-6 md:p-8">
         <%= form_with url: session_path, class: "space-y-6" do |form| %>
-          <!-- 消息提示 -->
-          <% if alert = flash[:alert] %>
-            <div class="alert alert-error">
-              <span><%= alert %></span>
-            </div>
-          <% end %>
-
-          <% if notice = flash[:notice] %>
-            <div class="alert alert-success">
-              <span><%= notice %></span>
-            </div>
-          <% end %>
-
           <!-- 邮箱输入 -->
           <div class="form-control">
             <label class="label">
