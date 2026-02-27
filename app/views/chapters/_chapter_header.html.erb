@@ -1,0 +1,18 @@
+<!-- 章节标题 -->
+<div class="text-center mb-4 flex items-center justify-between reading-mode-title">
+  <div class="flex-1 text-center">
+    <h2 class="text-xl font-medium text-gray-800 dark:text-gray-200">
+      <%= chapter.title %>
+    </h2>
+  </div>
+  <button
+    type="button"
+    data-action="chapter-reader#toggleReadingMode"
+    class="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 cursor-pointer ml-4 reading-mode-only"
+    title="退出阅读模式"
+  >
+    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+    </svg>
+  </button>
+</div>

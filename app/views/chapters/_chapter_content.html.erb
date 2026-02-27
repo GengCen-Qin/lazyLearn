@@ -1,0 +1,18 @@
+<!-- 阅读内容区域 -->
+<div class="overflow-y-auto p-3 flex-1">
+  <div class="prose dark:prose-invert max-w-none leading-8" style="font-size: var(--font-size, 18px);">
+    <% chapter.content.each do |line| %>
+      <% if line['type'] == "img" %>
+        <%== line['content'] %>
+      <% elsif line['type'] == "txt" %>
+        <p class="my-3">
+          <%== render_text_with_clickable_words(line['content']) %>
+        </p>
+      <% else %>
+        <p>
+          <%== line['content'] %>
+        </p>
+      <% end %>
+    <% end %>
+  </div>
+</div>

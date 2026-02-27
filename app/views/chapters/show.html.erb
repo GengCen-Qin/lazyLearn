@@ -5,148 +5,19 @@
   data-controller="chapter-reader text-selection-explain font-size"
 >
   <!-- 顶部导航 -->
-  <div class="mb-4 flex items-center justify-between reading-hide">
-    <div class="min-w-[100px]">
-      <%= link_to "← 返回书籍", books_path,
-          class: "inline-flex items-center text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100" %>
-    </div>
-    <div class="flex items-center gap-2">
-      <button
-        type="button"
-        data-action="chapter-reader#toggleToc"
-        class="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 cursor-pointer reading-hide"
-        title="目录"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-        </svg>
-      </button>
-      <button
-        type="button"
-        data-action="font-size#decrease"
-        class="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 cursor-pointer reading-hide"
-        title="减小字体"
-      >
-        <span class="text-sm font-medium">A-</span>
-      </button>
-      <button
-        type="button"
-        data-action="font-size#increase"
-        class="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 cursor-pointer reading-hide"
-        title="增大字体"
-      >
-        <span class="text-sm font-medium">A+</span>
-      </button>
-      <button
-        type="button"
-        data-action="chapter-reader#toggleReadingMode"
-        class="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 cursor-pointer"
-        title="阅读模式"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
-        </svg>
-      </button>
-    </div>
-  </div>
+  <%= render "chapters/top_nav" %>
 
   <!-- 章节标题 -->
-  <div class="text-center mb-4 flex items-center justify-between reading-mode-title">
-    <div class="flex-1 text-center">
-      <h2 class="text-xl font-medium text-gray-800 dark:text-gray-200">
-        <%= @chapter.title %>
-      </h2>
-    </div>
-    <button
-      type="button"
-      data-action="chapter-reader#toggleReadingMode"
-      class="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 cursor-pointer ml-4 reading-mode-only"
-      title="退出阅读模式"
-    >
-      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
-      </svg>
-    </button>
-  </div>
+  <%= render "chapters/chapter_header", chapter: @chapter %>
 
   <!-- 阅读内容区域 -->
-  <div class="overflow-y-auto p-3 flex-1">
-    <div class="prose dark:prose-invert max-w-none leading-8" style="font-size: var(--font-size, 18px);">
-      <% @chapter.content.each do |line| %>
-        <% if line['type'] == "img" %>
-          <%== line['content'] %>
-        <% elsif line['type'] == "txt" %>
-          <p class="my-3">
-            <%== render_text_with_clickable_words(line['content']) %>
-          </p>
-        <% else %>
-          <p>
-            <%== line['content'] %>
-          </p>
-        <% end %>
-      <% end %>
-    </div>
-  </div>
+  <%= render "chapters/chapter_content", chapter: @chapter %>
 
   <!-- 底部导航 -->
-  <div class="mt-4 flex items-center justify-center gap-8">
-    <% if @prev.present? %>
-      <%= link_to book_chapter_path(@book, @prev),
-          class: "p-3 rounded-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300",
-          title: "上一章" do %>
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-        </svg>
-      <% end %>
-    <% end %>
-
-    <% if @next.present? %>
-      <%= link_to book_chapter_path(@book, @next),
-          class: "p-3 rounded-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300",
-          title: "下一章" do %>
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-        </svg>
-      <% end %>
-    <% end %>
-  </div>
+  <%= render "chapters/chapter_nav", book: @book, prev: @prev, next_chapter: @next %>
 
   <!-- 目录侧边栏 -->
-  <div
-    id="toc-sidebar"
-    class="fixed inset-y-0 right-0 w-64 bg-white dark:bg-gray-800 shadow-lg transform translate-x-full transition-transform duration-300 z-50 flex flex-col"
-    data-chapter-reader-target="tocSidebar"
-  >
-    <div class="p-4">
-      <div class="flex items-center justify-between mb-4">
-        <h3 class="text-lg font-semibold">目录</h3>
-        <button
-          type="button"
-          data-action="chapter-reader#closeToc"
-          class="text-gray-500 hover:text-gray-700"
-        >
-          ✕
-        </button>
-      </div>
-    </div>
-    <ul class="flex-1 overflow-y-auto px-4 pb-4 space-y-2">
-      <% @book.chapters.each do |chapter| %>
-        <li>
-          <%= link_to chapter.title,
-              book_chapter_path(@book, chapter),
-              class: "block px-3 py-2 rounded-lg #{chapter.id == @chapter.id ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300' : 'hover:bg-gray-100 dark:hover:bg-gray-700'}" %>
-        </li>
-      <% end %>
-    </ul>
-  </div>
-
-  <!-- 遮罩层 -->
-  <div
-    id="toc-overlay"
-    class="fixed inset-0 bg-black/50 hidden z-40"
-    data-chapter-reader-target="tocOverlay"
-    data-action="click->chapter-reader#closeToc"
-  ></div>
+  <%= render "chapters/toc_sidebar", book: @book, chapters: @book.chapters, current_chapter: @chapter %>
 
   <!-- 短语解释模态框 -->
   <%= render "shared/phrase_explain_modal" %>

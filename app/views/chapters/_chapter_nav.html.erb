@@ -1,0 +1,22 @@
+<!-- 底部导航 -->
+<div class="mt-4 flex items-center justify-center gap-8">
+  <% if prev.present? %>
+    <%= link_to book_chapter_path(book, prev),
+        class: "p-3 rounded-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300",
+        title: "上一章" do %>
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+      </svg>
+    <% end %>
+  <% end %>
+
+  <% if next_chapter.present? %>
+    <%= link_to book_chapter_path(book, next_chapter),
+        class: "p-3 rounded-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300",
+        title: "下一章" do %>
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+      </svg>
+    <% end %>
+  <% end %>
+</div>
