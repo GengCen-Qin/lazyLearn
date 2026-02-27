@@ -2,7 +2,7 @@
 
 class ChaptersController < ApplicationController
   before_action :set_book
-  before_action :set_chapter, only: [ :show, :prev, :next ]
+  before_action :set_chapter, only: [ :show ]
 
   # GET /books/:book_id/chapters
   def index
@@ -12,6 +12,8 @@ class ChaptersController < ApplicationController
   # GET /books/:book_id/chapters/:id
   def show
     @chapters = @book.chapters.order(:order_index)
+    @prev = @chapter.prev
+    @next = @chapter.next
 
     # 更新阅读进度
     update_reading_progress
@@ -23,18 +25,6 @@ class ChaptersController < ApplicationController
     progress.start_line ||= 0
     progress.end_line ||= 0
     progress.save!
-  end
-
-  # GET /books/:book_id/chapters/:id/prev
-  def prev
-    @chapter = @book.chapters.where("order_index < ?", @chapter.order_index).order(:order_index).last
-    render :show
-  end
-
-  # GET /books/:book_id/chapters/:id/next
-  def next
-    @chapter = @book.chapters.where("order_index > ?", @chapter.order_index).order(:order_index).first
-    render :show
   end
 
   private

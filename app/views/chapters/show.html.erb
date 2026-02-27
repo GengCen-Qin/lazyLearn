@@ -90,8 +90,8 @@
 
   <!-- 底部导航 -->
   <div class="mt-4 flex items-center justify-center gap-8">
-    <% if @chapter.order_index > 1 %>
-      <%= link_to prev_book_chapter_path(@book, @chapter),
+    <% if @prev.present? %>
+      <%= link_to book_chapter_path(@book, @prev),
           class: "p-3 rounded-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300",
           title: "上一章" do %>
         <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -100,8 +100,8 @@
       <% end %>
     <% end %>
 
-    <% if @chapter.order_index < @book.chapters.last.order_index %>
-      <%= link_to next_book_chapter_path(@book, @chapter),
+    <% if @next.present? %>
+      <%= link_to book_chapter_path(@book, @next),
           class: "p-3 rounded-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300",
           title: "下一章" do %>
         <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

@@ -24,4 +24,12 @@
 class Chapter < ApplicationRecord
   belongs_to :book
   has_many_attached :images, dependent: :purge
+
+  def prev
+    book.chapters.find_by(order_index: order_index - 1)
+  end
+
+  def next
+    book.chapters.find_by(order_index: order_index + 1)
+  end
 end
