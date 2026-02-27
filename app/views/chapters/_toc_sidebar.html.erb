@@ -9,7 +9,7 @@
       <h3 class="text-lg font-semibold">目录</h3>
       <button
         type="button"
-        data-action="chapter-reader#closeToc"
+        data-action="chapter-reader#toggleToc"
         class="text-gray-500 hover:text-gray-700"
       >
         ✕
@@ -32,5 +32,5 @@
   id="toc-overlay"
   class="fixed inset-0 bg-black/50 hidden z-40"
   data-chapter-reader-target="tocOverlay"
-  data-action="click->chapter-reader#closeToc"
+  data-action="click->chapter-reader#toggleToc"
 ></div>
