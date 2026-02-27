@@ -89,7 +89,7 @@ gem "psych", "~> 5.2"
 # POSTGRESQL
 gem "pg", "~> 1.6"
 # 请求底层
-gem "openssl", "~> 3.3"
+gem "openssl", "~> 4.0"
 # 性能监控
 gem "rails_pulse"
 

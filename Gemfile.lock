@@ -233,7 +233,7 @@ GEM
     nokogiri (1.18.10-x86_64-linux-gnu)
       racc (~> 1.4)
     observer (0.1.2)
-    openssl (3.3.2)
+    openssl (4.0.0)
     ostruct (0.6.3)
     pagy (43.2.0)
       json
@@ -484,7 +484,7 @@ DEPENDENCIES
   letter_opener (~> 1.10)
   mission_control-jobs
   nokogiri (~> 1.18)
-  openssl (~> 3.3)
+  openssl (~> 4.0)
   pagy (~> 43.2)
   pg (~> 1.6)
   propshaft
