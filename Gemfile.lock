@@ -77,6 +77,8 @@ GEM
     annotaterb (4.20.0)
       activerecord (>= 6.0.0)
       activesupport (>= 6.0.0)
+    archive-zip (0.13.1)
+      io-like (~> 0.4.0)
     ast (2.4.3)
     backport (1.2.0)
     base64 (0.3.0)
@@ -116,6 +118,14 @@ GEM
       addressable (~> 2.8)
     drb (2.2.3)
     ed25519 (1.4.0)
+    epub-cfi (0.1.4)
+      racc
+    epub-parser (0.5.0)
+      addressable (>= 2.3.5)
+      archive-zip (>= 0.13.0)
+      epub-cfi
+      rchardet (>= 1.6.1)
+      rexml
     erb (6.0.0)
     erubi (1.13.1)
     et-orbi (1.4.0)
@@ -151,6 +161,7 @@ GEM
       activesupport (>= 6.0.0)
       railties (>= 6.0.0)
     io-console (0.8.1)
+    io-like (0.4.0)
     irb (1.15.3)
       pp (>= 0.6.0)
       rdoc (>= 4.0.0)
@@ -314,6 +325,7 @@ GEM
       i18n
     rbs (3.9.5)
       logger
+    rchardet (1.10.0)
     rdoc (6.15.1)
       erb
       psych (>= 4.0.0)
@@ -477,6 +489,7 @@ DEPENDENCIES
   debug
   dotenv
   down (~> 5.4)
+  epub-parser
   httparty
   importmap-rails
   jbuilder

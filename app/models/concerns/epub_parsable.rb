@@ -8,6 +8,7 @@ module EpubParsable
 
   class_methods do
     def parse_from_io(io, user_id)
+      binding.irb
       temp_dir = Dir.mktmpdir("epub_#{SecureRandom.hex(8)}_")
       epub_path = File.join(temp_dir, "book.epub")
       File.open(epub_path, "wb") { |f| f.write(io.read) }
@@ -37,13 +38,13 @@ module EpubParsable
     private
 
     def get_epub_info(epub_path)
-      json, stderr, status = Open3.capture3("epub2md -i #{epub_path}")
-      json = json.gsub(/\e\[[0-9;]*[a-zA-Z]/, "")
-      info = eval json.split("book info:").last.gsub("\n", "").gsub("},", "}")
-      author = info[:author]
-      title = info[:title]
-      language = info[:language]
-      publisher = info[:publisher]
+      book = EPUB::Parser.parse(epub_path)
+      md = book.package.metadata
+
+      author = md.creators.first.content
+      title = md.title
+      language = md.language.to_s
+      publisher = md.publishers.first.content
 
       {
         title: title,
