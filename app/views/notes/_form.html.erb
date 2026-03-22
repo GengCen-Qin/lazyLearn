@@ -1,0 +1,43 @@
+<%= form_with(model: note, local: true, class: "p-6 space-y-6") do |form| %>
+  <% if note.errors.any? %>
+    <div class="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg p-4">
+      <h2 class="text-sm font-medium text-red-800 dark:text-red-200 mb-2">
+        <%= pluralize(note.errors.count, "个错误") %>导致此笔记无法保存：
+      </h2>
+      <ul class="list-disc list-inside text-sm text-red-700 dark:text-red-300">
+        <% note.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <!-- 学习内容 -->
+  <div>
+    <%= form.label :content, "学习内容", class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" %>
+    <%= form.rich_text_area :content,
+        placeholder: "输入学习内容，支持 Markdown 语法..." %>
+  </div>
+
+  <!-- 问题 -->
+  <div>
+    <%= form.label :question, "问题", class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" %>
+    <%= form.rich_text_area :question,
+        placeholder: "输入相关问题..." %>
+  </div>
+
+  <!-- 备注 -->
+  <div>
+    <%= form.label :note, "备注（可选）", class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" %>
+    <%= form.rich_text_area :note,
+        placeholder: "一些当时的想法或补充信息..." %>
+  </div>
+
+  <!-- 提交按钮 -->
+  <div class="flex justify-end gap-3 pt-4">
+    <%= link_to "取消", notes_path,
+        class: "inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+    <%= form.submit "保存",
+        class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+  </div>
+<% end %>
