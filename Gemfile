@@ -46,7 +46,7 @@ gem "kamal", require: false
 gem "thruster", require: false
 
 # Use Active Storage variants [https://guides.rubyonrails.org/active_storage_overview.html#transforming-images]
-# gem "image_processing", "~> 1.2"
+gem "image_processing", "~> 1.2"
 
 group :development, :test do
   gem "sqlite3", ">= 2.1"
@@ -100,3 +100,5 @@ gem "letter_opener", "~> 1.10"
 gem "requestjs-rails"
 
 gem "epub-parser"
+
+gem "lexxy", "~> 0.9.0.beta"

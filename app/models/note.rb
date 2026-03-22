@@ -24,6 +24,11 @@
 class Note < ApplicationRecord
   belongs_to :user
 
+  # Action Text 富文本支持
+  has_rich_text :content
+  has_rich_text :question
+  has_rich_text :note
+
   validates :content, presence: true
   validates :question, presence: true
 

@@ -3,3 +3,5 @@ import "@hotwired/turbo-rails";
 import "controllers";
 import "services/wordLookupService"
 import "@rails/request.js"
+import "lexxy"
+import "@rails/actiontext"

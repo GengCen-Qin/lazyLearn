@@ -1,4 +1,5 @@
 <% content_for :title, "新建笔记" %>
+<%= stylesheet_link_tag "lexxy" %>
 
 <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
   <div class="max-w-4xl mx-auto px-4 py-6">
@@ -29,32 +30,26 @@
         <!-- 学习内容 -->
         <div>
           <%= form.label :content, "学习内容", class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" %>
-          <%= form.text_area :content,
-              rows: 4,
-              placeholder: "例如：I can see lots of cards passing by one after other",
-              class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-gray-100" %>
+          <%= form.rich_text_area :content,
+              placeholder: "输入学习内容，支持 Markdown 语法..." %>
         </div>
 
         <!-- 问题 -->
         <div>
           <%= form.label :question, "问题", class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" %>
-          <%= form.text_area :question,
-              rows: 3,
-              placeholder: "例如：如何表达：我看到很多车一个接一个地过去",
-              class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-gray-100" %>
+          <%= form.rich_text_area :question,
+              placeholder: "输入相关问题..."%>
         </div>
 
         <!-- 备注 -->
         <div>
           <%= form.label :note, "备注（可选）", class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" %>
-          <%= form.text_area :note,
-              rows: 3,
-              placeholder: "一些当时的想法或补充信息",
-              class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-gray-100" %>
+          <%= form.rich_text_area :note,
+              placeholder: "一些当时的想法或补充信息..."%>
         </div>
 
         <!-- 提交按钮 -->
-        <div class="flex justify-end gap-3">
+        <div class="flex justify-end gap-3 pt-4">
           <%= link_to "取消", notes_path,
               class: "inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
           <%= form.submit "保存",
