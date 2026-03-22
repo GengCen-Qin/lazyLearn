@@ -206,8 +206,8 @@ class WhisperTranscriptionService
 
   def build_whisper_cpp_command(wav_path, language, output_dir)
     cmd = [
-      "/Users/qinsicheng/PythonProjects/whisper.cpp/build/bin/whisper-cli",
-      "-m", "/Users/qinsicheng/PythonProjects/whisper.cpp/models/ggml-base.en.bin",
+      ENV["WHISPER_PATH"],
+      "-m", ENV["WHISPER_MODAL"],
       "-f", wav_path,
       "-oj",  # 输出 JSON 格式
       "-l", language || "auto",  # 语言设置
