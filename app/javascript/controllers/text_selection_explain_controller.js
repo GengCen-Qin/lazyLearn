@@ -132,7 +132,17 @@ export default class extends Controller {
     icon.innerHTML = this.getIconSVG()
 
     // 添加点击事件处理器
-    icon.addEventListener("click", this.handleIconClick.bind(this))
+    // 阻止 mousedown 默认行为，防止点击时失去文本选择
+    icon.addEventListener("mousedown", (e) => {
+      e.preventDefault()
+    })
+
+    // 添加点击事件处理器
+    icon.addEventListener("click", (e) => {
+      e.preventDefault()
+      e.stopPropagation()
+      this.handleIconClick(e)
+    })
 
     return icon
   }
