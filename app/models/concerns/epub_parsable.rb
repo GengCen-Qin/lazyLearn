@@ -8,7 +8,6 @@ module EpubParsable
 
   class_methods do
     def parse_from_io(io, user_id)
-      binding.irb
       temp_dir = Dir.mktmpdir("epub_#{SecureRandom.hex(8)}_")
       epub_path = File.join(temp_dir, "book.epub")
       File.open(epub_path, "wb") { |f| f.write(io.read) }
