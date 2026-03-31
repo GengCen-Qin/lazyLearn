@@ -1,5 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
-import { post } from "@rails/request.js"
+import { useClickOutside } from 'stimulus-use'
 
 export default class extends Controller {
   connect() {
@@ -8,8 +8,18 @@ export default class extends Controller {
     this.selectionTimeout = null
     this.selectionBound = null
     this.setupTextSelectionListener()
+    useClickOutside(this)
   }
 
+  clickOutside(event) {
+    event.preventDefault()
+    console.log('clickOutside')
+    const modal = document.getElementById("phraseExplainModal")
+    if (modal) {
+      modal.close()
+    }
+  }
+  
   disconnect() {
     this.removeFloatingIcon()
     if (this.selectionBound) {
