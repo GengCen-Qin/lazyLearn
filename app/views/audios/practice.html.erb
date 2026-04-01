@@ -1,0 +1,141 @@
+<% content_for :title, "#{@audio.title} - 练习" %>
+
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900"
+     data-controller="audio-practice"
+     data-audio-practice-audio-id-value="<%= @audio.id %>"
+     data-audio-practice-segments-value="<%= @practice_segments.to_json %>">
+
+  <!-- 头部导航 -->
+  <header class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-10">
+    <div class="max-w-4xl mx-auto px-4 py-3">
+      <div class="flex items-center gap-3">
+        <!-- 返回按钮 -->
+        <%= link_to @audio,
+            class: "flex items-center gap-1 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100" do %>
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+          </svg>
+          <span class="text-sm font-medium">返回播放页</span>
+        <% end %>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-4xl mx-auto px-4 py-6">
+    <!-- 场景描述 -->
+    <div class="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+      <h2 class="text-lg font-semibold text-blue-900 dark:text-blue-100 mb-2">
+        🎭 <%= @material.core_dialogue["title"] %>
+      </h2>
+      <p class="text-blue-800 dark:text-blue-200">
+        <%= @material.core_dialogue["scenario"] %>
+      </p>
+    </div>
+
+    <!-- 关键表达学习区 -->
+    <% if @material.key_expressions.present? %>
+      <div class="mb-6">
+        <h3 class="text-base font-semibold text-gray-800 dark:text-gray-100 mb-3">
+          🔑 关键表达
+        </h3>
+        <div class="grid gap-3">
+          <% @material.key_expressions.each_with_index do |expr, idx| %>
+            <div class="p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+              <div class="font-medium text-indigo-600 dark:text-indigo-400 mb-1">
+                <%= expr["expression"] %>
+              </div>
+              <div class="text-sm text-gray-600 dark:text-gray-300">
+                <span class="font-medium">释义：</span><%= expr["meaning"] %>
+              </div>
+              <% if expr["note"].present? %>
+                <div class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  <span class="font-medium">用法：</span><%= expr["note"] %>
+                </div>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+
+    <!-- 练习区域 -->
+    <div class="space-y-6">
+      <h3 class="text-base font-semibold text-gray-800 dark:text-gray-100">
+        ✍️ 开始练习（看着中文提示写英文）
+      </h3>
+
+      <% @practice_segments.each_with_index do |segment, index| %>
+        <div class="practice-item p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700"
+             data-index="<%= index %>">
+
+          <!-- 角色和时间 -->
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-medium text-gray-500 dark:text-gray-400">
+              <% if segment["type"] == "dialogue" %>
+                <%= segment["role"] %>
+              <% else %>
+                关键句
+              <% end %>
+            </span>
+          </div>
+
+          <!-- 中文提示 -->
+          <div class="mb-3 text-sm text-gray-600 dark:text-gray-300">
+            💡 <%= segment["cn_hint"] %>
+          </div>
+
+          <!-- 用户输入框 -->
+          <textarea
+            class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg
+                   bg-white dark:bg-gray-900
+                   text-gray-800 dark:text-gray-100
+                   focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+            rows="2"
+            placeholder="在此输入你的英文..."
+            data-audio-practice-target="input"
+            data-index="<%= index %>"
+          ></textarea>
+
+          <!-- 操作按钮 -->
+          <div class="mt-3 flex items-center gap-2">
+            <button
+              type="button"
+              class="px-3 py-1.5 text-sm bg-indigo-600 text-white rounded hover:bg-indigo-700 cursor-pointer"
+              data-action="click->audio-practice#toggleAnswer"
+              data-audio-practice-index-param="<%= index %>"
+            >
+              查看原句
+            </button>
+          </div>
+
+          <!-- 答案区域（默认隐藏） -->
+          <div class="hidden mt-3 p-3 bg-green-50 dark:bg-green-900/20 rounded border border-green-200 dark:border-green-800"
+               data-audio-practice-target="answer"
+               data-index="<%= index %>">
+            <div class="flex items-start justify-between gap-2">
+              <div class="flex-1">
+                <div class="font-medium text-green-900 dark:text-green-100 mb-1">
+                  📖 原声版本：
+                </div>
+                <div class="text-green-800 dark:text-green-200">
+                  <%= segment["text"] %>
+                </div>
+              </div>
+              <button
+                type="button"
+                class="cursor-pointer text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-200 flex-shrink-0"
+                data-action="click->audio-practice#toggleAnswer"
+                data-audio-practice-index-param="<%= index %>"
+                title="隐藏原句"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </main>
+</div>

@@ -26,6 +26,7 @@ class Audio < ApplicationRecord
   has_one_attached :audio_file, dependent: :purge
   has_many :user_audios, dependent: :destroy
   has_many :users, through: :user_audios
+  has_one :learning_material, class_name: "AudioLearningMaterial", dependent: :destroy
 
   enum :transcription_status, { pending: 0, processing: 1, completed: 2, failed: 3 }
 
@@ -35,6 +36,12 @@ class Audio < ApplicationRecord
   after_create_commit do
     local_upload_async
     trigger_transcription_async
+  end
+
+  after_update_commit :trigger_learning_analysis_async, if: :just_completed_transcription?
+
+  def just_completed_transcription?
+    saved_change_to_transcription_status? && transcription_completed?
   end
 
   def local_path
@@ -101,5 +108,13 @@ class Audio < ApplicationRecord
     else
       "未知状态"
     end
+  end
+
+  def learning_material_ready?
+    learning_material&.completed? && learning_material.has_content?
+  end
+
+  def trigger_learning_analysis_async
+    AudioLearningAnalysisJob.perform_later(id)
   end
 end

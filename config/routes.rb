@@ -24,6 +24,7 @@ Rails.application.routes.draw do
   resources :audios, only: [ :index, :show, :destroy ] do
     member do
       get :read_mode
+      get :practice
     end
   end
 

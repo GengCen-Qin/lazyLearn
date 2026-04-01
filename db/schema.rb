@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_03_22_074637) do
+ActiveRecord::Schema[8.0].define(version: 2026_03_31_135758) do
   create_table "action_text_rich_texts", force: :cascade do |t|
     t.string "name", null: false
     t.text "body"
@@ -47,6 +47,19 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_22_074637) do
     t.bigint "blob_id", null: false
     t.string "variation_digest", null: false
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
+
+  create_table "audio_learning_materials", force: :cascade do |t|
+    t.integer "audio_id", null: false
+    t.json "core_dialogue", default: {}
+    t.json "key_expressions", default: []
+    t.json "practice_segments", default: []
+    t.integer "status", default: 0, null: false
+    t.text "error_message"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["audio_id"], name: "index_audio_learning_materials_on_audio_id", unique: true
+    t.index ["status"], name: "index_audio_learning_materials_on_status"
   end
 
   create_table "audios", force: :cascade do |t|
@@ -468,6 +481,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_22_074637) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "audio_learning_materials", "audios", on_delete: :cascade
   add_foreign_key "books", "users"
   add_foreign_key "chapters", "books"
   add_foreign_key "favorites", "users"

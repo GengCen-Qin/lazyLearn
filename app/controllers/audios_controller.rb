@@ -1,7 +1,7 @@
 class AudiosController < ApplicationController
-  allow_unauthenticated_access only: [ :index, :show, :read_mode ]
+  allow_unauthenticated_access only: [ :index, :show, :read_mode, :practice ]
   try_user
-  before_action :set_audio, only: [ :show, :read_mode, :destroy ]
+  before_action :set_audio, only: [ :show, :read_mode, :destroy, :practice ]
 
   def index
     if Current.user
@@ -33,6 +33,24 @@ class AudiosController < ApplicationController
 
     # 渲染通用模板
     render 'shared/read_mode'
+  end
+
+  # GET /audios/:id/practice
+  def practice
+    # 权限验证
+    if Current.user && !Current.user.audios.exists?(id: @audio.id)
+      redirect_to audios_path, alert: "您没有访问此音频的权限"
+      return
+    end
+
+    # 检查是否有学习材料
+    unless @audio.learning_material_ready?
+      redirect_to audio_path(@audio), alert: "学习材料正在准备中，请稍后再试"
+      return
+    end
+
+    @material = @audio.learning_material
+    @practice_segments = @material.practice_segments
   end
 
   def destroy
